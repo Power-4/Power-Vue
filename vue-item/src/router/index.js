@@ -1,26 +1,144 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
+    // 主路径
     path: '/',
     name: 'home',
-    component: Home
+    component: () => import('../views/Home.vue'),
+    children: [
+      // 个人信息平台
+      {
+        path: '',
+        name: 'self',
+        component: () => import('../views/Self.vue'),
+        meta: {
+          auth: true
+        },
+        children: [
+          {
+            path: 'work',
+            name: 'work',
+            component: () => import('../views/Work.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'selfmsg',
+            name: 'selfmsg',
+            component: () => import('../views/Selfmsg.vue'),
+            meta: {
+              auth: true
+            }
+          },
+        ]
+      },
+      // 管理系统
+      {
+        path: 'system',
+        name: 'system',
+        component: () => import('../views/System.vue'),
+        meta: {
+          auth: true
+        },
+        children: [
+          {
+            path: 'role',
+            name: 'role',
+            component: () => import('../views/Role.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'users',
+            name: 'user',
+            component: () => import('../views/Users.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'power',
+            name: 'power',
+            component: () => import('../views/Power.vue'),
+            meta: {
+              auth: true
+            }
+          }
+        ]
+      },
+      // 杆塔管理
+      {
+        path: 'towar',
+        name: 'towar',
+        component: () => import('../views/Towar.vue'),
+        meta: {
+          auth: true
+        }
+      },
+      // 线路管理
+      {
+        path: 'line',
+        name: 'line',
+        component: () => import('../views/Line.vue'),
+        meta: {
+          auth: true
+        }
+      },
+      // 缺陷管理
+      {
+        path: 'defect',
+        name: 'defect',
+        component: () => import('../views/Defect.vue'),
+        meta: {
+          auth: true
+        }
+      },
+      // 巡检管理
+      {
+        path: 'inspect',
+        name: 'inspect',
+        component: () => import('../views/Inspect.vue'),
+        meta: {
+          auth: true
+        }
+      },
+      // 消缺管理
+      {
+        path: 'repair',
+        name: 'repair',
+        component: () => import('../views/Repair.vue'),
+        meta: {
+          auth: true
+        }
+      },
+      // 信息统计
+      {
+        path: 'total',
+        name: 'total',
+        component: () => import('../views/total.vue'),
+        meta: {
+          auth: true
+        }
+      }
+    ]
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    // 登录窗口
+    path: '/login',
+    name: 'name',
+    component: () => import('../views/Login.vue')
   }
 ]
 
 const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
   routes
 })
 
