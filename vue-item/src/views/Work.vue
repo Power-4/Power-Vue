@@ -207,12 +207,6 @@ export default {
         }
       ]
     };
-<<<<<<< HEAD
-  },
-  methods: {
-    
-=======
->>>>>>> 王波搞破坏补偿 + Home、work、self、selfmsg vue视图的改动
   }
 };
 </script>
