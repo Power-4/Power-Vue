@@ -40,7 +40,7 @@ export default {
     };
   },
   methods: {
-    tableRowClassName({ row, rowIndex }) {
+    tableRowClassName({rowIndex }) {
       if (rowIndex === 1) {
         return "warning-row";
       } else if (rowIndex === 3) {
