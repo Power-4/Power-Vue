@@ -14,7 +14,11 @@
         left
       -->
       <div class="left">
-        <hover-button v-for="(item, index) in powerData" :key="index" :item="item" @click="tf(index)" ref="header"></hover-button>
+        <hover-button
+          v-for="(item, index) in powerData"
+          :key="index"
+          :item="item"
+        ></hover-button>
       </div>
       <!--
         right
@@ -44,7 +48,6 @@ export default {
         "repair",
         "total"
       ],
-      a: 0
     };
   },
   components: {
