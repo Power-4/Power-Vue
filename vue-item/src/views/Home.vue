@@ -27,13 +27,11 @@
         <router-view></router-view>
       </div>
     </section>
-    <!-- <router-link to="/inspect">inspect</router-link>
-    <router-view/> -->
-
   </div>
 </template>
 
 <script>
+import hoverButton from "../components/hoverButton.vue";
 export default {
   name: "home",
   data() {
@@ -51,7 +49,9 @@ export default {
     };
   },
   components: {
-  
+    hoverButton
+  },
+  methods: {
   }
 };
 </script>
