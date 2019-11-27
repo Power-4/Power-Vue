@@ -14,7 +14,11 @@
         left
       -->
       <div class="left">
-        <hover-button v-for="(item, index) in powerData" :key="index" :item="item" @click="tf(index)" ref="header"></hover-button>
+        <hover-button
+          v-for="(item, index) in powerData"
+          :key="index"
+          :item="item"
+        ></hover-button>
       </div>
       <!--
         right
@@ -23,9 +27,6 @@
         <router-view></router-view>
       </div>
     </section>
-    <!-- <router-link to="/inspect">inspect</router-link>
-    <router-view/> -->
-
   </div>
 </template>
 
@@ -45,7 +46,6 @@ export default {
         "repair",
         "total"
       ],
-      a: 0
     };
   },
   components: {

@@ -146,7 +146,7 @@ const routes = [
       {
         path: 'total',
         name: 'total',
-        component: () => import('../views/total.vue'),
+        component: () => import('../views/Total.vue'),
         meta: {
           auth: true
         }
@@ -163,7 +163,7 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: process. env.BASE_URL, 
   routes
 })
 
