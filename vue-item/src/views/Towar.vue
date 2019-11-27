@@ -1,6 +1,10 @@
 <template>
   <div class="towar">
+<<<<<<< HEAD
     <!-- 查询杆塔 -->
+=======
+    
+>>>>>>> 杆塔
     <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
       <el-breadcrumb-item>电力巡检系统</el-breadcrumb-item>
       <el-breadcrumb-item>杆塔管理</el-breadcrumb-item>
