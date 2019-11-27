@@ -1,8 +1,8 @@
 <template>
   <div class="total">
     <div class="nav">
-      <span :class="{select:!zi}" @click="zi=false">消缺记录</span>
-      <span :class="{select:zi}" @click="zi=true">巡检记录</span>
+      <span :class="{select:name=='xiao'}" @click="name='xiao'">消缺记录</span>
+      <span :class="{select:name=='xun'}" @click="name='xun'">巡检记录</span>
       <!-- 这个在左边 -->
     </div>
 
@@ -13,13 +13,13 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>编号查询:</span>
-        <el-input v-model="input" placeholder="请输入任务或者线路编号" class="in-bianhao"></el-input>
+        <el-input v-model="submit.id" placeholder="请输入任务或者线路编号" class="in-bianhao"></el-input>
       </div>
 
       <div class="error">
         <span>有无故障:</span>
-        <el-select v-model="value" placeholder="请选择" class=" in-error" :class="{inErrorMin:value}">
-          <el-option label="有" value="yes" ></el-option>
+        <el-select v-model="submit.error" placeholder="请选择" class="in-error" :class="{inErrorMin:submit.error}">
+          <el-option label="有" value="yes"></el-option>
 
           <el-option label="无" value="no"></el-option>
         </el-select>
@@ -29,51 +29,59 @@
         <span>时间查询:</span>
         <wdtime class="wdtime" @addTime="addTime"></wdtime>
       </div>
-   <el-button type="primary" icon="el-icon-search" class="chaxun-btn">查询</el-button>
+      <el-button type="primary" icon="el-icon-search" class="chaxun-btn" @click="chaxun()">查询</el-button>
+    </div>
+
+    <div>
+        
     </div>
   </div>
 </template>
 
 <script>
-import wdtime from '../components/wdtime'
+import wdtime from "../components/wdtime";
 
 export default {
   name: "total",
   data() {
     return {
-      zi: true,
       title: "巡检记录",
-      input: "",
-      value: "",
-      time:"",
+      name:"xun",
+      submit: { name:"", id: "", error: "", time: "" }
     };
   },
-components:{
-  wdtime,
-},
+  components: {
+    wdtime
+  },
   watch: {
-    zi() {
-      if (this.zi) {
+    name() {
+      if ( this.name=="xun") {
         this.title = "巡检记录";
+        this.submit.name="xun";
       } else {
         this.title = "消缺记录";
+        this.submit.name="xiao";
       }
     }
   },
   methods:{
-    addTime(time){
-      this.time=time;
+    addTime(time) {
+      this.submit.time = time;
+    },
+    chaxun(){
+      window.console.log(this.submit)
     }
   }
 };
 </script>
 
 <style lang="less" scoped>
+@mainColor: #5ee4e4;
 .total {
-  width: 1000px;
-  height: 600px;
-  border: 1px solid red;
-  margin: 0 auto;
+  width: 998px;
+  height: 500px;
+  float: right;
+  border: 1px solid rgb(218, 218, 218);
 }
 /* 导航栏 */
 .nav {
@@ -102,9 +110,14 @@ components:{
 
 /* 路径提示  */
 .lu {
-  margin-top: 20px;
-  margin-left: 50px;
+  height: 40px;
   font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(218, 218, 218);
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
   span:nth-of-type(2) {
     font-size: 14px;
     padding-top: 1px;
@@ -115,10 +128,10 @@ components:{
 .chaxun {
   width: 100%;
   height: 60px;
-  margin-top: 20px;
   display: flex;
   align-items: center;
-  border: 1px solid rgb(218, 218, 218);
+  justify-content: space-evenly;
+  border-bottom: 1px solid rgb(218, 218, 218);
 }
 /* 查询中的Div */
 .chaxun > div {
@@ -128,52 +141,37 @@ components:{
   span {
     width: 70px;
     float: left;
-    margin-right: 5px;
     color: #000000;
   }
-  }
-  
-  /* 编号查询 */
-  .in-bianhao {
-    width: 190px;
-    height: 30px;
-    float: left;
-    font-size: 14px;
-  }
+}
 
-  /* 是否为错误查询 */
-  .in-error {
-    width: 90px;
-    float: left;
-  }
-  /* 选择后 */
-  .inErrorMin{
-    width: 70px;
-    float: left;
-  }
+/* 编号查询 */
+.in-bianhao {
+  width: 190px;
+  float: left;
+  font-size: 14px;
+}
 
-  /* 时间查询 */
- 
-   .wdtime{
-    width: 250px;
-    float: left;
-  }
- 
-/* 查询输入框组件 */
- .chaxun > div:first-child {
-    width: 300px;
-    margin-left: 70px;
-  }
-  /* 第二个是否为错误 */
-  .chaxun > div:nth-of-type(2) {
-    width: 200px;
-  }
-  /* 时间查询 */
-  .time{
-   width: 330px;
-  }
-  .chaxun-btn{
-    margin-left: 10px;
-    margin-right: 10px;
-  }
+/* 是否为错误查询 */
+.in-error {
+  width: 90px;
+  float: left;
+}
+/* 选择后 */
+.inErrorMin {
+  width: 70px;
+  float: left;
+}
+
+/* 时间查询 */
+.wdtime {
+  width: 250px;
+  float: left;
+}
+
+/* 查询按钮 */
+.chaxun-btn {
+  border-color: @mainColor;
+  background-color: @mainColor;
+}
 </style>
