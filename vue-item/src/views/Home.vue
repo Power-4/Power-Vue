@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import hoverButton from "../components/hoverButton.vue";
 export default {
   name: "home",
   data() {
@@ -49,9 +48,7 @@ export default {
     };
   },
   components: {
-    hoverButton
-  },
-  methods: {
+  
   }
 };
 </script>
