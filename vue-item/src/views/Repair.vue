@@ -63,7 +63,16 @@
                 </div>
               </el-col>
               <el-button type="primary" class="repair-query">查询</el-button>
-              <el-button type="primary" icon="el-icon-edit" class="repair-add" >制定消缺任务</el-button>
+              <el-button type="primary" icon="el-icon-edit" class="repair-add" @click="dialogFormVisible = true">
+                制定消缺任务
+              </el-button>
+
+              <!-- 模态框 -->
+              <el-dialog title="制定消缺任务" :visible.sync="dialogFormVisible">
+                <div>
+                  我是制定消缺任务的模态框
+                </div>
+              </el-dialog>
             </el-row>
 
             <!-- 下方表格 -->
@@ -266,10 +275,10 @@ export default {
           completionTime: "",
           isCancel: "否"
         }
-      ]
+      ],
+      dialogFormVisible: false,
     };
   }
-  
 };
 </script>
 
