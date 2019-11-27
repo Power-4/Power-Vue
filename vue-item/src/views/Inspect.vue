@@ -246,10 +246,7 @@ export default {
         color: #fff;
         padding: 0 15px;
       }
-
     }
-
-
   }
 
   .el-table {
@@ -265,7 +262,4 @@ export default {
     text-align: right;
   }
 }
-
-
-
 </style>
