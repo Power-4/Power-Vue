@@ -23,6 +23,9 @@
         <router-view></router-view>
       </div>
     </section>
+    <!-- <router-link to="/inspect">inspect</router-link>
+    <router-view/> -->
+
   </div>
 </template>
 
