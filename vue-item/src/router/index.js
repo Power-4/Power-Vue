@@ -121,7 +121,7 @@ const routes = [
       {
         path: 'total',
         name: 'total',
-        component: () => import('../views/total.vue'),
+        component: () => import('../views/Total.vue'),
         meta: {
           auth: true
         }
