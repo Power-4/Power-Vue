@@ -20,7 +20,7 @@ const routes = [
         },
         children: [
           {
-            path: 'work',
+            path: '',
             name: 'work',
             component: () => import('../views/Work.vue'),
             meta: {
@@ -97,41 +97,7 @@ const routes = [
         component: () => import('../views/Defect.vue'),
         meta: {
           auth: true
-        },
-        children: [
-          {
-            path: '/',
-            component: () => import('../views/DefectType.vue'),
-            meta: {
-              auth: true
-            }
-          },
-          {
-            path: '/DefectType',
-            name: 'defectType',
-            component: () => import('../views/DefectType.vue'),
-            meta: {
-              auth: true
-            }
-          },
-          {
-            path: '/defectLevel',
-            name: 'defectLevel',
-            component: () => import('../views/DefectLevel.vue'),
-            meta: {
-              auth: true
-            }
-          },
-          //工作平台操作-处理
-          {
-            path: '/dispose',
-            name: 'dispose',
-            component: () => import('../views/Dispose.vue'),
-            meta: {
-              auth: true
-            }
-          }
-        ]
+        }
       },
       // 巡检管理
       {
@@ -155,7 +121,7 @@ const routes = [
       {
         path: 'total',
         name: 'total',
-        component: () => import('../views/Total.vue'),
+        component: () => import('../views/total.vue'),
         meta: {
           auth: true
         }
@@ -172,7 +138,7 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  base: process. env.BASE_URL, 
+  base: process.env.BASE_URL,
   routes
 })
 
