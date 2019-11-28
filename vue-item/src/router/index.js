@@ -106,7 +106,75 @@ const routes = [
         component: () => import('../views/Inspect.vue'),
         meta: {
           auth: true
-        }
+        },
+        children: [
+          {
+            path: '/',
+            name: 'insenact',
+            component: () => import('../views/InsEnact.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'insenact',
+            name: 'insenact',
+            component: () => import('../views/InsEnact.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'insexecute',
+            name: 'insexecute',
+            component: () => import('../views/InsExecute.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'insdefect',
+            name: 'insdefect',
+            component: () => import('../views/InsDefect.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'enactadd',
+            name: 'enactadd',
+            component: () => import('../views/EnactAdd.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'enactmodify',
+            name: 'enactmodify',
+            component: () => import('../views/EnactModify.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'enactview',
+            name: 'enactview',
+            component: () => import('../views/EnactView.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: 'executeenter',
+            name: 'executeenter',
+            component: () => import('../views/ExecuteEnter.vue'),
+            meta: {
+              auth: true
+            }
+          }
+
+        ]
+
       },
       // 消缺管理
       {
