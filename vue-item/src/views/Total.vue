@@ -46,12 +46,12 @@
     <div class="table">
       <wdtable :tableData="tableData"  class="wdtable"  :wdname="wdname"></wdtable>
 
-      <div class="block">
+      <div class="fyblock" >
         <el-pagination
           layout="prev, pager, next"
           :current-page.sync="submit.pageSize"
           :total="currentPage"
-          :page-size="7"
+          :page-size="5"
           @current-change="handleCurrentChange"
         ></el-pagination>
       </div>
@@ -86,16 +86,6 @@ var tableData = [
   },
   {
     date: "2016-05-04",
-    name: "王小虎",
-    address: "上海市普"
-  },
-  {
-    date: "2016-05-01",
-    name: "王小虎",
-    address: "上海市普"
-  },
-  {
-    date: "2016-05-03",
     name: "王小虎",
     address: "上海市普"
   }
@@ -148,7 +138,7 @@ export default {
       this.total.name = this.wdname; /* 赋 name 值 */
       this.total.error = this.submit.error || "all"; /* 赋error 值*/
       this.total.pageSize = this.submit.pageSize; /* 页面初始值 */
-      this.total.currentPage = 7; /* 页面显示条数 */
+      this.total.currentPage = 5; /* 页面显示条数 */
 
       /* 对 Key 和  content 赋值*/
 
@@ -359,12 +349,14 @@ export default {
   margin-top: 10px;
   margin-bottom: 5px;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
 }
 .wdtable {
+  margin: 0 auto;
   width: 990px;
+}
+.fyblock
+{
+  float: right;
 }
 </style>
