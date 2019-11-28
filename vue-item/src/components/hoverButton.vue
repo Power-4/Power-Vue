@@ -4,7 +4,7 @@
       :class="[boolset ? c1 : c2]"
       :to="'/' + item"
       id="butt"
-    >{{ wordsValue }} {{ boolset }}</router-link>
+    > <span class="aaa">{{ wordsValue }}<span class="eng"> {{ item == 'a' ? 'PERSON' : item.toUpperCase() }}</span></span></router-link>
   </div>
 </template>
 
@@ -17,15 +17,15 @@ export default {
   data() {
     return {
       wordsValue: "请传入值",
-      c1: 'butt-click',
-      c2: 'SlowAlterBac',
+      c1: "butt-click",
+      c2: "SlowAlterBac",
       boolset: false
     };
   },
   methods: {
     initWords() {
       switch (this.item) {
-        case "":
+        case "a":
           this.wordsValue = "个人信息";
           break;
         case "system":
@@ -62,6 +62,18 @@ export default {
 </script>
 
 <style lang="less" scoped>
+#hoverButton {
+  height: 60px;
+}
+.aaa {
+  float: left;
+  margin-left: 15px;
+  line-height: 60px;
+}
+.eng {
+
+  font-size: 14px;
+}
 .butt-click {
   display: inline-block;
   text-align: center;

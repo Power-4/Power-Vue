@@ -1,8 +1,8 @@
 <template>
   <div class="self">
     <nav>
-      <router-link @click.native="isCheck=true" :class="[isCheck ? c1 : c2]" to="/">代办列表</router-link>
-      <router-link @click.native="isCheck=false" :class="[isCheck ? c2 : c1]" to="/selfmsg">个人资料修改</router-link>
+      <router-link @click.native="isCheck=true" :class="[isCheck ? c1 : c2]" to="/a">代办列表</router-link>
+      <router-link @click.native="isCheck=false" :class="[isCheck ? c2 : c1]" to="/a/selfmsg">个人资料修改</router-link>
     </nav>
     <!-- 代办事件流程图 -->
     <section>

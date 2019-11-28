@@ -3,6 +3,7 @@
     <div class></div>
     <el-table
       style="width: 100%"
+      stripe
       :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
     >
       <el-table-column prop="date" label="代办任务类型" width="180"></el-table-column>
