@@ -32,17 +32,7 @@
               <i class="el-icon-circle-plus-outline"></i>添加线路
             </button>
             <el-dialog title="添加线路" :visible.sync="dialogFormVisible">
-              <el-form :model="form">
-                <el-form-item label="线路编号" :label-width="formLabelWidth">
-                  <el-input v-model="form.name" autocomplete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="启动状态" :label-width="formLabelWidth">
-                  <el-select v-model="form.region" placeholder="请选启动状态">
-                    <el-option label="启用" value="启用"></el-option>
-                    <el-option label="停用" value="停用"></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-form>
+              
               <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
                 <el-button type="primary" @click="dialogFormVisible = false" class="ok-btn">确 定</el-button>
@@ -255,5 +245,8 @@ export default {
   margin-right: 20px;
   padding: 20px 0;
   font-size: 16px;
+}
+.long{
+  width: 200px;
 }
 </style>

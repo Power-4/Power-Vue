@@ -149,7 +149,7 @@ export default {
       window.console.log(this.submit);
     },
     open() {
-        this.$prompt('请输入邮箱', '修改杆塔', {
+        this.$prompt('杆塔编号', '修改杆塔', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
         }).then(() => {
