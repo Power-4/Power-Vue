@@ -97,7 +97,41 @@ const routes = [
         component: () => import('../views/Defect.vue'),
         meta: {
           auth: true
-        }
+        },
+        children: [
+          {
+            path: '/',
+            component: () => import('../views/DefectType.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: '/DefectType',
+            name: 'defectType',
+            component: () => import('../views/DefectType.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: '/defectLevel',
+            name: 'defectLevel',
+            component: () => import('../views/DefectLevel.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          //工作平台操作-处理
+          {
+            path: '/dispose',
+            name: 'dispose',
+            component: () => import('../views/Dispose.vue'),
+            meta: {
+              auth: true
+            }
+          }
+        ]
       },
       // 巡检管理
       {
