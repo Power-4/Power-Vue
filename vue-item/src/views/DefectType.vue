@@ -6,7 +6,7 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <button type="button" class="btn-query" @click="dialogFormVisible = true">
-              <i class="el-icon-circle-plus-outline"></i>制定巡检任务
+              <i class="el-icon-circle-plus-outline"></i>添加缺陷类型
             </button>
             <el-dialog title="添加缺陷类型" :visible.sync="dialogFormVisible">
               <el-form :model="form">
@@ -31,43 +31,68 @@
     </div>
 
     <!-- 缺陷类型表单 -->
-    <el-table :data="tableData" stripe style="width: 100%" align="center">
-      <el-table-column prop="name" label="缺陷类型名称" width="300" align="center"></el-table-column>
+    <el-table 
+      stripe style="width: 100%" align="center"
+      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)">
+      <el-table-column prop="type" label="缺陷类型名称" width="300" align="center"></el-table-column>
       <el-table-column prop="state" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
-        <el-button type="text" size="small">修改</el-button>|
-        <el-button type="text" size="small">取消</el-button>
+        <el-button type="text" size="small" >修改</el-button>|
+        <el-button type="text" size="small">删除</el-button>
       </el-table-column>
     </el-table>
+    <div class="block">
+      <el-pagination
+        layout="prev, pager, next"
+        :total="tableData.length"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :page-size="pagesize"
+        class="pages"
+      ></el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'DefectType',
   data() {
     return {
       tableData: [
         {
-          name: "叉粱断裂",
+          type: "叉粱断裂",
           state: "启用"
         },{},{},{}
       ],
       dialogFormVisible: false,
-        form: {
-          name: '',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: ''
-        },
-        formLabelWidth: '120px'
+        form: {name: '',region: ''},
+        formLabelWidth: '120px',
+        a: 0,
+        // 分页数据 一页显示最大数，当前页数
+        pagesize: 5,
+        currpage: 1,
+        // 渲染表格的数据
     };
   },
   methods: {
-    
+    // index 编号传入 scope.$index
+    // rows 需要修改的数组
+    deleteRow(index, rows) {
+      rows.splice(index, 1);
+    },
+    looklook(index) {
+      this.a = index++;
+    },
+    // 分页函数
+    // 每页几条
+    handleSizeChange(val) {
+      this.pagesize = val;
+    },
+    // 当前页数
+    handleCurrentChange(val) {
+      this.currpage = val;
+    }
   }
 };
 </script>

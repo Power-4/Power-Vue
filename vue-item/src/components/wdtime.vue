@@ -1,5 +1,4 @@
 <template>
-
     <el-date-picker
       v-model="value"
       type="daterange"
