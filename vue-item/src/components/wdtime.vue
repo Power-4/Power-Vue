@@ -1,20 +1,24 @@
 <template>
 
     <el-date-picker
-      v-model="value2"
+      v-model="value"
       type="daterange"
       align="right"
       unlink-panels
       range-separator="至"
       start-placeholder="开始日期"
       end-placeholder="结束日期"
-      :picker-options="pickerOptions">
+      :picker-options="pickerOptions"
+      value-format="yyyy-MM-dd">
     </el-date-picker>
 </template>
 
 <script>
   export default {
     name:"wdtime",
+    props:{
+      wdname:String,
+    },
     data() {
       return {
         pickerOptions: {
@@ -44,16 +48,15 @@
             }
           }]
         },
-        value1: '',
-        value2: ''
+        value: '',
       };
     },
     watch:{
-      value1(){
-        this.$emit("addTime",this.value1)
+      value(){
+        this.$emit("addTime",this.value)
       },
-      value2(){
-        this.$emit("addTime",this.value2)
+      wdname(){
+        this.value="";
       }
     }
   };
