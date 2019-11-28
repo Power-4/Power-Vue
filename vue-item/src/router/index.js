@@ -12,7 +12,7 @@ const routes = [
     children: [
       // 个人信息平台
       {
-        path: '',
+        path: 'a',
         name: 'self',
         component: () => import('../views/Self.vue'),
         meta: {
@@ -47,7 +47,7 @@ const routes = [
         },
         children: [
           {
-            path: 'role',
+            path: '',
             name: 'role',
             component: () => import('../views/Role.vue'),
             meta: {
@@ -121,7 +121,7 @@ const routes = [
       {
         path: 'total',
         name: 'total',
-        component: () => import('../views/total.vue'),
+        component: () => import('../views/Total.vue'),
         meta: {
           auth: true
         }
