@@ -1,52 +1,52 @@
 <template>
-  <div class="level">   
+  <div class="level">
     <div class="action">
       <el-row :gutter="20">
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
-            <el-input v-model="submit.rankId" type="text" class="data"/> 
+            <el-input v-model="submit.rankId" type="text" class="data" />
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>线路编号：</label>
-            <el-input type="text"  v-model="submit.circuitId" class="data"/>
+            <el-input type="text" v-model="submit.circuitId" class="data" />
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>塔杆编号：</label>
-            <el-input type="text" v-model="submit.poleId" class="data"/>
+            <el-input type="text" v-model="submit.poleId" class="data" />
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <div class="grid-content bg-purple">
-            <label>发现人员：</label>
-            <el-input type="text" v-model="submit.people" class="data"/>
-          </div>
+              <label>发现人员：</label>
+              <el-input type="text" v-model="submit.people" class="data" />
+            </div>
           </div>
         </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="6">
-          <div class="grid-content bg-purple ">
+          <div class="grid-content bg-purple">
             <label>缺陷类型：</label>
-            <el-select  class="data" v-model="submit.type">
-              <el-option lable= "叉梁断裂" value="叉梁断裂"></el-option>
-              <el-option lable= "拦河线断裂" value="拦河线断裂"></el-option>
-              <el-option lable= "绝缘子爆破" value="绝缘子爆破"></el-option>
-              <el-option  lable= "塔杆倾斜" value="塔杆倾斜"></el-option>
-              <el-option lable= "吊杆变形" value="吊杆变形"></el-option>
-              <el-option lable= "其他" value="其他"></el-option>
+            <el-select class="data" v-model="submit.type">
+              <el-option lable="叉梁断裂" value="叉梁断裂"></el-option>
+              <el-option lable="拦河线断裂" value="拦河线断裂"></el-option>
+              <el-option lable="绝缘子爆破" value="绝缘子爆破"></el-option>
+              <el-option lable="塔杆倾斜" value="塔杆倾斜"></el-option>
+              <el-option lable="吊杆变形" value="吊杆变形"></el-option>
+              <el-option lable="其他" value="其他"></el-option>
             </el-select>
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="grid-content bg-purple ">
+          <div class="grid-content bg-purple">
             <label>缺陷级别：</label>
-            <el-select v-model="submit.level"  class="data">
+            <el-select v-model="submit.level" class="data">
               <el-option value="一般">一般</el-option>
               <el-option value="紧急">紧急</el-option>
               <el-option value="严重">严重</el-option>
@@ -54,9 +54,9 @@
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="grid-content bg-purple bg-time ">
+          <div class="grid-content bg-purple bg-time">
             <label>发现时间：</label>
-            <el-date-picker type="date"  class="datas" v-model="submit.time"></el-date-picker>
+            <el-date-picker type="date" class="datas" v-model="submit.time"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
@@ -68,15 +68,18 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <div class="grid-content bg-purple">
-            <button type="button" class="btn-query btn">保 存</button>
+            <el-button type="text" class="btn-query" @click="save()">保存</el-button>
           </div>
         </el-col>
       </el-row>
     </div>
     <div class="form">
-      <el-table 
-      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)" 
-      stripe style="width: 100%" align="center">
+      <el-table
+        :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
+        stripe
+        style="width: 100%"
+        align="center"
+      >
         <el-table-column prop="rankId" label="任务编号" width="100" align="center"></el-table-column>
         <el-table-column prop="circuitId" label="线路编号" width="100" align="center"></el-table-column>
         <el-table-column prop="poleId" label="塔杆编号" width="100" align="center"></el-table-column>
@@ -85,26 +88,26 @@
         <el-table-column prop="connect" label="缺陷描述" width="100" align="center"></el-table-column>
         <el-table-column prop="date" label="发现时间" width="100" align="center"></el-table-column>
         <el-table-column prop="people" label="发现人员" width="100" align="center"></el-table-column>
-        <el-table-column prop="level" label="缺陷级别"  align="center">
-           <template slot-scope="scope">
-              <el-select class="selectOne" v-model="scope.row.selectOne">
+        <el-table-column prop="level" label="缺陷级别" align="center">
+          <template slot-scope="scope">
+            <el-select class="selectOne" v-model="scope.row.selectOne">
               <el-option value="一般">一般</el-option>
               <el-option value="紧急">紧急</el-option>
               <el-option value="严重">严重</el-option>
             </el-select>
-          </template> 
+          </template>
         </el-table-column>
       </el-table>
-       <div class="block">
-      <el-pagination
-        layout="prev, pager, next"
-        :total="tableData.length"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :page-size="pagesize"
-        class="pages"
-      ></el-pagination>
-    </div>
+      <div class="block">
+        <el-pagination
+          layout="prev, pager, next"
+          :total="tableData.length"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :page-size="pagesize"
+          class="pages"
+        ></el-pagination>
+      </div>
     </div>
   </div>
 </template>
@@ -115,52 +118,49 @@ export default {
   data() {
     return {
       tableData: [
-        {
-          rankId:'LTX0245',
-          date: "2016-05-02",
-          name: "拦河线断裂",
-          people: "巡检员测试用户01"
-        },{},{},{},{},{},{}
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""}
       ],
       a: 0,
       // 分页数据 一页显示最大数，当前页数
       pagesize: 5,
       currpage: 1,
 
-      // 渲染表格的数据
-      submit:{rankId:"", circuitId:"",poleId:"",people:"",type:"", level: "", time: "",selectOne:"" }
+      // 查询所需要的数据
+      submit: {rankId: "",circuitId: "",poleId: "",people: "",type: "",level: "",time: ""}
     };
   },
   methods: {
-    // index 编号传入 scope.$index
-    // rows 需要修改的数组
-    deleteRow(index, rows) {
-      rows.splice(index, 1);
+    //查询
+    search() {
+      window.console.log("所查询的信息",this.submit);
     },
-    looklook(index) {
-      this.a = index++;
-    },
-    // 分页函数
-    // 每页几条
+    //保存
+    save() {},
+    //分页函数  每页几条
     handleSizeChange(val) {
       this.pagesize = val;
     },
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
-    },
-    search() {
-    window.console.log(this.submit)
     }
-
-
   }
 };
 </script>
 
 
 <style lang="less" scoped>
-
 .level {
   padding: 0 20px;
 }
@@ -174,9 +174,8 @@ export default {
   height: 26px;
 }
 
-
 .el-row {
- padding:  20px 0 ;
+  padding: 20px 0;
 }
 
 .bg-purple {
@@ -189,7 +188,7 @@ export default {
 .btn-query {
   width: 120px;
   height: 30px;
-  background: rgb(94,228,228);
+  background: rgb(94, 228, 228);
   border: 0;
   border-radius: 5px;
   color: #fff;
@@ -200,7 +199,7 @@ export default {
 }
 
 .btn {
-float: left;
+  float: left;
 }
 
 .btn-query:active {
@@ -208,6 +207,10 @@ float: left;
 }
 
 .selectOne {
-  border-radius: 5px
+  border-radius: 5px;
+}
+
+.pages {
+  float: right;
 }
 </style>

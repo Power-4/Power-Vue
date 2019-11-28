@@ -108,6 +108,10 @@ a {
   color: #ccc;
 }
 
+ .bg-purple {
+   margin-left: 80px;
+ }
+
 .btn-query {
   width: 120px;
   height: 30px;
@@ -117,7 +121,6 @@ a {
   color: #fff;
   padding: 0 15px;
   outline: none;
-  margin-right: 20px;
 }
 
 .btn-query:active {
