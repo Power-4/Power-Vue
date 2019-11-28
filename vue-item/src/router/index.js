@@ -122,6 +122,15 @@ const routes = [
               auth: true
             }
           },
+          //工作平台操作-处理
+          {
+            path: '/dispose',
+            name: 'dispose',
+            component: () => import('../views/Dispose.vue'),
+            meta: {
+              auth: true
+            }
+          }
         ]
       },
       // 巡检管理
