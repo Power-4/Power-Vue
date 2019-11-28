@@ -40,7 +40,8 @@
 
     <div class="daochu">
       <el-button type="primary" class="excel">打印</el-button>
-      <el-button type="primary" class="excel">导出为EXCEL</el-button>
+      <el-button type="primary" class="excel" @click="downloadExcel">导出为EXCEL</el-button>
+
     </div>
     <div class="table">
       <wdtable :tableData="tableData"  class="wdtable"  :wdname="wdname"></wdtable>
@@ -114,7 +115,8 @@ export default {
   },
   components: {
     wdtime,
-    wdtable
+    wdtable,
+   
   },
   watch: {
     wdname() {
@@ -187,13 +189,43 @@ export default {
     handleCurrentChange(val) {
       this.submit.pageSize = val;
       this.chaxun();
-    }
+    },
+
+    downloadExcel() {
+                this.$confirm(`确定导出${this.title}吗?'`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.excelData = tableData; //你要导出的数据list。
+                    this.export2Excel()
+                }).catch(() => {
+
+                });
+            },
+            //数据写入excel
+            export2Excel() {
+                var that = this;
+                require.ensure([], () => {
+                    const { export_json_to_excel } =  require('@/excel/export2Excel'); //这里必须使用绝对路径，使用@/+存放export2Excel的路径
+                    const tHeader = ['时间','名字','地址']; // 导出的表头名信息
+                    const filterVal = ['date','name', 'address']; // 导出的表头字段名，需要导出表格字段名
+                    const list = that.excelData;
+                    const data = that.formatJson(filterVal, list);
+                    export_json_to_excel(tHeader, data, this.title);// 导出的表格名称，根据需要自己命名
+                })
+            },
+            //格式转换，直接复制即可
+            formatJson(filterVal, jsonData) {
+                return jsonData.map(v => filterVal.map(j => v[j]))
+            },
   },
   /*创建开始时*/
   created() {
     this.chaxun();
   }
-};
+}
+
 </script>
 
 <style lang="less" scoped>
