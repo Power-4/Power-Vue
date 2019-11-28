@@ -18,7 +18,12 @@
 
       <div class="error">
         <span>有无故障:</span>
-        <el-select v-model="submit.error" placeholder="请选择" class="in-error" :class="{inErrorMin:submit.error}">
+        <el-select
+          v-model="submit.error"
+          placeholder="请选择"
+          class="in-error"
+          :class="{inErrorMin:submit.error}"
+        >
           <el-option label="有" value="yes"></el-option>
 
           <el-option label="无" value="no"></el-option>
@@ -32,56 +37,125 @@
       <el-button type="primary" icon="el-icon-search" class="chaxun-btn" @click="chaxun()">查询</el-button>
     </div>
 
-    <div>
-        
+    <div class="daochu">
+      <el-button type="primary" class="excel">打印</el-button>
+      <el-button type="primary" class="excel">导出为EXCEL</el-button>
+    </div>
+    <div class="table">
+      <wdtable :tableData="tableData" class="wdtable"></wdtable>
+      
+      <div class="block">
+        <el-pagination layout="prev, pager, next" :total="50" :page-size="7"  
+        @current-change="handleCurrentChange"></el-pagination>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import wdtime from "../components/wdtime";
+import wdtable from "../components/wdtable";
+
+var tableData = [
+  {
+    date: "2016-05-02",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1518 弄"
+  },
+  {
+    date: "2016-05-04",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1517 弄"
+  },
+  {
+    date: "2016-05-01",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1519 弄"
+  },
+  {
+    date: "2016-05-03",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1516 弄"
+  },
+  {
+    date: "2016-05-04",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1517 弄"
+  },
+  {
+    date: "2016-05-01",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1519 弄"
+  },
+  {
+    date: "2016-05-03",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1516 弄"
+  }
+];
 
 export default {
   name: "total",
   data() {
     return {
       title: "巡检记录",
-      name:"xun",
-      submit: { name:"", id: "", error: "", time: "" }
+      name: "xun",
+      submit: { name: "", id: "", error: "", time: "",page:1, },
+      tableData: []
     };
   },
   components: {
-    wdtime
+    wdtime,
+    wdtable
   },
   watch: {
     name() {
-      if ( this.name=="xun") {
+      if (this.name == "xun") {
         this.title = "巡检记录";
-        this.submit.name="xun";
+        this.submit.name = "xun";
       } else {
         this.title = "消缺记录";
-        this.submit.name="xiao";
+        this.submit.name = "xiao";
       }
     }
   },
-  methods:{
+  methods: {
     addTime(time) {
       this.submit.time = time;
     },
-    chaxun(){
-      window.console.log(this.submit)
-    }
+    chaxun() {
+      window.console.log(this.submit);
+    },
+    handleCurrentChange(val) {
+       this.submit.page=val;
+      }
+  },
+  beforeCreate(){
+   /*  var total=
+    {
+      name=this.submit.name,
+
+    };
+    if(!this.submit.error)
+    {
+      total = {}
+    } */
+  },
+  /* 数据复制 */
+  created() {
+    this.tableData = tableData;
   }
 };
 </script>
 
 <style lang="less" scoped>
 @mainColor: #5ee4e4;
+@bottom: 1px solid rgb(218, 218, 218);
 .total {
   width: 998px;
-  height: 500px;
+
   float: right;
-  border: 1px solid rgb(218, 218, 218);
+  border: @bottom;
 }
 /* 导航栏 */
 .nav {
@@ -114,7 +188,7 @@ export default {
   font-size: 16px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgb(218, 218, 218);
+  border-bottom: @bottom;
   span:nth-of-type(1) {
     margin-left: 20px;
   }
@@ -131,7 +205,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  border-bottom: 1px solid rgb(218, 218, 218);
+  border-bottom: @bottom;
 }
 /* 查询中的Div */
 .chaxun > div {
@@ -170,8 +244,38 @@ export default {
 }
 
 /* 查询按钮 */
-.chaxun-btn {
+.chaxun-btn{
   border-color: @mainColor;
   background-color: @mainColor;
+}
+
+/* 导出 */
+.daochu {
+  width: 100%;
+  height: 60px;
+  border-bottom: @bottom;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  .excel {
+    height: 40px;
+    position: relative;
+    right: 30px;
+    border-color: @mainColor;
+    background-color: @mainColor;
+  }
+}
+
+/* 表格 */
+
+.table {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.wdtable {
+  width: 900px;
 }
 </style>
