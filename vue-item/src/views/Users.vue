@@ -20,7 +20,6 @@
         </el-form-item>
       </el-form>
     </div>
- +
  
      <el-table
       stripe
@@ -42,7 +41,7 @@
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
 
-          <el-button @click="del(scope.$index, tableData)" type="text" size="small">删除</el-button>
+          <el-button @click="del(scope.row, scope.$index, tableData)" type="text" size="small">删除</el-button>
           <el-button @click="seeLog(scope.$index, tableData)" type="text" size="small">日志</el-button>
         </template>
       </el-table-column>
@@ -136,6 +135,30 @@ export default {
     addUsers () {
       this.addDataTab = true;
     },
+    // 删除用户
+    del (obj, index, rows) {
+      this.$confirm("是否删除用户", "删除用户", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+          // 通过传入 scope.row 获取 选取的对象，获得id
+          window.console.log(obj);
+          rows.splice(index, 1);
+          
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "取消修改"
+          });
+        });
+    },
     // 启用/禁用选项框
     achecbox(index) {
       var words = "此操作将禁用该角色, 是否继续?";
@@ -206,7 +229,7 @@ export default {
           isCheck: false
         },
         {
-          date: "2016-05-02",
+          date: "2016-05-02222222",
           name: "王小虎",
           address: "上海市普陀区金沙江路 1518 弄",
           isCheck: true
