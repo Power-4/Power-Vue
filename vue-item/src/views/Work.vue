@@ -150,6 +150,12 @@ export default {
         }
       ]
     };
+  },
+  created() {
+    // axios({
+    //   url: "http://192.168.6.177/taskOrchid/getTaskByUserId?currentPage=1&pageSize=5",
+    //   method: "GET",
+    // });
   }
 };
 </script>
