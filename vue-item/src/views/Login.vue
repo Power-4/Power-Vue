@@ -8,29 +8,30 @@
       ref="ruleForm"
       label-width="100px"
       class="demo-ruleForm"
+      
     >   
        
-      <el-form-item label="账号" prop="pass">
-        <el-input type="text" v-model="ruleForm.pass" autocomplete="off"></el-input>
+      <el-form-item label="账号" prop="user">
+        <el-input type="text" v-model="ruleForm.user" autocomplete="off" placeholder="请输入账号"></el-input>
       </el-form-item>
-      <el-form-item label="密码" prop="checkPass">
-        <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+      <el-form-item label="密码" prop="pass">
+        <el-input type="password" v-model="ruleForm.pass" autocomplete="off" placeholder="请输入密码"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm('ruleForm')" class="tijiao">登录</el-button>
-        <el-button @click="resetForm('ruleForm')" class="chongzhi">重置</el-button>
+        <el-button @click="resetForm('ruleForm');chongzhi=false" class="chongzhi">重置</el-button>
       </el-form-item>
     </el-form>
 
       
-    <div class="xuan">
+    <div class="xuan" v-if="chongzhi">
       <vue-particles
-        color="#439797"
+        color="#5ee4e4"
         :particleOpacity="0.7"
         :particlesNumber="60"
         shapeType="circle"
         :particleSize="4"
-        linesColor="#439797"
+        linesColor="#5ee4e4"
         :linesWidth="1"
         :lineLinked="true"
         :lineOpacity="0.4"
@@ -50,6 +51,7 @@
 <script>
 export default {
   data() {
+    
     var validatePass = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请输入账号"));
@@ -66,14 +68,27 @@ export default {
     };
     return {
       ruleForm: {
-        pass: "",
-        checkPass: ""
+        user: "",
+        pass: ""
       },
+      chongzhi:true,
       rules: {
-        pass: [{ validator: validatePass, trigger: "blur" }],
-        checkPass: [{ validator: validatePass2, trigger: "blur" }]
+        user: [{required: true,validator: validatePass, trigger: "blur" }],
+        pass: [{ required: true,validator: validatePass2, trigger: "blur" }]
       }
     };
+  },
+  watch:{
+    chongzhi(){
+      if(!this.chongzhi)
+      { 
+        setTimeout(()=>{
+         this.chongzhi=true;
+        },100)
+        
+      }
+     
+    }
   },
   methods: {
     /* 判断是否可以提交 */
@@ -90,7 +105,9 @@ export default {
       this.$refs[formName].resetFields();
     },
     tijiao() {
+
       window.console.log(this.ruleForm);
+      
     }
   }
 };
@@ -110,6 +127,7 @@ export default {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  z-index: 10;
   .demo-ruleForm {
     width: 80%;
   }
@@ -144,5 +162,6 @@ export default {
   top: 0;
   left: 0;
   z-index: -1;
+  
 }
 </style>
