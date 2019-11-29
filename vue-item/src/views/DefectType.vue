@@ -63,21 +63,12 @@
     </el-dialog> -->
 
     <!-- 缺陷类型表单 -->
-    <el-table
-      stripe
-      style="width: 100%"
-      align="center"
-      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
-    >
+    <el-table stripe style="width: 100%" align="center" :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)" >
       <el-table-column prop="type" label="缺陷类型名称" width="300" align="center"></el-table-column>
       <el-table-column prop="state" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
         <template slot-scope="scope">
-          <el-button
-            type="text"
-            size="small"
-            @click="Edit(scope.$index, scope.row ,dialogVisible = true)"
-          >修改</el-button>|
+          <el-button type="text" size="small" @click="Edit(scope.$index, scope.row ,dialogVisible = true)"> 修改 </el-button>|
           <el-button type="text" size="small" @click="Delete(scope.$index, scope.row,del())">删除</el-button>
         </template>
       </el-table-column>
