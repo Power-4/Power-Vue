@@ -26,7 +26,7 @@
         <vue-particles
           color="#5ee4e4"
           :particleOpacity="0.7"
-          :particlesNumber="60"
+          :particlesNumber="250"
           shapeType="circle"
           :particleSize="4"
           linesColor="#5ee4e4"

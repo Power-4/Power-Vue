@@ -223,7 +223,8 @@ export default {
 @bottom: 1px solid rgb(218, 218, 218);
 .total {  
   width: 998px;
-
+  max-height: 700px;
+  overflow: hidden;
   float: right;
   border: @bottom;
 }
