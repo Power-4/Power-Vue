@@ -54,13 +54,13 @@
     </el-dialog>
 
     <!-- 删除模态框 -->
-    <el-dialog title="提示" :visible.sync="delVisible" width="40%">
+    <!-- <el-dialog title="提示" :visible.sync="delVisible" width="40%">
       <span>确定要删除嘛?</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="delVisible = false">取 消</el-button>
         <el-button type="primary" @click="delVisible = false">确 定</el-button>
       </span>
-    </el-dialog>
+    </el-dialog> -->
 
     <!-- 缺陷类型表单 -->
     <el-table
@@ -78,7 +78,7 @@
             size="small"
             @click="Edit(scope.$index, scope.row ,dialogVisible = true)"
           >修改</el-button>|
-          <el-button type="text" size="small" @click="Delete(scope.$index, scope.row,delVisible = true)">删除</el-button>
+          <el-button type="text" size="small" @click="Delete(scope.$index, scope.row,del())">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -108,7 +108,6 @@ export default {
       ],
       dialogFormVisible: false,
       dialogVisible: false,
-      delVisible: false,
       addTable: { name: "", region: "" },
       revaTable: { type: "", state: "" },
       formLabelWidth: "120px",
@@ -141,7 +140,24 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
-    }
+    },
+    del(){
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+      }
   }
 };
 </script>

@@ -3,8 +3,7 @@
     <div class="defect">
     <section>
     <router-link to="/defectType" >缺陷类型名称</router-link> |
-    <router-link to="/defectLevel">缺陷等级确认</router-link> |
-    <router-link to="/dispose">等级确认</router-link> 
+    <router-link to="/defectLevel">缺陷等级确认</router-link> 
       <router-view></router-view>
     </section>
    </div>
