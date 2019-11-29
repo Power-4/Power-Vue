@@ -104,6 +104,9 @@ export default {
         { type: "叉粱断裂", state: "启用" },
         { type: "叉粱断裂", state: "不启用" },
         { type: "断裂", state: "启用" },
+        { type: "叉粱断裂", state: "不启用" },
+        { type: "叉粱断裂", state: "不启用" },
+        { type: "叉粱断裂", state: "不启用" },
         { type: "叉粱断裂", state: "不启用" }
       ],
       dialogFormVisible: false,
@@ -136,11 +139,14 @@ export default {
     // 每页几条
     handleSizeChange(val) {
       this.pagesize = val;
+      window.console.log(`每页 ${val} 条`);
     },
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+      window.console.log(`当前页: ${val}`);
     },
+    //删除功能模态框
     del(){
         this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
