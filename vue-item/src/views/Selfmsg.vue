@@ -1,22 +1,15 @@
 <template>
   <div class="selfMsg">
-    <p>
-      <span>工作岗位:</span>
-      {{ user.role }}
-    </p>
-    <p>
-      <span>工作编号:</span>
-      {{ user.userId }}
-    </p>
-    <p>
-      <span>入职日期:</span>
-      {{ user.goDate }}
-    </p>
-    <p>
-      <span>离职日期:</span>
-      {{ user.runDate }}
-    </p>
-    <el-form label-position="labelPosition" label-width="80px">
+    <el-form class="abc" label-position="labelPosition" label-width="120px">
+      <el-form-item label="工作岗位：">
+        <el-input v-model="user.role" @change="saveC = true"></el-input>
+      </el-form-item>
+      <el-form-item label="工作编号：">
+        <el-input v-model="user.userId" @change="saveC = true"></el-input>
+      </el-form-item>
+      <el-form-item label="入职日期：">
+        <el-input v-model="user.goDate" @change="saveC = true"></el-input>
+      </el-form-item>
       <el-form-item label="年龄:">
         <el-input v-model="user.name" @change="saveC = true"></el-input>
       </el-form-item>
@@ -107,9 +100,12 @@ export default {
 </script>
 
 <style lang="less" scoped>
+
+.abc {
+  margin-top: 30px;
+}
 .selfMsg {
-  width: 750px;
-  margin: 0 auto;
+  width: 900px;
 }
 .butt {
   float: right;

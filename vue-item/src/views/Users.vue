@@ -14,13 +14,15 @@
           </el-select>
           <el-button class="btn-sea">搜索</el-button>
 
-          <el-button class="addusers">
+          <el-button class="addusers" @click="addUsers">
             <i class="el-icon-circle-plus-outline"></i>添加用户
           </el-button>
         </el-form-item>
       </el-form>
     </div>
-    <el-table
+ +
+ 
+     <el-table
       stripe
       style="width: 100%"
       :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
@@ -32,16 +34,16 @@
       <el-table-column prop="address" label="最后登录时间"></el-table-column>
       <el-table-column label="状态(冻结/未冻结)">
         <template slot-scope="scope">
-          <el-checkbox v-model="scope.row.isCheck"></el-checkbox>
+          <el-checkbox v-model="scope.row.isCheck" @change="achecbox(scope.row)"></el-checkbox>
           <!-- // 添加一个多选框,控制选中与否 -->
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="150">
         <template slot-scope="scope">
-          <el-button class="cli" @click="looklook(scope.$index)" type="text" size="small">查看</el-button>
+          <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
 
-          <el-button @click="deleteRow(scope.$index, tableData)" type="text" size="small">处理</el-button>
-          <el-button @click="deleteRow(scope.$index, tableData)" type="text" size="small">日志</el-button>
+          <el-button @click="del(scope.$index, tableData)" type="text" size="small">删除</el-button>
+          <el-button @click="seeLog(scope.$index, tableData)" type="text" size="small">日志</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -56,6 +58,16 @@
         class="pages"
       ></el-pagination>
     </div>
+
+    <el-dialog title="修改用户信息" :visible.sync="updataTab">
+      <!-- 插入类型 -->
+    </el-dialog>
+    <el-dialog title="添加用户信息" :visible.sync="addDataTab">
+      <!-- 插入类型 -->
+    </el-dialog>
+    <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
+      <!-- 插入类型 -->
+    </el-dialog>
   </div>
 </template>
 
@@ -112,13 +124,43 @@
 <script>
 export default {
   methods: {
-    // index 编号传入 scope.$index
-    // rows 需要修改的数组
-    deleteRow(index, rows) {
-      rows.splice(index, 1);
+    // 修改用户
+    updata() {
+      this.updataTab = true;
     },
-    looklook(index) {
-      this.a = index++;
+    // 查看日志
+    seeLog() {
+      this.seeLogTab = true;
+    },
+    // 添加用户
+    addUsers () {
+      this.addDataTab = true;
+    },
+    // 启用/禁用选项框
+    achecbox(index) {
+      var words = "此操作将禁用该角色, 是否继续?";
+      if (index.isCheck) words = "此操作将启用该角色, 是否继续?";
+      this.$confirm(words, "启用/禁用", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+          // 通过传入 scope.row 获取 选取的对象，获得id
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "取消修改"
+          });
+          window.console.log(index.name);
+          // 传入的值是已经修改过的
+          index.isCheck = !index.isCheck;
+        });
     },
     // 分页函数
     // 每页几条
@@ -132,6 +174,13 @@ export default {
   },
   data() {
     return {
+      // 修改用户数据模态框
+      updataTab: false,
+      // 添加用户模态框控制
+      addDataTab: false,
+      // 查看日志模态框控制
+      seeLogTab: false,
+      // 搜索框内容
       search: "",
       // 分页数据 一页显示最大数，当前页数
       pagesize: 3,
