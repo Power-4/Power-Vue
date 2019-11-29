@@ -217,7 +217,40 @@ const routes = [
         component: () => import('../views/Repair.vue'),
         meta: {
           auth: true
-        }
+        },
+        children: [
+          {
+            path: '/',
+            component: () => import('../views/RepairDistribution.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: '/repairdistribution',
+            name: 'repairdistribution',
+            component: () => import('../views/RepairDistribution.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: '/repairperform',
+            name: 'repairperformg',
+            component: () => import('../views/RepairPerform.vue'),
+            meta: {
+              auth: true
+            }
+          },
+          {
+            path: '/repairquery',
+            name: 'repairquery',
+            component: () => import('../views/RepairQuery.vue'),
+            meta: {
+              auth: true
+            }
+          }
+        ]
       },
       // 信息统计
       {
