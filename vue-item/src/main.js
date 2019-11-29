@@ -8,6 +8,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 import axios from 'axios';
 import vueAxios from 'vue-axios';
 
+import VueParticles from 'vue-particles'  
+Vue.use(VueParticles) 
 
 Vue.use(vueAxios,axios)
 
