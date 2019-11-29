@@ -8,50 +8,46 @@
       ref="ruleForm"
       label-width="100px"
       class="demo-ruleForm"
-      
-    >   
-       
+    >
       <el-form-item label="账号" prop="user">
         <el-input type="text" v-model="ruleForm.user" autocomplete="off" placeholder="请输入账号"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="pass">
         <el-input type="password" v-model="ruleForm.pass" autocomplete="off" placeholder="请输入密码"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item class="caozuo">
         <el-button type="primary" @click="submitForm('ruleForm')" class="tijiao">登录</el-button>
         <el-button @click="resetForm('ruleForm');chongzhi=false" class="chongzhi">重置</el-button>
       </el-form-item>
     </el-form>
 
-      
-    <div class="xuan" v-if="chongzhi">
-      <vue-particles
-        color="#5ee4e4"
-        :particleOpacity="0.7"
-        :particlesNumber="60"
-        shapeType="circle"
-        :particleSize="4"
-        linesColor="#5ee4e4"
-        :linesWidth="1"
-        :lineLinked="true"
-        :lineOpacity="0.4"
-        :linesDistance="150"
-        :moveSpeed="2"
-        :hoverEffect="true"
-        hoverMode="grab"
-        :clickEffect="true"
-        clickMode="push"
-        class="lizi" 
-      >
-      </vue-particles>
-    </div>
-
+    <transition name="fade">
+      <div class="xuan" v-if="chongzhi" name="xuan">
+        <vue-particles
+          color="#5ee4e4"
+          :particleOpacity="0.7"
+          :particlesNumber="60"
+          shapeType="circle"
+          :particleSize="4"
+          linesColor="#5ee4e4"
+          :linesWidth="1"
+          :lineLinked="true"
+          :lineOpacity="0.4"
+          :linesDistance="150"
+          :moveSpeed="2"
+          :hoverEffect="true"
+          hoverMode="grab"
+          :clickEffect="true"
+          clickMode="push"
+          class="lizi"
+        ></vue-particles>
+      </div>
+    </transition>
   </div>
 </template>
 <script>
 export default {
   data() {
-    
     var validatePass = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请输入账号"));
@@ -71,23 +67,20 @@ export default {
         user: "",
         pass: ""
       },
-      chongzhi:true,
+      chongzhi: true,
       rules: {
-        user: [{required: true,validator: validatePass, trigger: "blur" }],
-        pass: [{ required: true,validator: validatePass2, trigger: "blur" }]
+        user: [{ required: true, validator: validatePass, trigger: "blur" }],
+        pass: [{ required: true, validator: validatePass2, trigger: "blur" }]
       }
     };
   },
-  watch:{
-    chongzhi(){
-      if(!this.chongzhi)
-      { 
-        setTimeout(()=>{
-         this.chongzhi=true;
-        },100)
-        
+  watch: {
+    chongzhi() {
+      if (!this.chongzhi) {
+        setTimeout(() => {
+          this.chongzhi = true;
+        }, 100);
       }
-     
     }
   },
   methods: {
@@ -105,9 +98,13 @@ export default {
       this.$refs[formName].resetFields();
     },
     tijiao() {
-
+      /* 提交数据 */
       window.console.log(this.ruleForm);
-      
+
+      /* 路由调转 */
+      var url = this.$route.query.redirect;
+      url = url ? url : "/a";
+      this.$router.replace(url);
     }
   }
 };
@@ -133,8 +130,10 @@ export default {
   }
 }
 
-.biaoti{
+.biaoti {
   width: 100%;
+  letter-spacing: 5px;
+  font-weight: 600;
   text-align: center;
 }
 .tijiao {
@@ -144,6 +143,10 @@ export default {
     background-color: #439797;
   }
 }
+.caozuo{
+  position: relative;
+  left: 40px;
+}
 .chongzhi {
   background: #ffffff;
   color: black;
@@ -151,17 +154,27 @@ export default {
     background-color: #61e6e6da;
     color: #ffffff;
   }
-  &:active{
+  &:active {
     background-color: #439797;
   }
 }
-.xuan{
+.xuan {
   width: 100%;
   height: 100%;
-  position:fixed;
+  position: fixed;
   top: 0;
   left: 0;
   z-index: -1;
-  
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 1s ease;
+}
+
+.fade-enter {
+  opacity: 0;
+}
+.fade-leave-to{
+  opacity: 0.9;
 }
 </style>
