@@ -13,10 +13,10 @@
       <div class="details">
         <el-form>
           <el-form-item label="线路编码：">
-            <el-input v-model="form.circuitryNo" disabled="true"></el-input>
+            <el-input v-model="form.circuitryNo" :disabled="edit"></el-input>
           </el-form-item>
           <el-form-item label="杆塔编码：">
-            <el-input v-model="form.poleNo" disabled="true"></el-input>
+            <el-input v-model="form.poleNo" :disabled="edit"></el-input>
           </el-form-item>
           <el-form-item label="缺陷类型：">
             <el-select v-model="form.defectName" clearable placeholder="请选择">
@@ -42,10 +42,10 @@
             <el-input v-model="form.completionRate"></el-input>
           </el-form-item>
           <el-form-item label="发现时间：">
-            <el-input v-model="form.findDate" disabled="true"></el-input>
+            <el-input v-model="form.findDate" :disabled="edit"></el-input>
           </el-form-item>
           <el-form-item label="发现人员：">
-            <el-input v-model="form.foundPerson" disabled="true"></el-input>
+            <el-input v-model="form.foundPerson" :disabled="edit"></el-input>
           </el-form-item>
           <el-form-item label="缺陷描述：">
             <el-input type="textarea" v-model="form.defectsDescribe" class="area"></el-input>
@@ -143,7 +143,8 @@ export default {
             label: '其他'
           } 
         ],
-      }
+      },
+      edit:true
     }
   },
   methods: {

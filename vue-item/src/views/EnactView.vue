@@ -1,6 +1,6 @@
 <template>
   <div class="enact-view">
-    <p>查看巡检任务</p>
+    <p class="view-title">查看巡检任务</p>
     <div class="base-info">
       <el-row :gutter="1">
         <el-col :span="6">
@@ -161,7 +161,7 @@ export default {
   },
   methods: {
     backto() {
-      this.$router.push('/inspect/insenact')
+      this.$router.go(-1)
     },
     handleNodeClick() {
 
@@ -174,6 +174,10 @@ export default {
 <style lang="less" scoped>
 .enact-view {
   padding: 0 30px 0;
+
+  p {
+    margin: 30px 0 10px;
+  }
 
   .base-info {
     width: 100%;

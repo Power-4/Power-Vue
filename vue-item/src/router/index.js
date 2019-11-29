@@ -175,22 +175,6 @@ const routes = [
             }
           },
           {
-            path: 'enactadd',
-            name: 'enactadd',
-            component: () => import('../views/EnactAdd.vue'),
-            meta: {
-              auth: true
-            }
-          },
-          {
-            path: 'enactmodify',
-            name: 'enactmodify',
-            component: () => import('../views/EnactModify.vue'),
-            meta: {
-              auth: true
-            }
-          },
-          {
             path: 'enactview',
             name: 'enactview',
             component: () => import('../views/EnactView.vue'),

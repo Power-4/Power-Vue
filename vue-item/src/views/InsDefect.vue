@@ -5,46 +5,38 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
-              <el-input
-                placeholder="请输入内容"
-                v-model="taskNo"
-                clearable>
-              </el-input>
+            <el-input placeholder="请输入内容" v-model="taskNo" clearable></el-input>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>线路编号：</label>
-              <el-input
-                placeholder="请输入内容"
-                v-model="circuitryId"
-                clearable>
-              </el-input>
+            <el-input placeholder="请输入内容" v-model="circuitryNo" clearable></el-input>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>缺陷类型：</label>
-              <el-select v-model="defectName" clearable placeholder="请选择">
-                <el-option
-                  v-for="item in typeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
+            <el-select v-model="defectsName" clearable placeholder="请选择">
+              <el-option
+                v-for="item in typeOptions"
+                :key="item.id"
+                :label="item.label"
+                :value="item.label"
+              ></el-option>
+            </el-select>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>缺陷级别：</label>
-              <el-select v-model="defectLevel" clearable placeholder="请选择">
-                <el-option
-                  v-for="item in levelOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.label">
-                </el-option>
+            <el-select v-model="defectsLevel" clearable placeholder="请选择">
+              <el-option
+                v-for="item in levelOptions"
+                :key="item.id"
+                :label="item.label"
+                :value="item.label"
+              ></el-option>
             </el-select>
           </div>
         </el-col>
@@ -53,105 +45,49 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>发现时间：</label>
-              <el-date-picker
-                v-model="foundDate"
-                type="date"
-                placeholder="选择日期">
-              </el-date-picker>
+            <el-date-picker v-model="findDate" type="date" placeholder="选择日期"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-              <el-date-picker
-                v-model="createDate"
-                type="date"
-                placeholder="选择日期">
-            </el-date-picker>
+            <el-date-picker v-model="createDate" type="date" placeholder="选择日期"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
-            <el-button type="primary">查 询</el-button>
+            <el-button type="primary" @click="defectQuery" class="bg-color">查 询</el-button>
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="grid-content bg-purple bg-add"> 
-            <el-button type="primary">导出EXCEL</el-button>   
+          <div class="grid-content bg-purple bg-add">
+            <el-button type="primary" @click="downloadExcel" class="bg-color">导出EXCEL</el-button>
           </div>
         </el-col>
       </el-row>
     </div>
 
-    <el-table
-      :data="tableData"
-      stripe
-      style="width: 100%">
-      <el-table-column
-        prop="taskId"
-        label="任务编号"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="lineId"
-        label="线路编号"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="towerId"
-        label="杆塔编号"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="defectLevel"
-        label="缺陷级别"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="defectType"
-        label="缺陷类型"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="foundPerson"
-        label="发现人"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="foundTime"
-        label="发现时间"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="issuePerson"
-        label="下发人"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="issueTime"
-        label="下发时间"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="intactRate"
-        label="完好率"
-        align= "center">
-      </el-table-column>
-      <el-table-column
-        prop="defectDescribe"
-        label="缺陷描述"
-        align= "center">
-      </el-table-column>
-
+    <el-table :data="tableData.slice((currentPage - 1) * pagesize, currentPage * pagesize)" stripe style="width: 100%">
+      <el-table-column prop="taskNo" label="任务编号" align="center"></el-table-column>
+      <el-table-column prop="circuitryNo" label="线路编号" align="center"></el-table-column>
+      <el-table-column prop="poleNo" label="杆塔编号" align="center"></el-table-column>
+      <el-table-column prop="defectsLevel" label="缺陷级别" align="center"></el-table-column>
+      <el-table-column prop="defectsName" label="缺陷类型" align="center"></el-table-column>
+      <el-table-column prop="findPerson" label="发现人" align="center"></el-table-column>
+      <el-table-column prop="findDate" label="发现时间" align="center"></el-table-column>
+      <el-table-column prop="issuePerson" label="下发人" align="center"></el-table-column>
+      <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
+      <el-table-column prop="completionRate" label="完好率" align="center"></el-table-column>
+      <el-table-column prop="defectDescribe" label="缺陷描述" align="center"></el-table-column>
     </el-table>
     <div class="pagination">
-      <el-pagination
-        layout="prev, pager, next"
-        :total="total"
-        :page-size="5">
+      <el-pagination 
+      layout="prev, pager, next"
+      :total="tableData.length"
+      @current-change="handleCurrentChange"
+      :page-size="pagesize">
       </el-pagination>
     </div>
-
   </div>
 </template>
 
@@ -159,67 +95,188 @@
 export default {
   data() {
     return {
+      title: "缺陷记录",
       tableData: [
         {
-          taskId: 'RW0245',
-          lineId: 'XW001',
-          towerId: 'XW0001',
-          defectLevel: '一般',
-          defectType: '断裂',
-          foundPerson: '测试1',
-          foundTime: '2013/02/01',
-          issuePerson: '管理员1',
-          issueTime: '2013/02/03',
-          intactRate: '78%',
-          defectDescribe: '断裂'
-        }
+          taskNo: "RW0245",
+          circuitryNo: "XW001",
+          poleNo: "XW0001",
+          defectsLevel: "一般",
+          defectsName: "断裂",
+          foundPerson: "测试1",
+          findDate: "2013/02/01",
+          issuePerson: "管理员1",
+          createDate: "2013/02/03",
+          completionRate: "78%",
+          defectDescribe: "断裂"
+        },
+        {
+          taskNo: "RW0245",
+          circuitryNo: "XW001",
+          poleNo: "XW0001",
+          defectsLevel: "一般",
+          defectsName: "断裂",
+          foundPerson: "测试1",
+          findDate: "2013/02/01",
+          issuePerson: "管理员1",
+          createDate: "2013/02/03",
+          completionRate: "78%",
+          defectDescribe: "断裂"
+        },
+        {
+          taskNo: "RW0245",
+          circuitryNo: "XW001",
+          poleNo: "XW0001",
+          defectsLevel: "一般",
+          defectsName: "断裂",
+          foundPerson: "测试1",
+          findDate: "2013/02/01",
+          issuePerson: "管理员1",
+          createDate: "2013/02/03",
+          completionRate: "78%",
+          defectDescribe: "断裂"
+        },
+        {
+          taskNo: "RW0245",
+          circuitryNo: "XW001",
+          poleNo: "XW0001",
+          defectsLevel: "一般",
+          defectsName: "断裂",
+          foundPerson: "测试1",
+          findDate: "2013/02/01",
+          issuePerson: "管理员1",
+          createDate: "2013/02/03",
+          completionRate: "78%",
+          defectDescribe: "断裂"
+        },
+        {
+          taskNo: "RW0245",
+          circuitryNo: "XW001",
+          poleNo: "XW0001",
+          defectsLevel: "一般",
+          defectsName: "断裂",
+          foundPerson: "测试1",
+          findDate: "2013/02/01",
+          issuePerson: "管理员1",
+          createDate: "2013/02/03",
+          completionRate: "78%",
+          defectDescribe: "断裂"
+        },
+        {
+          taskNo: "RW0245",
+          circuitryNo: "XW001",
+          poleNo: "XW0001",
+          defectsLevel: "一般",
+          defectsName: "断裂",
+          foundPerson: "测试1",
+          findDate: "2013/02/01",
+          issuePerson: "管理员1",
+          createDate: "2013/02/03",
+          completionRate: "78%",
+          defectDescribe: "断裂"
+        },
       ],
-      total: 10,
-      pagesize:5,
-      currentPage:1,
-      taskNo: '',
-      circuitryId: '',
-      defectName: '',
+      pagesize: 5,
+      currentPage: 1,
+      taskNo: "",
+      circuitryNo: "",
+      defectsName: "",
       typeOptions: [
         {
-          value: '选项1',
-          label: '叉梁断裂'
-        }, {
-          value: '选项2',
-          label: '拦河线断裂'
-        }, {
-          value: '选项3',
-          label: '绝缘子爆破'
-        }, {
-          value: '选项4',
-          label: '杆塔倾斜'
-        }, {
-          value: '选项4',
-          label: '吊杆变形'
-        }, {
-          value: '选项4',
-          label: '其他'
+          id: 1,
+          label: "叉梁断裂"
+        },
+        {
+          id: 2,
+          label: "拦河线断裂"
+        },
+        {
+          id: 3,
+          label: "绝缘子爆破"
+        },
+        {
+          id: 4,
+          label: "杆塔倾斜"
+        },
+        {
+          id: 5,
+          label: "吊杆变形"
+        },
+        {
+          id: 6,
+          label: "其他"
         }
       ],
-      defectLevel: '',
+      defectsLevel: "",
       levelOptions: [
         {
-          value: '选项1',
-          label: '一般'
-        }, {
-          value: '选项2',
-          label: '严重'
-        }, {
-          value: '选项3',
-          label: '其他'
-        } 
+          id: 1,
+          label: "一般"
+        },
+        {
+          id: 2,
+          label: "严重"
+        },
+        {
+          id: 3,
+          label: "其他"
+        }
       ],
-      foundDate: '',
-      createDate: ''
+      findDate: "",
+      createDate: ""
+    };
+  },
+  methods: {
+    // 查询
+    defectQuery() {
+
+      this.axios.get('/', {
+        taskNo: this.taskNo,
+        circuitryNo: this.circuitryNo
+      })
+      .then((res) => {
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
+
+    },
+    // 分页点击事件
+    handleCurrentChange(val) {
+      this.currentPage = val;
+    },
+    // 导出excel表
+    downloadExcel() {
+      this.$confirm(`确定导出${this.title}吗?'`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.excelData = this.tableData; //你要导出的数据list。
+          this.export2Excel();
+        })
+        .catch(() => {});
+    },
+    //数据写入excel
+    export2Excel() {
+      var that = this;
+      require.ensure([], () => {
+        const { export_json_to_excel } = require("@/excel/export2Excel"); //这里必须使用绝对路径，使用@/+存放export2Excel的路径
+        const tHeader = ["任务编号", "线路编号", "杆塔编号","缺陷级别","缺陷类型","发现人","发现时间","下发人","下发时间","完好率","缺陷描述"]; // 导出的表头名信息
+        const filterVal = ["taskNo", "circuitryNo", "poleNo","defectsLevel","defectsName","foundPerson","findDate","issuePerson","createDate","completionRate","defectDescribe"]; // 导出的表头字段名，需要导出表格字段名
+        const list = that.excelData;
+        const data = that.formatJson(filterVal, list);
+        export_json_to_excel(tHeader, data, this.title); // 导出的表格名称，根据需要自己命名
+      });
+    },
+    //格式转换，直接复制即可
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => v[j]));
     }
   }
-  
-}
+};
 </script>
 
 <style lang="less" scoped>
@@ -232,6 +289,11 @@ export default {
     .el-row {
       margin: 10px 0;
 
+      .bg-color {
+        background-color: #5ee4e4;
+        border-color: #5ee4e4;
+      }
+
       .bg-add {
         text-align: right;
       }
@@ -240,7 +302,7 @@ export default {
         display: inline-block;
         width: 80px;
       }
-      
+
       .el-input {
         width: 150px;
       }
@@ -248,10 +310,7 @@ export default {
       .el-select {
         width: 150px;
       }
-
     }
-
-
   }
 
   .el-table {
@@ -267,5 +326,4 @@ export default {
     text-align: right;
   }
 }
-
 </style>
