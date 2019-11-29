@@ -1,6 +1,5 @@
 <template>
   <div class="towar">
-    
     <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
       <el-breadcrumb-item>电力巡检系统</el-breadcrumb-item>
       <el-breadcrumb-item>杆塔管理</el-breadcrumb-item>
@@ -39,7 +38,7 @@
             <el-dialog title="添加杆塔" :visible.sync="dialogFormVisible">
               <el-form :model="form">
                 <el-form-item label="杆塔编号" :label-width="formLabelWidth">
-                  <el-input v-model="form.name" autocomplete="off"></el-input>
+                  <el-input v-model="form.id" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="线路名称" :label-width="formLabelWidth">
                   <el-select v-model="value" placeholder="请选择">
@@ -68,17 +67,38 @@
       </el-row>
     </div>
 
+    <!-- 修改杆塔模态框 -->
+    <el-dialog title="修改杆塔" :visible.sync="dialogVisible" width="45%">
+      <el-form :model="revaTable">
+        <el-form-item label="杆塔编号" :label-width="dialogVisibleWidth">
+          <el-input v-model="revaTable.id" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="启动状态" :label-width="dialogVisibleWidth">
+          <el-select v-model="revaTable.state" placeholder="请选启动状态">
+            <el-option label="启用" value="启用"></el-option>
+            <el-option label="停用" value="停用"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
     <!-- 杆塔表单 -->
     <el-table :data="tableData" stripe style="width: 100%" align="center">
       <el-table-column prop="id" label="杆塔编号" width="300" align="center"></el-table-column>
       <el-table-column prop="name" label="所属路线" width="200" align="center"></el-table-column>
       <el-table-column prop="state" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
-        <el-button type="text" size="small">停用</el-button>
-        <el-button type="text" @click="open">修改</el-button>
-        <el-button type="text" size="small">删除</el-button>
+        <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
+        <el-button type="text" @click="del">删除</el-button>
       </el-table-column>
     </el-table>
+    <div class="block">
+      <el-pagination layout="prev, pager, next" :total="50" class="pages"></el-pagination>
+    </div>
   </div>
 </template>
 
@@ -87,9 +107,11 @@ export default {
   name: "total",
   data() {
     return {
+      //查询
       title: "杆塔",
       name: "xun",
       submit: { id: "", error: "" },
+      //模拟表格数据
       tableData: [
         {
           id: "XW00001",
@@ -112,26 +134,35 @@ export default {
           state: "启用"
         }
       ],
-      options: [{
-          value: 'XW00001',
-          label: '西渭线'
-        }, {
-          value: 'XW00001',
-          label: '西渭线'
-        }, {
-          value: 'XW00001',
-          label: '西渭线'
-        }, {
-          value: 'XW00001',
-          label: '西渭线'
-        }, {
-          value: 'XW00001',
-          label: '西渭线'
-        }],
-        value: '',
+      options: [
+        {
+          value: "XW00001",
+          label: "西渭线"
+        },
+        {
+          value: "XW00001",
+          label: "西渭线"
+        },
+        {
+          value: "XW00001",
+          label: "西渭线"
+        },
+        {
+          value: "XW00001",
+          label: "西渭线"
+        },
+        {
+          value: "XW00001",
+          label: "西渭线"
+        }
+      ],
+      value: "",
+      //添加
       dialogFormVisible: false,
+      dialogVisible: false,
+      revaTable: { id: "",state: "" },
       form: {
-        name: "",
+        id: "",
         region: "",
         date1: "",
         date2: "",
@@ -140,32 +171,38 @@ export default {
         resource: "",
         desc: ""
       },
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      dialogVisibleWidth: "120px"
     };
   },
   components: {},
   methods: {
+    //查询
     chaxun() {
       window.console.log(this.submit);
     },
-    open() {
-        this.$prompt('杆塔编号', '修改杆塔', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        }).then(() => {
+    //删除
+    del() {
+      this.$confirm("是否删除", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
           this.$message({
-            type: 'success',
-            message: '修改成功'
+            type: "success",
+            message: "删除成功!"
           });
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '取消修改'
-          });       
+            type: "info",
+            message: "已取消删除"
+          });
         });
-      }
     }
-  };
+  }
+};
 </script>
 
 <style lang="less" scoped>
@@ -280,5 +317,8 @@ export default {
   margin-right: 20px;
   padding: 20px 0;
   font-size: 16px;
+}
+.pages {
+  float: right;
 }
 </style>

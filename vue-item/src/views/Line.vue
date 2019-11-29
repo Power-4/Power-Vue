@@ -13,13 +13,18 @@
 
       <div class="error">
         <span>是否启用:</span>
-        <el-select v-model="submit.error" placeholder="请选择" class="in-error" :class="{inErrorMin:submit.error}">
+        <el-select
+          v-model="submit.error"
+          placeholder="请选择"
+          class="in-error"
+          :class="{inErrorMin:submit.error}"
+        >
           <el-option label="启用" value="yes"></el-option>
 
           <el-option label="停用" value="no"></el-option>
         </el-select>
       </div>
-  
+
       <el-button type="primary" icon="el-icon-search" class="chaxun-btn" @click="chaxun()">查询</el-button>
     </div>
 
@@ -32,7 +37,47 @@
               <i class="el-icon-circle-plus-outline"></i>添加线路
             </button>
             <el-dialog title="添加线路" :visible.sync="dialogFormVisible">
-              
+              <el-form :inline="true" :model="revaTable" class="demo-form-inline">
+                <el-form-item label="线路编码" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.lineId" placeholder="请输入线路编码"></el-input>
+                </el-form-item>
+                <el-form-item label="线路名称" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.lineName" placeholder="请输入线路名称"></el-input>
+                </el-form-item>
+                <el-form-item label="线路长度" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.lineLength" placeholder="请输入线路长度"></el-input>
+                </el-form-item>
+                <el-form-item label="回路长度" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.loopLength" placeholder="请输入回路长度"></el-input>
+                </el-form-item>
+                <el-form-item label="搬运日期" :label-width="formLabelWidth">
+                  <el-date-picker
+                    style="width:202px"
+                    v-model="revaTable.value"
+                    type="date"
+                    placeholder="选择日期"
+                    format="yyyy 年 MM 月 dd 日"
+                  ></el-date-picker>
+                </el-form-item>
+                <el-form-item label="电压等级" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.voltage" placeholder="请输入电压等级"></el-input>
+                </el-form-item>
+                <el-form-item label="起始杆号" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.start" placeholder="请输入起始杆号"></el-input>
+                </el-form-item>
+                <el-form-item label="终止杆号" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.end" placeholder="请输入终止杆号"></el-input>
+                </el-form-item>
+                <el-form-item label="塔基数" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.towerBase" placeholder="请输入塔基数"></el-input>
+                </el-form-item>
+                <el-form-item label="启动状态" :label-width="formLabelWidth">
+                  <el-select v-model="revaTable.state" placeholder="请选启动状态" style="width:202px">
+                    <el-option label="启用" value="启用"></el-option>
+                    <el-option label="停用" value="停用"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
               <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
                 <el-button type="primary" @click="dialogFormVisible = false" class="ok-btn">确 定</el-button>
@@ -42,6 +87,55 @@
         </el-col>
       </el-row>
     </div>
+
+    <!-- 修改线路模态框 -->
+    <el-dialog title="修改线路" :visible.sync="dialogVisible" width="675px">
+      <el-form :inline="true" :model="revaTable" class="demo-form-inline">
+        <el-form-item label="线路编码" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.lineId" placeholder="请输入线路编码"></el-input>
+        </el-form-item>
+        <el-form-item label="线路名称" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.lineName" placeholder="请输入线路名称"></el-input>
+        </el-form-item>
+        <el-form-item label="线路长度" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.lineLength" placeholder="请输入线路长度"></el-input>
+        </el-form-item>
+        <el-form-item label="回路长度" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.loopLength" placeholder="请输入回路长度"></el-input>
+        </el-form-item>
+        <el-form-item label="搬运日期" :label-width="formLabelWidth">
+          <el-date-picker
+            style="width:202px"
+            v-model="revaTable.value"
+            type="date"
+            placeholder="选择日期"
+            format="yyyy 年 MM 月 dd 日"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="电压等级" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.voltage" placeholder="请输入电压等级"></el-input>
+        </el-form-item>
+        <el-form-item label="起始杆号" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.start" placeholder="请输入起始杆号"></el-input>
+        </el-form-item>
+        <el-form-item label="终止杆号" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.end" placeholder="请输入终止杆号"></el-input>
+        </el-form-item>
+        <el-form-item label="塔基数" :label-width="formLabelWidth">
+          <el-input v-model="revaTable.towerBase" placeholder="请输入塔基数"></el-input>
+        </el-form-item>
+        <el-form-item label="启动状态" :label-width="formLabelWidth">
+          <el-select v-model="revaTable.state" placeholder="请选启动状态" style="width:202px">
+            <el-option label="启用" value="启用"></el-option>
+            <el-option label="停用" value="停用"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
 
     <!-- 线路表单 -->
     <el-table :data="tableData" stripe style="width: 100%" align="center">
@@ -53,81 +147,142 @@
       <el-table-column prop="run" label="运行状态" width="100" align="center"></el-table-column>
       <el-table-column prop="state" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
-        <el-button type="text" size="small">停用</el-button> 
-        <el-button type="text" size="small">修改</el-button> 
-        <el-button type="text" size="small">删除</el-button>
+        <el-button type="text" @click="block">停用</el-button>
+        <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
+        <el-button type="text" @click="del">删除</el-button>
       </el-table-column>
     </el-table>
+    <div class="block">
+      <el-pagination layout="prev, pager, next" :total="50" class="pages"></el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
-
 export default {
   name: "total",
   data() {
     return {
+      //查询
       title: "线路",
-      name:"xun",
-      submit: {id: "", error: ""},
+      name: "xun",
+      submit: { id: "", error: "" },
+      //模拟表格数据
       tableData: [
         {
-          lineid:"XW00001",
-          startid:"XW00010",
-          endid:"XW00250",
-          base:"440",
-          run:"正常",
+          lineid: "XW00001",
+          startid: "XW00010",
+          endid: "XW00250",
+          base: "440",
+          run: "正常",
           name: "西渭线",
           state: "启用"
         },
         {
-          lineid:"XW00001",
-          startid:"XW00010",
-          endid:"XW00250",
-          base:"440",
-          run:"检修中",
+          lineid: "XW00001",
+          startid: "XW00010",
+          endid: "XW00250",
+          base: "440",
+          run: "检修中",
           name: "西渭线",
           state: "启用"
         },
         {
-          lineid:"XW00001",
-          startid:"XW00010",
-          endid:"XW00250",
-          base:"440",
-          run:"正常",
+          lineid: "XW00001",
+          startid: "XW00010",
+          endid: "XW00250",
+          base: "440",
+          run: "正常",
           name: "西渭线",
           state: "启用"
         },
         {
-          lineid:"XW00001",
-          startid:"XW00010",
-          endid:"XW00250",
-          base:"440",
-          run:"正常",
+          lineid: "XW00001",
+          startid: "XW00010",
+          endid: "XW00250",
+          base: "440",
+          run: "正常",
           name: "西渭线",
           state: "停用"
         }
       ],
+      //修改和添加
       dialogFormVisible: false,
-        form: {
-          name: '',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: ''
-        },
-        formLabelWidth: '120px'
+      dialogVisible: false,
+      revaTable: {
+        lineId: "",
+        lineName: "",
+        lineLength: "",
+        loopLength: "",
+        value: "",
+        voltage: "",
+        start: "",
+        end: "",
+        towerBase: "",
+        state: ""
+      },
+      form: {
+        name: "",
+        region: "",
+        date1: "",
+        date2: "",
+        delivery: false,
+        type: [],
+        resource: "",
+        desc: ""
+      },
+      formLabelWidth: "100px",
+      dialogVisibleWidth: "120px"
     };
   },
-  components: {
-    
-  },
-  methods:{
-    chaxun(){
-      window.console.log(this.submit)
+  components: {},
+  methods: {
+    //查询
+    chaxun() {
+      window.console.log(this.submit);
+    },
+    onSubmit() {
+      window.console.log("submit!");
+    },
+    //删除
+    del() {
+      this.$confirm("是否删除", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    //停用
+    block() {
+      this.$confirm("是否停用/启用", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "停用/启用成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消停用/启用"
+          });
+        });
     }
   }
 };
@@ -246,7 +401,10 @@ export default {
   padding: 20px 0;
   font-size: 16px;
 }
-.long{
+.long {
   width: 200px;
+}
+.pages {
+  float: right;
 }
 </style>
