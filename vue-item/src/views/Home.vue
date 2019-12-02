@@ -9,12 +9,12 @@
           <i class="el-icon-timer"></i>
           {{ this.timeColok }}
         </nav>
-        <nav class="logo">
-          <h1>欢迎来到电力巡检系统</h1>
-        </nav>
         <nav class="top-right">
           <span>{{ username }}</span>
           <strong @click="quit">退出</strong>
+        </nav>
+        <nav class="logo">
+          <h1>欢迎来到电力巡检系统</h1>
         </nav>
       </nav>
     </nav>
@@ -85,6 +85,7 @@ export default {
             type: "success",
             message: "退出成功!"
           });
+          sessionStorage.removeItem("token");
           // 跳转到login
           this.$router.replace("/login");
         })
