@@ -17,11 +17,15 @@
 </script>
 
 <style lang="less" scoped>
+
 .defect {
-  overflow: hidden;
+  width: 1000px;
+  float: left;
 }
 
+
 .right-type {
+  width: 1000px;
   overflow: hidden;
 }
 

@@ -5,26 +5,26 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
-            <el-input v-model="submit.taskNo" type="text" class="data" />
+            <el-input v-model="submit.rankId" type="text" class="data" />
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>线路编号：</label>
-            <el-input type="text" v-model="submit.circuitryNo" class="data" />
+            <el-input type="text" v-model="submit.circuitId" class="data" />
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>塔杆编号：</label>
-            <el-input type="text" v-model="submit.poleNo" class="data" />
+            <el-input type="text" v-model="submit.poleId" class="data" />
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <div class="grid-content bg-purple">
               <label>发现人员：</label>
-              <el-input type="text" v-model="submit.findUser" class="data" />
+              <el-input type="text" v-model="submit.people" class="data" />
             </div>
           </div>
         </el-col>
@@ -33,7 +33,7 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>缺陷类型：</label>
-            <el-select class="data" v-model="submit.defectsName">
+            <el-select class="data" v-model="submit.type">
               <el-option lable="叉梁断裂" value="叉梁断裂"></el-option>
               <el-option lable="拦河线断裂" value="拦河线断裂"></el-option>
               <el-option lable="绝缘子爆破" value="绝缘子爆破"></el-option>
@@ -46,7 +46,7 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>缺陷级别：</label>
-            <el-select v-model="submit.defectsLevel" class="data">
+            <el-select v-model="submit.level" class="data">
               <el-option value="一般">一般</el-option>
               <el-option value="紧急">紧急</el-option>
               <el-option value="严重">严重</el-option>
@@ -56,7 +56,7 @@
         <el-col :span="6">
           <div class="grid-content bg-purple bg-time">
             <label>发现时间：</label>
-            <el-date-picker type="date" class="datas" v-model="submit.findDate"  value-format = "yyyy/MM/DD"></el-date-picker>
+            <el-date-picker type="date" class="datas" v-model="submit.time"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
@@ -80,17 +80,17 @@
         style="width: 100%"
         align="center"
       >
-        <el-table-column prop="taskNo" label="任务编号" width="100" align="center"></el-table-column>
-        <el-table-column prop="circuitryNo" label="线路编号" width="100" align="center"></el-table-column>
-        <el-table-column prop="poleNo" label="塔杆编号" width="100" align="center"></el-table-column>
-        <el-table-column prop="defectsName" label="缺陷类型" width="100" align="center"></el-table-column>
-        <el-table-column prop="completionRate" label="完好率" width="100" align="center"></el-table-column>
-        <el-table-column prop="defectsDescribe" label="缺陷描述" width="100" align="center"></el-table-column>
-        <el-table-column prop="findDate" label="发现时间" width="100" align="center"></el-table-column>
-        <el-table-column prop="findUser" label="发现人员" width="100" align="center"></el-table-column>
-        <el-table-column prop="defectsLevel" label="缺陷级别" align="center">
+        <el-table-column prop="rankId" label="任务编号" width="100" align="center"></el-table-column>
+        <el-table-column prop="circuitId" label="线路编号" width="100" align="center"></el-table-column>
+        <el-table-column prop="poleId" label="塔杆编号" width="100" align="center"></el-table-column>
+        <el-table-column prop="type" label="缺陷类型" width="100" align="center"></el-table-column>
+        <el-table-column prop="rate" label="完好率" width="100" align="center"></el-table-column>
+        <el-table-column prop="connect" label="缺陷描述" width="100" align="center"></el-table-column>
+        <el-table-column prop="date" label="发现时间" width="100" align="center"></el-table-column>
+        <el-table-column prop="people" label="发现人员" width="100" align="center"></el-table-column>
+        <el-table-column prop="level" label="缺陷级别" align="center">
           <template slot-scope="scope">
-            <el-select class="selectOne" v-model="scope.row.selectOne" > 
+            <el-select class="selectOne" v-model="scope.row.selectOne">
               <el-option value="一般">一般</el-option>
               <el-option value="紧急">紧急</el-option>
               <el-option value="严重">严重</el-option>
@@ -117,14 +117,27 @@ export default {
   name: "DefectLevel",
   data() {
     return {
-      tableData: [],
+      tableData: [
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""},
+        {rankId: "LTX0245",date: "2016-05-02",name: "拦河线断裂",people: "巡检员测试用户01",selectOne: ""}
+      ],
       a: 0,
       // 分页数据 一页显示最大数，当前页数
       pagesize: 5,
       currpage: 1,
 
       // 查询所需要的数据
-      submit: {taskNo: "",circuitryNo: "",poleNo: "",findUser: "",defectsName: "",defectsLevel: "",findDate: ""}
+      submit: {rankId: "",circuitId: "",poleId: "",people: "",type: "",level: "",time: ""}
     };
   },
   methods: {
@@ -133,13 +146,7 @@ export default {
       window.console.log("所查询的信息",this.submit);
     },
     //保存
-    save() {
-      this.tableData.forEach((item,index) => { 
-        if(index < this.pagesize){
-          window.console.log(item.selectOne)
-        }
-      })
-    },
+    save() {},
     //分页函数  每页几条
     handleSizeChange(val) {
       this.pagesize = val;
@@ -148,19 +155,6 @@ export default {
     handleCurrentChange(val) {
       this.currpage = val;
     }
-  },
-  created() {
-    this.axios.post("http://192.168.6.184:8080/selectAllDefects", {
-    currentPage: 1,
-    pageSize: 5
-    })
-  .then(res => {
-    window.console.log(res.data);
-    this.tableData = res.data.data.defectsVO  
-    })
-    .catch(err => {
-    window.console.log(err);
-  });
   }
 };
 </script>

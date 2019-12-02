@@ -176,9 +176,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+
 .type {
-  width: 1000px;
-  float: left;
+  
   padding: 0 20px;
 }
 
