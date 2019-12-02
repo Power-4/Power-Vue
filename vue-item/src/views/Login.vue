@@ -105,13 +105,16 @@ export default {
         "userName=" + this.ruleForm.user + "&userPwd=" + this.ruleForm.pass;
 
       this.axios({
-        url: "http://192.168.6.184/user/login",
+        url: "http://192.168.6.184:8080/user/login",
         method: "POST",
         headers: { "content-type": "application/x-www-form-urlencoded" },
         data: params
       })
         .then(res => {
-          window.console.log(res);
+          window.console.log(res.data.data);
+          window.sessionStorage.setItem('token', res.data.data.token);
+          window.sessionStorage.setItem('userId',res.data.data.user.userId);
+          window.sessionStorage.setItem('userId',res.data.data.user.role);
         })
         .catch(err => {
           window.console.log(err, "为啥登录不了");

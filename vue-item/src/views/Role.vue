@@ -46,7 +46,7 @@
     <div class="block">
       <el-pagination
         layout="prev, pager, next"
-        :total="tableData.length"
+        :total="pages"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :page-size="pagesize"
@@ -123,10 +123,10 @@ export default {
     getPower(index) {
       // 获取的数据为字符串
       window.console.log(index);
-      if (index == 'true') {
-        this.chose = '2';
+      if (index == "true") {
+        this.chose = "2";
       } else {
-        this.chose = '3';
+        this.chose = "3";
       }
       window.console.log(this.chose);
     },
@@ -209,7 +209,7 @@ export default {
       this.addRoleTab = true;
     },
     getSearch() {
-      if (this.chose == '1') {
+      if (this.chose == "1") {
         if (this.search == "") {
           // 没有内容
           window.console.log("没有内容");
@@ -218,8 +218,8 @@ export default {
           window.console.log("没选择但是有内容");
         }
       }
-      if (this.chose == '2') {
-        if (this.search == '') {
+      if (this.chose == "2") {
+        if (this.search == "") {
           // 没有内容选 true
           window.console.log("没有内容选 true");
         } else {
@@ -227,7 +227,7 @@ export default {
           window.console.log("选 true 但是有内容");
         }
       }
-      if (this.chose == '3') {
+      if (this.chose == "3") {
         if (this.search == "") {
           // 没有内容选 false
           window.console.log("没有内容选 false");
@@ -236,7 +236,26 @@ export default {
           window.console.log("选 false 但是有内容");
         }
       }
+    },
+    // 加载角色
+    LoadData() {
+      // 获取平台数据
+      var words = `http://192.168.6.184:8080/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
+      this.axios
+        .get(words)
+        .then(res => {
+          window.console.log(res);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+    updateRole () {
+
     }
+  },
+  created() {
+    this.LoadData();
   },
   data() {
     return {
@@ -250,6 +269,7 @@ export default {
       // 分页数据 一页显示最大数，当前页数
       pagesize: 3,
       currpage: 1,
+      pages: 3,
       // select选择框取下的值
       selValue: "",
       // 复选框选择
