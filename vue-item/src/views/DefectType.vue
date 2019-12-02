@@ -60,15 +60,24 @@
         <el-button @click="delVisible = false">取 消</el-button>
         <el-button type="primary" @click="delVisible = false">确 定</el-button>
       </span>
-    </el-dialog> -->
+    </el-dialog>-->
 
     <!-- 缺陷类型表单 -->
-    <el-table stripe style="width: 100%" align="center" :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)" >
-      <el-table-column prop="type" label="缺陷类型名称" width="300" align="center"></el-table-column>
-      <el-table-column prop="state" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
+    <el-table
+      stripe
+      style="width: 100%"
+      align="center"
+      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
+    >
+      <el-table-column prop="defectsName" label="缺陷类型名称" width="300" align="center"></el-table-column>
+      <el-table-column prop="defectsState" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="Edit(scope.$index, scope.row ,dialogVisible = true)"> 修改 </el-button>|
+          <el-button
+            type="text"
+            size="small"
+            @click="Edit(scope.$index, scope.row ,dialogVisible = true)"
+          >修改</el-button>|
           <el-button type="text" size="small" @click="Delete(scope.$index, scope.row,del())">删除</el-button>
         </template>
       </el-table-column>
@@ -91,15 +100,7 @@ export default {
   name: "DefectType",
   data() {
     return {
-      tableData: [
-        { type: "叉粱断裂", state: "启用" },
-        { type: "叉粱断裂", state: "不启用" },
-        { type: "断裂", state: "启用" },
-        { type: "叉粱断裂", state: "不启用" },
-        { type: "叉粱断裂", state: "不启用" },
-        { type: "叉粱断裂", state: "不启用" },
-        { type: "叉粱断裂", state: "不启用" }
-      ],
+      tableData: [],
       dialogFormVisible: false,
       dialogVisible: false,
       addTable: { name: "", region: "" },
@@ -117,11 +118,13 @@ export default {
     // rows 需要修改的数组
     Edit(index, row) {
       window.console.log(index, row);
-      this.revaTable.state = this.tableData[index].state;
-      this.revaTable.type = this.tableData[index].type;
+      this.revaTable.state = this.tableData[index].defectsState;
+      this.revaTable.type = this.tableData[index].defectsName; 
     },
     Delete(index, row) {
       window.console.log(index, row);
+      var defectsId = index;
+      window.console.log("当前所删除的id",defectsId)
     },
     addType() {
       window.console.log(this.addTable);
@@ -155,6 +158,19 @@ export default {
           });          
         });
       }
+  },
+  created() {
+    this.axios.post("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
+    currentPage: 1,
+    pageSize: 5
+    })
+    .then(res => {
+    window.console.log(res.data);
+    this.tableData = res.data.data.defects
+    })
+    .catch(err => {
+    window.console.log(err);
+  });
   }
 };
 </script>
