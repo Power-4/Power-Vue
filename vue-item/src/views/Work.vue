@@ -1,12 +1,7 @@
 <template>
   <div class="work">
     <div class></div>
-    <el-table
-      style="width: 100%"
-      stripe
-      border
-      :data="tableData"
-    >
+    <el-table style="width: 100%" stripe border :data="tableData">
       <!-- 
         传回来的值
         circuitry: null
@@ -162,21 +157,21 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
-      window.console.log("当前页数", this.currpage);
-      this.LoadData()
+      this.LoadData();
     },
     LoadData() {
-      window.console.log("工作数据初始化");
       // 获取平台数据
       var words = `http://192.168.6.184:8080/taskOrchid/getTaskByUserId?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
-      this.axios.get(words).then(res => {
-        window.console.log('asd');
-        this.pages = res.data.data.countPage;
-        this.tableData = res.data.data.tasks;
-      })
-      .catch(err=>{
-        window.console.log(err);
-      });
+      this.axios
+        .get(words)
+        .then(res => {
+          window.console.log("asd");
+          this.pages = res.data.data.countPage;
+          this.tableData = res.data.data.tasks;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     }
   },
   data() {
