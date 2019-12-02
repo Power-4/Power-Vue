@@ -102,7 +102,7 @@ export default {
       window.console.log(this.ruleForm);
 
       // 假登录
-      this.axios.post("http://192.168.6.175:8080/user/login", {
+      this.axios.post("http://192.168.6.184:8080/user/login", {
         username: this.ruleForm.user,
         userpass: this.ruleForm.pass
       })

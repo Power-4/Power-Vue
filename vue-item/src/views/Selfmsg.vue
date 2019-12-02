@@ -1,26 +1,35 @@
 <template>
   <div class="selfMsg">
     <el-form class="abc" label-position="labelPosition" label-width="120px">
-      <el-form-item label="工作岗位：">
-        <el-input v-model="user.role" @change="saveC = true"></el-input>
+      <el-form-item label="用户ID：">
+        <el-input v-model="user.role" @change="saveC = true" disabled></el-input>
       </el-form-item>
-      <el-form-item label="工作编号：">
-        <el-input v-model="user.userId" @change="saveC = true"></el-input>
+      <el-form-item label="用户名：">
+        <el-input v-model="user.userId" @change="saveC = true" disabled></el-input>
       </el-form-item>
-      <el-form-item label="入职日期：">
-        <el-input v-model="user.goDate" @change="saveC = true"></el-input>
+      <el-form-item label="手机号码">
+        <el-input v-model="user.userId" @change="saveC = true" disabled></el-input>
       </el-form-item>
-      <el-form-item label="年龄:">
-        <el-input v-model="user.name" @change="saveC = true"></el-input>
-      </el-form-item>
-      <el-form-item label="电话:">
+      <el-form-item label="入职时间">
         <el-input v-model="user.age" @change="saveC = true"></el-input>
       </el-form-item>
-      <el-form-item label="邮箱:">
-        <el-input v-model="user.userEmail" @change="saveC = true"></el-input>
+    </el-form>
+    <el-form class="abc" label-position="labelPosition" label-width="120px">
+      <el-form-item label="用户年龄">
+        <el-input v-model="user.name" @change="saveC = true"></el-input>
+      </el-form-item>
+      <el-form-item label="用户性别：">
+        <el-input v-model="user.goDate" @change="saveC = true" disabled></el-input>
+      </el-form-item>
+      <el-form-item label="邮箱">
+        <el-input v-model="user.goDate" @change="saveC = true" disabled></el-input>
+      </el-form-item>
+      <el-form-item label="离职时间">
+        <el-input v-model="user.role" @change="saveC = true" disabled></el-input>
       </el-form-item>
       <el-button class="butt" @click="cancel">取消</el-button>
       <el-button class="butt a" @click="saveBtn">保存修改</el-button>
+      <el-button class="butt" @click="changePwd">修改密码</el-button>
     </el-form>
   </div>
 </template>
@@ -43,6 +52,8 @@ export default {
         this.ok("取消成功");
       }
     },
+    // 修改密码
+    changePwd() {},
     // 弹出成功提示
     ok(msg) {
       this.$message({
@@ -68,7 +79,43 @@ export default {
 
         this.ok("修改成功");
       }
+    },
+    // 加载用户信息
+    loadUserMsg() {
+      //
+      var userId = sessionStorage.getItem("userId");
+      if (userId) {
+        var words = `http://192.168.6.184:8080/user/showUser?userId=${userId}`;
+        this.axios.get(words).then(res => {
+          this.a = res;
+          return;
+        });
+      } else {
+        // 未登录
+        window.console.log("未登录");
+      }
+    },
+    updateUserMsg() {
+      var words = `http://192.168.6.184:8080/user/modifyUser`;
+      this.axios
+        .post(words, {
+          userId: this.user.userId,
+          userName: this.user.name,
+          sex: this.user.sex,
+          age: this.user.age,
+          joinDate: this.user.goDate,
+          leavingDate: this.user.runDate,
+          phone: this.data.phone,
+          email: this.data.userEmail
+        })
+        .then(res => {
+          this.a = res;
+          return;
+        });
     }
+  },
+  created() {
+    this.loadUserMsg();
   },
   data() {
     return {
@@ -100,9 +147,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
 .abc {
   margin-top: 30px;
+  float: left;
+  width: 400px;
+  margin-left: 50px;
 }
 .selfMsg {
   width: 900px;
