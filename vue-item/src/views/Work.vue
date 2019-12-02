@@ -83,6 +83,17 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+      window.console.log("当前页数", val);
+    },
+    firstLoad() {
+      // 获取平台数据
+      var words = `http://192.168.6.177/taskOrchid/getTaskByUserId?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
+      this.axios({
+        url: words,
+        method: "GET"
+      }).then(res => {
+        window.console.log(res.data);
+      });
     }
   },
   data() {
@@ -90,7 +101,9 @@ export default {
       a: 0,
       lookTab: false,
       // 分页数据 一页显示最大数，当前页数
+      // 页数大小
       pagesize: 5,
+      // 当前页数，初始值为 1
       currpage: 1,
       // 渲染表格的数据
       tableData: [
@@ -152,10 +165,7 @@ export default {
     };
   },
   created() {
-    // axios({
-    //   url: "http://192.168.6.177/taskOrchid/getTaskByUserId?currentPage=1&pageSize=5",
-    //   method: "GET",
-    // });
+    this.firstLoad();
   }
 };
 </script>

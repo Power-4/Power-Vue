@@ -9,6 +9,9 @@
           <i class="el-icon-timer"></i>
           {{ this.timeColok }}
         </nav>
+        <nav class="logo">
+          <h1>欢迎来到电力巡检系统</h1>
+        </nav>
         <nav class="top-right">
           <span>{{ username }}</span>
           <strong @click="quit">退出</strong>
@@ -72,7 +75,7 @@ export default {
     // 退出登录
     quit() {
       // 弹出确认窗口
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("是否退出?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -179,5 +182,12 @@ export default {
 }
 .tab {
   display: block;
+}
+.logo h1 {
+  color: white;
+  font-size: 24px;
+  font-weight: 200;
+  line-height: 64px;
+  text-align: center;
 }
 </style>

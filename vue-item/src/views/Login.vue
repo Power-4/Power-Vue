@@ -101,10 +101,17 @@ export default {
       /* 提交数据 */
       window.console.log(this.ruleForm);
 
-      /* 路由调转 */
-      var url = this.$route.query.redirect;
-      url = url ? url : "/a";
-      this.$router.replace(url);
+      // 假登录
+      this.axios.post("http://192.168.6.175:8080/user/login", {
+        username: this.ruleForm.user,
+        userpass: this.ruleForm.pass
+      })
+      .then(function (res){
+        window.console.log(res);
+      })
+      .catch(err=> {
+        window.console.log(err);
+      });
     }
   }
 };
@@ -143,7 +150,7 @@ export default {
     background-color: #439797;
   }
 }
-.caozuo{
+.caozuo {
   position: relative;
   left: 40px;
 }
@@ -167,14 +174,15 @@ export default {
   z-index: -1;
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 1s ease;
 }
 
 .fade-enter {
   opacity: 0;
 }
-.fade-leave-to{
+.fade-leave-to {
   opacity: 0.9;
 }
 </style>
