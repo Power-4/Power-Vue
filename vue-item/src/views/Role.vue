@@ -4,7 +4,7 @@
       <el-form>
         <el-form-item label="角色名称：">
           <el-input class="inputs" v-model="search" placeholder="请输入角色名称"></el-input>
-          <el-select class="select-css" v-model="selValue" placeholder="请选择">
+          <el-select class="select-css" v-model="selValue" @change="getPower" placeholder="请选择">
             <el-option
               v-for="item in selOptions"
               :key="item.value"
@@ -12,7 +12,7 @@
               :value="item.value"
             ></el-option>
           </el-select>
-          <el-button class="btn-sea" type="button">搜索</el-button>
+          <el-button class="btn-sea" type="button" @click="getSearch">搜索</el-button>
           <el-button class="addusers" type="button" @click="addRole">
             <i class="el-icon-circle-plus-outline"></i>添加角色
           </el-button>
@@ -119,6 +119,17 @@
 <script>
 export default {
   methods: {
+    // 根据角色id roleId加载权限
+    getPower(index) {
+      // 获取的数据为字符串
+      window.console.log(index);
+      if (index == 'true') {
+        this.chose = '2';
+      } else {
+        this.chose = '3';
+      }
+      window.console.log(this.chose);
+    },
     // 启用/禁用选项框
     achecbox(index) {
       var words = "此操作将禁用该角色, 是否继续?";
@@ -196,6 +207,35 @@ export default {
     },
     addRole() {
       this.addRoleTab = true;
+    },
+    getSearch() {
+      if (this.chose == '1') {
+        if (this.search == "") {
+          // 没有内容
+          window.console.log("没有内容");
+        } else {
+          // 没选择但是有内容
+          window.console.log("没选择但是有内容");
+        }
+      }
+      if (this.chose == '2') {
+        if (this.search == '') {
+          // 没有内容选 true
+          window.console.log("没有内容选 true");
+        } else {
+          // 选 true 但是有内容
+          window.console.log("选 true 但是有内容");
+        }
+      }
+      if (this.chose == '3') {
+        if (this.search == "") {
+          // 没有内容选 false
+          window.console.log("没有内容选 false");
+        } else {
+          // 选 false 但是有内容
+          window.console.log("选 false 但是有内容");
+        }
+      }
     }
   },
   data() {
@@ -204,12 +244,15 @@ export default {
       addRoleTab: false,
       // 控制修改模态框弹出
       updataTab: false,
+      // 搜索内容
       search: "",
+      chose: "1",
       // 分页数据 一页显示最大数，当前页数
       pagesize: 3,
       currpage: 1,
       // select选择框取下的值
       selValue: "",
+      // 复选框选择
       selOptions: [
         {
           value: "true",
@@ -276,7 +319,8 @@ export default {
           address: "上海市普陀区金沙江路 1518 弄",
           isCheck: true
         }
-      ]
+      ],
+      newList: []
     };
   }
 };
