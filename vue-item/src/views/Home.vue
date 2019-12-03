@@ -85,6 +85,8 @@ export default {
             type: "success",
             message: "退出成功!"
           });
+          sessionStorage.removeItem("role");
+          sessionStorage.removeItem("userId");
           sessionStorage.removeItem("token");
           // 跳转到login
           this.$router.replace("/login");

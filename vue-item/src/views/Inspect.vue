@@ -1,7 +1,7 @@
 <template>
   <div class="app-inspect">
-    <p class="now-positon">
-      <router-link to="/inspect/insenact">巡检任务制定与分配</router-link> 
+    <p class="now-position">
+      <router-link to="/inspect">巡检任务制定与分配</router-link> 
       <router-link to="/inspect/insexecute">巡检任务执行与回执</router-link> 
       <router-link to="/inspect/insdefect">缺陷查询</router-link>
     </p>
@@ -64,9 +64,9 @@ export default {
   text-align: left;
 
   .now-position {
-    margin: 25px 0 35px;
-
-
+    margin: 10px 0;
+    padding: 10px 0;
+    box-shadow: 3px 3px 3px #5ee4e4;
   }
 
 }
@@ -80,6 +80,7 @@ a {
   width: 180px;
   text-align: left;
   text-decoration: none;
+  color: #ccc;
 }
 
 .router-link-exact-active.router-link-active {

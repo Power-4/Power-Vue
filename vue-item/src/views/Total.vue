@@ -13,45 +13,47 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>编号查询:</span>
-        <el-input v-model="submit.id" placeholder="请输入任务或者线路编号" class="in-bianhao"></el-input>
+        <el-input v-model="submit.id" placeholder="请输入任务或者线路编号" class="in-bianhao" 
+          @input="chaxun"
+          clearable=ture
+        ></el-input>
       </div>
-  
+
       <div class="time">
         <span>时间查询:</span>
-        <wdtime class="wdtime" @addTime="addTime" :wdname="wdname"></wdtime>
+        <wdtime class="wdtime" @addTime="addTime" :wdname="wdname" ></wdtime>
       </div>
-      <div class="error" v-show="wdname=='xiao'">
+      <div class="error" v-show="wdname=='xun'"  @input="chaxun">
         <span>有无故障:</span>
         <el-select
           v-model="submit.error"
           placeholder="请选择"
           class="in-error"
-          :class="{inErrorMin:submit.error=='yes'||submit.error=='no'}"
+          :class="{inErrorMin:submit.error=='1'||submit.error=='2'}"
         >
-          <el-option label="全部" value="all"></el-option>
-          <el-option label="有" value="yes"></el-option>
+          <el-option label="全部" value></el-option>
+          <el-option label="有" value="1"></el-option>
 
-          <el-option label="无" value="no"></el-option>
+          <el-option label="无" value="2"></el-option>
         </el-select>
       </div>
 
-      <el-button type="primary" icon="el-icon-search" class="chaxun-btn" @click="chaxun()">查询</el-button>
+      <el-button type="primary" icon="el-icon-search" class="chaxun-btn" @click="chaxun()" :loading="loading">查询</el-button>
     </div>
 
     <div class="daochu">
-      <el-button type="primary" class="excel">打印</el-button>
+      <el-button type="primary" class="excel" disabled="ture"> 打印</el-button>
       <el-button type="primary" class="excel" @click="downloadExcel">导出为EXCEL</el-button>
-
     </div>
     <div class="table">
-      <wdtable :tableData="tableData"  class="wdtable"  :wdname="wdname"></wdtable>
+      <wdtable :tableData="tableData" class="wdtable" :wdname="wdname" :loading="loading"></wdtable>
 
-      <div class="fyblock" >
+      <div class="fyblock">
         <el-pagination
           layout="prev, pager, next"
-          :current-page.sync="submit.pageSize"
-          :total="currentPage"
-          :page-size="5"
+          :current-page.sync="submit.currentPage"
+          :total="countPage"
+          :page-size="pageSize"
           @current-change="handleCurrentChange"
         ></el-pagination>
       </div>
@@ -63,50 +65,23 @@
 import wdtime from "../components/wdtime";
 import wdtable from "../components/wdtable";
 
-var tableData = [
-  {
-    date: "2016-05-02",
-    name: "王小虎",
-    address: "上海市"
-  },
-  {
-    date: "2016-05-04",
-    name: "王小虎",
-    address: "上海市普陀"
-  },
-  {
-    date: "2016-05-01",
-    name: "王小虎",
-    address: "上海市普陀"
-  },
-  {
-    date: "2016-05-03",
-    name: "王小虎",
-    address: "上海市普陀"
-  },
-  {
-    date: "2016-05-04",
-    name: "王小虎",
-    address: "上海市普"
-  }
-];
-
 export default {
   name: "total",
   data() {
     return {
       title: "巡检记录",
       wdname: "xun",
-      submit: { id: "", error: "", time: "", pageSize: 1 },
+      submit: { id: "", error: "", time: ["", ""], currentPage: 1 },
       tableData: [],
       total: {},
-      currentPage:50,
+      countPage:null,
+      pageSize:5,
+      loading:true
     };
   },
   components: {
     wdtime,
-    wdtable,
-   
+    wdtable
   },
   watch: {
     wdname() {
@@ -116,14 +91,15 @@ export default {
   },
   methods: {
     addTime(time) {
-      this.submit.time = time;
+      this.submit.time = time||["",""];
+      this.chaxun();
     },
     chongzhii() {
       /* 初始化页面数据 */
       this.submit.id = "";
       this.submit.error = "";
-      this.submit.time = "";
-      this.submit.pageSize=1;
+      this.submit.time = ["", ""];
+      this.submit.currentPage = 1;
       /* 初始化 wdname  */
       if (this.wdname == "xun") {
         this.title = "巡检记录";
@@ -135,93 +111,156 @@ export default {
     },
     /* 点击查询 */
     chaxun() {
-      this.total.name = this.wdname; /* 赋 name 值 */
-      this.total.error = this.submit.error || "all"; /* 赋error 值*/
-      this.total.pageSize = this.submit.pageSize; /* 页面初始值 */
-      this.total.currentPage = 5; /* 页面显示条数 */
 
-      /* 对 Key 和  content 赋值*/
+      this.loading=true;
+      this.tableData=[];
+      this.total.currentPage = this.submit.currentPage; /* 页面初始值 第几页 */
+      this.total.pageSize = this.pageSize; /* 页面显示条数 */
 
-      /* 判断 id 是否存在 */
-      if (this.submit.id) {
-        var task = /^R/;
+      /* 时间赋值 */
+      this.total.startDate = this.submit.time[0];
+      this.total.endDate = this.submit.time[1];
 
-        /* 判断是任务编号还是线路编号 */
-        if (task.test(this.submit.id)) {
-          this.total.key = "task";
-        } else {
-          this.total.key = "line";
-        }
-        /* 给content 赋值 */
-        this.total.content = this.submit.id;
-      } else if (this.submit.time) {
-      /* 判断 time 是否存在 */
-        (this.total.key = "time"), (this.total.content = this.submit.time);
+      if (this.wdname == "xun") {
+        this.total.error = this.submit.error; /* 赋 error 值*/
+      } else {
+        delete this.total.error; // 删除 error 值
       }
-      
-      /* 在此发送 axios */
+
+      /* 判断是任务编号还是线路编号*/
+
+      var task = /^R/;
+      /* 任务编号 */
+      if (task.test(this.submit.id)) {
+        // this.total.circuitryNo ? delete this.total.circuitryNo : "";
+
+        this.total.circuitryNo = "";
+        this.total.taskNo = this.submit.id;
+      } else {
+        /* 线路编号 */
+        // this.total.taskNo ? delete this.total.taskNo : "";
+        this.total.taskNo = "";
+        this.total.circuitryNo = this.submit.id;
+      }
+
       window.console.log(this.total);
 
-      this.axios.get("http://192.168.6.175:8080/fix/getallfix")
-      .then((res)=>{
-          window.console.log(res)
-      })
-      .catch((err)=>{
-        window.console.log("错误",err)
-      })
-  
-      /* 赋值 */
-      this.currentPage=50;
-      this.tableData = tableData;
+      var url = "http://192.168.6.184:8080";
+      this.wdname == "xun" ? "" : (url = url + "/selectFixRecordByFind");
+
+      this.axios
+        .get(url, {
+          params: this.total
+        })
+        .then(res => {
+         
+         this.countPage = res.data.data.count; //初始化分页
+         this.tableData=[] //初始化表格数据 ;
+          window.console.log(res.data)
+          
+          var wdData = res.data.data.fixRecord;
+      
+        
+
+          /* 赋值 */
+          wdData.forEach((item)=>{
+          var tableData={};
+           
+           // 各种赋值
+           tableData.taskNo=item.poleFixRelation.fix.task.taskNo;
+           tableData.taskName=item.poleFixRelation.fix.task.taskName;
+           
+           tableData.line=`${item.poleFixRelation.fix.task.circuitry.circuitryNo}
+           (${item.poleFixRelation.fix.task.circuitry.startPole.poleNo}-${ item.poleFixRelation.fix.task.circuitry.endPole.poleNo})`
+          
+           tableData.poleNo=item.pole.poleNo;
+           tableData.defectsLevel=item.defectsLevel;
+           tableData.defectsName=item.defects.defectsName;
+           tableData.finishDate=item.poleFixRelation.fix.task.finishDate;
+           tableData.findDate=item.findDate;
+           tableData.defectsDescribe=item.defectsDescribe;
+           
+           this.tableData.push(tableData);
+         
+
+         })
+
+          this.loading=false;
+
+        })
+        .catch(err => {
+          this.loading=false;
+          window.console.log("错误", err);
+        });
     },
 
     /* 监测分页 */
     handleCurrentChange(val) {
-      this.submit.pageSize = val;
+      this.submit.currentPage = val;
       this.chaxun();
     },
 
     downloadExcel() {
-                this.$confirm(`确定导出${this.title}吗?'`, '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    this.excelData = tableData; //你要导出的数据list。
-                    this.export2Excel()
-                }).catch(() => {
+      this.$confirm(`确定导出${this.title}吗?'`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.excelData = this.tableData; //你要导出的数据list。
+          this.export2Excel();
+        })
+        .catch(() => {});
+    },
+    //数据写入excel
+    export2Excel() {
+      var that = this;
+      require.ensure([], () => {
 
-                });
-            },
-            //数据写入excel
-            export2Excel() {
-                var that = this;
-                require.ensure([], () => {
-                    const { export_json_to_excel } =  require('@/excel/export2Excel'); //这里必须使用绝对路径，使用@/+存放export2Excel的路径
-                    const tHeader = ['时间','名字','地址']; // 导出的表头名信息
-                    const filterVal = ['date','name', 'address']; // 导出的表头字段名，需要导出表格字段名
-                    const list = that.excelData;
-                    const data = that.formatJson(filterVal, list);
-                    export_json_to_excel(tHeader, data, this.title);// 导出的表格名称，根据需要自己命名
-                })
-            },
-            //格式转换，直接复制即可
-            formatJson(filterVal, jsonData) {
-                return jsonData.map(v => filterVal.map(j => v[j]))
-            },
+        const { export_json_to_excel } = require("@/excel/export2Excel"); //这里必须使用绝对路径，使用@/+存放export2Excel的路径
+        
+        var arr1;
+        var arr2;
+        if(this.wdname=="xun")
+        {
+          arr1 = ["任务编号", "任务名称", "线路编号（起始编号-终止编号","杆塔编号","有无故障","缺陷级别","缺陷类型","发现时间","缺陷描述"];
+          arr2 = ["taskNo","taskName","line","poleNo","error","poleNo","defectsLevel","defectsName","findDate","defectsDescribe"];
+        }
+
+        else 
+        {
+           arr1  = ["任务编号", "任务名称", "线路编号（起始编号-终止编号","杆塔编号","缺陷级别","缺陷类型","发现时间","消缺时间","缺陷描述"]; // 导出的表头名信息
+           arr2  = ["taskNo","taskName","line","poleNo","defectsLevel","defectsName","findDate","finishDate","defectsDescribe"];  // 导出的表头字段名，需要导出表格字段名
+        }
+           const tHeader = arr1;  // 导出的表头名信息
+           const filterVal =arr2;  // 导出的表头字段名，需要导出表格字段名
+       
+        
+          
+       
+        
+        const list = that.excelData;
+        const data = that.formatJson(filterVal, list);
+        export_json_to_excel(tHeader, data, this.title); // 导出的表格名称，根据需要自己命名
+      });
+    },
+    //格式转换，直接复制即可
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map( j => v[j]));
+    }
   },
   /*创建开始时*/
   created() {
     this.chaxun();
   }
-}
-
+};
 </script>
 
 <style lang="less" scoped>
+
 @mainColor: #5ee4e4;
 @bottom: 1px solid rgb(218, 218, 218);
-.total {  
+.total {
   width: 998px;
   max-height: 700px;
   overflow: hidden;
@@ -318,8 +357,8 @@ export default {
 .chaxun-btn {
   border-color: @mainColor;
   background-color: @mainColor;
-} 
-.chaxun-btn:active{
+}
+.chaxun-btn:active {
   background-color: #51bdbd;
 }
 
@@ -337,11 +376,10 @@ export default {
     right: 30px;
     border-color: @mainColor;
     background-color: @mainColor;
-    &:active{
-    background-color: #51bdbd;
+    &:active {
+      background-color: #51bdbd;
+    }
   }
-  }
-  
 }
 
 /* 表格 */
@@ -356,8 +394,7 @@ export default {
   margin: 0 auto;
   width: 990px;
 }
-.fyblock
-{
+.fyblock {
   float: right;
 }
 </style>

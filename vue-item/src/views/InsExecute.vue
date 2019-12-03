@@ -11,7 +11,7 @@
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>线路编号：</label>
-            <el-input placeholder="请输入内容" v-model="circuitryId" clearable></el-input>
+            <el-input placeholder="请输入内容" v-model="circuitryNo" clearable></el-input>
           </div>
         </el-col>
         <el-col :span="7">
@@ -35,7 +35,7 @@
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>下发人：</label>
-            <el-input placeholder="请输入内容" v-model="userId" clearable></el-input>
+            <el-input placeholder="请输入内容" v-model="userName" clearable></el-input>
           </div>
         </el-col>
         <el-col :span="7">
@@ -46,7 +46,7 @@
         </el-col>
         <el-col :span="3">
           <div class="grid-content bg-purple">
-            <el-button type="primary" class="bg-color">查 询</el-button>
+            <el-button type="primary" class="bg-color" @click="taskQuery">查 询</el-button>
           </div>
         </el-col>
         <el-col :span="7">
@@ -55,113 +55,57 @@
       </el-row>
     </div>
 
-    <el-table :data="tableData.slice((currentPage - 1) * pagesize, currentPage * pagesize)" stripe style="width: 100%">
-      <el-table-column prop="taskId" label="任务编号" align="center"></el-table-column>
+    <el-table :data="tableData" stripe style="width: 100%">
+      <el-table-column prop="taskNo" label="任务编号" align="center">
+         <template slot-scope="scope">
+          <el-popover>
+            <p>ID: {{ scope.row.taskId}}</p>
+            <div slot="reference">
+              {{ scope.row.taskNo }}
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
       <el-table-column prop="taskName" label="任务名称" align="center"></el-table-column>
-      <el-table-column prop="inspectLine" label="巡检线路" align="center"></el-table-column>
-      <el-table-column prop="startNumber" label="起始杆号" align="center"></el-table-column>
-      <el-table-column prop="endNumber" label="终止杆号" align="center"></el-table-column>
-      <el-table-column prop="issuePerson" label="下发人" align="center"></el-table-column>
-      <el-table-column prop="issueDate" label="下发时间" align="center"></el-table-column>
-      <el-table-column prop="taskState" label="任务状态" align="center"></el-table-column>
+      <el-table-column prop="circuitry.circuitryName" label="巡检线路" align="center"></el-table-column>
+      <el-table-column prop="circuitry.startPole.circuitry" label="起始杆号" align="center"></el-table-column>
+      <el-table-column prop="circuitry.endPole.circuitry" label="终止杆号" align="center"></el-table-column>
+      <el-table-column prop="users.userName" label="下发人" align="center"></el-table-column>
+      <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
+      <el-table-column prop="systemPropertiesValue.sysProValueName" label="任务状态" align="center"></el-table-column>
       <el-table-column prop="finishDate" label="任务完成时间" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" width="200px" fixed="right" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="view">查看</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.taskState == '执行中'? !edit : edit" @click="add">回执录入</el-button>
+          <el-button type="text" size="small" @click="view(scope.$index,scope.row)">查看</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.taskState == '执行中'? !edit : edit" @click="add(scope.$index,scope.row)">回执录入</el-button>
           <el-button type="text" size="small" :disabled="scope.row.taskState == '已分配'? !edit : edit" @click="execute">执行</el-button>
-          <el-button type="text" size="small" @click="modifys">修改</el-button>
+          <el-button type="text" size="small" @click="modifys(scope.$index,scope.row)">修改</el-button>
         </template>
       </el-table-column>
     </el-table>
     <div class="pagination">
       <el-pagination
         layout="prev, pager, next"
-        :total="tableData.length"
+        :total="count"
         @current-change="handleCurrentChange"
-        :page-size="pagesize">
+        :page-size="pageSize">
       </el-pagination>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   data() {
     return {
-      tableData: [
-        {
-          taskId: "001",
-          taskName: "一线巡检",
-          inspectLine: "一线",
-          startNumber: "xs1",
-          endNumber: "xs05",
-          issuePerson: "测试1",
-          issueDate: "2013/02/02",
-          taskState: "执行中",
-          finishDate: "2013/02/10"
-        },
-        {
-          taskId: "001",
-          taskName: "一线巡检",
-          inspectLine: "一线",
-          startNumber: "xs1",
-          endNumber: "xs05",
-          issuePerson: "测试1",
-          issueDate: "2013/02/02",
-          taskState: "已分配",
-          finishDate: "2013/02/10"
-        },
-        {
-          taskId: "001",
-          taskName: "一线巡检",
-          inspectLine: "一线",
-          startNumber: "xs1",
-          endNumber: "xs05",
-          issuePerson: "测试1",
-          issueDate: "2013/02/02",
-          taskState: "已完成",
-          finishDate: "2013/02/10"
-        },
-        {
-          taskId: "001",
-          taskName: "一线巡检",
-          inspectLine: "一线",
-          startNumber: "xs1",
-          endNumber: "xs05",
-          issuePerson: "测试1",
-          issueDate: "2013/02/02",
-          taskState: "执行中",
-          finishDate: "2013/02/10"
-        },
-        {
-          taskId: "001",
-          taskName: "一线巡检",
-          inspectLine: "一线",
-          startNumber: "xs1",
-          endNumber: "xs05",
-          issuePerson: "测试1",
-          issueDate: "2013/02/02",
-          taskState: "执行中",
-          finishDate: "2013/02/10"
-        },
-        {
-          taskId: "001",
-          taskName: "一线巡检",
-          inspectLine: "一线",
-          startNumber: "xs1",
-          endNumber: "xs05",
-          issuePerson: "测试1",
-          issueDate: "2013/02/02",
-          taskState: "执行中",
-          finishDate: "2013/02/10"
-        }
-      ],
-      pagesize: 5,
+      tableData: [],
+      count: null,
+      pageSize: 5,
       currentPage: 1,
       taskNo: "",
-      circuitryId: "",
-      userId: "",
+      circuitryNo: "",
+      userName: "",
       createDate: "",
       taskState: "",
       options: [
@@ -182,32 +126,128 @@ export default {
           label: "已完成"
         }
       ],
-      edit: true
+      edit: true,
+      isQuery: false
     };
   },
+  created() {
+    window.console.log(this.isAdd);
+    // 渲染页面数据
+    this.axios.get('http://192.168.6.184:8080/getAllTaskByUserId?', {
+      params: {
+        currentPage: this.currentPage, 
+        pageSize: this.pageSize
+      }
+    })
+    .then((res) => {
+      this.tableData = res.data.data.tasks;
+      this.count = res.data.data.count;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
+  },
+  computed: {
+    ...mapState([
+      'isAdd'
+    ]),
+  },
+  
   methods: {
-    //执行录入
-    add() {
-      this.$router.push("/inspect/executeenter");
+
+    // 查询
+    taskQuery() {
+      this.isQuery = true;
+      // 请求列表数据
+      // this.axios.post('http://192.168.6.184:8080/getAllTaskByCondition?',{
+      //   taskNo: this.taskNo,
+      //   circuitryNo: this.circuitryNo,
+      //   taskState: this.taskState,
+      //   userName: this.userName,
+      //   startDate: this.startDate
+      // })
+      // .then((res) => {
+      //   window.console.log(res.data);
+      // })
+      // .catch((err) => {
+      //   window.console.log("错误",err)
+      // })
     },
-    view() {
-      this.$router.push("/inspect/enactview");
+    //回执录入
+    add(index, row) {
+      this.$store.state.isAdd = true;
+      var taskId = row.taskId;
+      this.$router.push({
+        path: "/inspect/executeenter",
+        query: { taskId }
+      });
     },
-    execute() {
+    view(index, row) {
+      var taskId = row.taskId;
+      this.$router.push({
+        path: "/inspect/enactview",
+        query: { taskId }
+      });
+    },
+    execute(row) {
+      window.console.log(row.taskId)
       this.$confirm("你确定执行此任务吗?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
-        .then(() => {})
-        .catch(() => {});
+      // .then(() => {
+      //   this.axios.get('http://192.168.6.184:8080/changeTaskSateToRunning?',{params:{taskId: row.taskId}})
+      //   .then((res) => {
+      //     window.console.log(res.data);
+      //   })
+      //   .catch((err) => {
+      //     window.console.log("错误",err)
+      //   })
+      // })
+      .catch(() => {});
     },
-    modifys() {
-      this.$router.push("/inspect/executeenter");
+    modifys(index, row) {
+      this.$store.state.isAdd = false;
+      var taskId = row.taskId;
+      this.$router.push({
+        path: "/inspect/executeenter",
+        query: { taskId }
+      });
     },
     // 分页点击事件
     handleCurrentChange(val) {
-      this.currentPage = val;
+      if(this.isQuery) {
+        this.axios.post('http://192.168.6.184:8080/getAllTaskByCondition?',{
+          taskNo: this.taskNo,
+          circuitryNo: this.circuitryNo,
+          taskState: this.taskState,
+          userName: this.userName,
+          startDate: this.startDate
+        })
+        .then((res) => {
+          window.console.log(res.data);
+        })
+        .catch((err) => {
+          window.console.log("错误",err)
+        })
+      }
+      
+      this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+        params: {
+          currentPage: val,
+          pageSize: this.pageSize
+        }
+      })
+      .then((res) => {
+        this.tableData = res.data.data.tasks;
+        this.count = res.data.data.count;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
     },
   }
 };

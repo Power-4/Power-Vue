@@ -45,13 +45,13 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>发现时间：</label>
-            <el-date-picker v-model="findDate" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker v-model="findStartDate" type="date" placeholder="选择日期"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="createDate" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker v-model="performStartDate" type="date" placeholder="选择日期"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
@@ -67,15 +67,15 @@
       </el-row>
     </div>
 
-    <el-table :data="tableData.slice((currentPage - 1) * pagesize, currentPage * pagesize)" stripe style="width: 100%">
+    <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe style="width: 100%">
       <el-table-column prop="taskNo" label="任务编号" align="center"></el-table-column>
       <el-table-column prop="circuitryNo" label="线路编号" align="center"></el-table-column>
       <el-table-column prop="poleNo" label="杆塔编号" align="center"></el-table-column>
       <el-table-column prop="defectsLevel" label="缺陷级别" align="center"></el-table-column>
       <el-table-column prop="defectsName" label="缺陷类型" align="center"></el-table-column>
-      <el-table-column prop="findPerson" label="发现人" align="center"></el-table-column>
+      <el-table-column prop="findUser" label="发现人" align="center"></el-table-column>
       <el-table-column prop="findDate" label="发现时间" align="center"></el-table-column>
-      <el-table-column prop="issuePerson" label="下发人" align="center"></el-table-column>
+      <el-table-column prop="PerformUser" label="下发人" align="center"></el-table-column>
       <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
       <el-table-column prop="completionRate" label="完好率" align="center"></el-table-column>
       <el-table-column prop="defectDescribe" label="缺陷描述" align="center"></el-table-column>
@@ -85,7 +85,7 @@
       layout="prev, pager, next"
       :total="tableData.length"
       @current-change="handleCurrentChange"
-      :page-size="pagesize">
+      :page-size="pageSize">
       </el-pagination>
     </div>
   </div>
@@ -96,87 +96,8 @@ export default {
   data() {
     return {
       title: "缺陷记录",
-      tableData: [
-        {
-          taskNo: "RW0245",
-          circuitryNo: "XW001",
-          poleNo: "XW0001",
-          defectsLevel: "一般",
-          defectsName: "断裂",
-          foundPerson: "测试1",
-          findDate: "2013/02/01",
-          issuePerson: "管理员1",
-          createDate: "2013/02/03",
-          completionRate: "78%",
-          defectDescribe: "断裂"
-        },
-        {
-          taskNo: "RW0245",
-          circuitryNo: "XW001",
-          poleNo: "XW0001",
-          defectsLevel: "一般",
-          defectsName: "断裂",
-          foundPerson: "测试1",
-          findDate: "2013/02/01",
-          issuePerson: "管理员1",
-          createDate: "2013/02/03",
-          completionRate: "78%",
-          defectDescribe: "断裂"
-        },
-        {
-          taskNo: "RW0245",
-          circuitryNo: "XW001",
-          poleNo: "XW0001",
-          defectsLevel: "一般",
-          defectsName: "断裂",
-          foundPerson: "测试1",
-          findDate: "2013/02/01",
-          issuePerson: "管理员1",
-          createDate: "2013/02/03",
-          completionRate: "78%",
-          defectDescribe: "断裂"
-        },
-        {
-          taskNo: "RW0245",
-          circuitryNo: "XW001",
-          poleNo: "XW0001",
-          defectsLevel: "一般",
-          defectsName: "断裂",
-          foundPerson: "测试1",
-          findDate: "2013/02/01",
-          issuePerson: "管理员1",
-          createDate: "2013/02/03",
-          completionRate: "78%",
-          defectDescribe: "断裂"
-        },
-        {
-          taskNo: "RW0245",
-          circuitryNo: "XW001",
-          poleNo: "XW0001",
-          defectsLevel: "一般",
-          defectsName: "断裂",
-          foundPerson: "测试1",
-          findDate: "2013/02/01",
-          issuePerson: "管理员1",
-          createDate: "2013/02/03",
-          completionRate: "78%",
-          defectDescribe: "断裂"
-        },
-        {
-          taskNo: "RW0245",
-          circuitryNo: "XW001",
-          poleNo: "XW0001",
-          defectsLevel: "一般",
-          defectsName: "断裂",
-          foundPerson: "测试1",
-          findDate: "2013/02/01",
-          issuePerson: "管理员1",
-          createDate: "2013/02/03",
-          completionRate: "78%",
-          defectDescribe: "断裂"
-        },
-      ],
-      pagesize: 5,
+      tableData: [],
+      pageSize: 5,
       currentPage: 1,
       taskNo: "",
       circuitryNo: "",
@@ -222,24 +143,45 @@ export default {
           label: "其他"
         }
       ],
-      findDate: "",
-      createDate: ""
+      findStartDate: "",
+      performStartDate: ""
     };
+  },
+  created() {
+    this.axios.get('http://192.168.6.184:8080/selectDefectsByCondition', {
+      params: {
+        currentPage: this.currentPage, 
+        pageSize: this.pageSize
+      }
+    })
+    .then((res) => {
+      this.tableData = res.data.data.defectsVO;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
+
   },
   methods: {
     // 查询
     defectQuery() {
-
-      this.axios.get('/', {
-        taskNo: this.taskNo,
-        circuitryNo: this.circuitryNo
-      })
-      .then((res) => {
-        window.console.log(res.data);
-      })
-      .catch((err) => {
-        window.console.log('错误是', err);
-      })
+      // this.axios.post('http://192.168.6.184:8080/selectDefectsByCondition', {
+      //   taskNo: this.taskNo,
+      //   circuitryNo: this.circuitryNo,
+      //   defectsName: this.defectsName,
+      //   defectsLevel: this.defectsLevel,
+      //   findStartDate: this.findStartDate,
+      //   performStartDate: this.performStartDate,
+      //   currentPage: this.currentPage,
+      //   pageSize: this.pageSize
+      // })
+      // .then((res) => {
+      //   window.console.log(res.data);
+      // })
+      // .catch((err) => {
+      //   window.console.log('错误是', err);
+      // })
 
     },
     // 分页点击事件

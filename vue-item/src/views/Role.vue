@@ -24,21 +24,28 @@
       style="width: 100%"
       :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
     >
-      <el-table-column prop="date" label="角色编号" width="180"></el-table-column>
-      <el-table-column prop="name" label="角色名称" width="180"></el-table-column>
-      <el-table-column prop="address" label="创建人"></el-table-column>
-      <el-table-column prop="address" label="创建时间"></el-table-column>
+      <!-- roleId:  -->
+      <!-- roleName:  -->
+      <!-- roleNo:  -->
+      <!-- systemProperties:  -->
+      <!-- systemPropertiesValue:  -->
+      <!-- updateDate:  -->
+      <!-- users:  -->
+      <el-table-column prop="roleNo" label="角色编号" width="180"></el-table-column>
+      <el-table-column prop="roleName" label="角色名称" width="180"></el-table-column>
+      <el-table-column prop="users" label="创建人"></el-table-column>
+      <el-table-column prop="updateDate" label="创建时间"></el-table-column>
       <el-table-column label="状态(启用/未启用)">
         <template slot-scope="scope">
-          <el-checkbox v-model="scope.row.isCheck" @change="achecbox(scope.row)"></el-checkbox>
           <!-- // 添加一个多选框,控制选中与否 -->
+          <el-radio v-model="scope.row.isCheck" label="1" @change="achecbox(scope.row, '1')">启用</el-radio>
+          <el-radio v-model="scope.row.isCheck" label="2" @change="achecbox(scope.row, '2')">未启用</el-radio>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
-
-          <el-button @click="deleteRow(scope.$index, tableData)" type="text" size="small">删除</el-button>
+          <el-button @click="deleteRow(scope.$index)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -46,7 +53,7 @@
     <div class="block">
       <el-pagination
         layout="prev, pager, next"
-        :total="tableData.length"
+        :total="pages"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :page-size="pagesize"
@@ -54,19 +61,68 @@
       ></el-pagination>
     </div>
 
-    <!-- 模态框 -->
+    <!-- 修改模态框 -->
     <el-dialog title="修改角色信息" :visible.sync="updataTab">
       <!-- 插入类型 -->
+      <el-form>
+        <el-form-item label="手机号码">
+          <el-input v-model="roleData.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <el-input v-model="roleData.roleNo"></el-input>
+          <!-- roleName -->
+          <!-- roleNo -->
+          <!-- sysProValueName -->
+          <!-- roleId -->
+        </el-form-item>
+        <div class="box">
+          <div>
+            <el-button type="button" class="ok" @click="updateRole">确认</el-button>
+            <el-button type="button" @click="updataTab = false">取消</el-button>
+          </div>
+        </div>
+      </el-form>
     </el-dialog>
 
-    <!-- 模态框 -->
-    <el-dialog title="添加角色" :visible.sync="addRoleTab">
+    <!-- 添加模态框 -->
+    <el-dialog title="添加角色" :visible.sync="addRoleTab" class="addbox">
       <!-- 插入类型 -->
+      <el-form>
+        <el-form-item label="角色名称">
+          <!-- @blur="isRoleNameOk" -->
+          <el-input v-model="role.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色编号">
+          <el-input v-model="role.roleNo" @blur="isRoleNoOk" minlength="4" maxlength="10"></el-input>
+        </el-form-item>
+        <el-radio v-model="radio" label="1">启用</el-radio>
+        <el-radio v-model="radio" label="2">未启用</el-radio>
+        <div class="box">
+          <div>
+            <el-button type="button" class="ok" @click="getRole">确认</el-button>
+            <el-button type="button" @click="addRoleTab = false">取消</el-button>
+          </div>
+        </div>
+      </el-form>
     </el-dialog>
   </div>
 </template>
 
 <style>
+.el-radio__input.is-checked .el-radio__inner {
+  border-color: #5ee4e4;
+  background-color: #5ee4e4;
+}
+.ok {
+  background-color: #5ee4e4;
+}
+.box {
+  height: 45px;
+  margin-top: 20px;
+}
+.box > div {
+  float: right;
+}
 .addusers {
   float: right;
   margin-right: 20px;
@@ -123,42 +179,21 @@ export default {
     getPower(index) {
       // 获取的数据为字符串
       window.console.log(index);
-      if (index == 'true') {
-        this.chose = '2';
+      if (index == "true") {
+        this.chose = "2";
       } else {
-        this.chose = '3';
+        this.chose = "3";
       }
       window.console.log(this.chose);
     },
-    // 启用/禁用选项框
-    achecbox(index) {
-      var words = "此操作将禁用该角色, 是否继续?";
-      if (index.isCheck) words = "此操作将启用该角色, 是否继续?";
-      this.$confirm(words, "启用/禁用", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(() => {
-          this.$message({
-            type: "success",
-            message: "修改成功"
-          });
-          // 通过传入 scope.row 获取 选取的对象，获得id
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "取消修改"
-          });
-          window.console.log(index.name);
-          // 传入的值是已经修改过的
-          index.isCheck = !index.isCheck;
-        });
+    // 启用/禁用选项框的修改
+    achecbox(obj, index) {
+      this.addRoleTab = true;
+      window.console.log(index.isCheck);
     },
     // index 编号传入 scope.$index
     // rows 需要修改的数组
-    deleteRow(index, rows) {
+    deleteRow(index) {
       // 弹出确认窗口
       this.$confirm("此操作将永久删除该角色, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -171,12 +206,16 @@ export default {
             message: "删除成功"
           });
           // 执行删除操作
-          rows.splice(index, 1);
           // 获取准确 id
           var a = this.currpage - 1;
           var b = a * this.pagesize + index;
           // 输出id
-          this.a = this.tableData[b].id;
+          var c = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleId=${this.tableData[b].roleId}`;
+          window.console.log(c);
+          this.axios.get(c).then(res => {
+            window.console.log(res);
+            this.LoadData();
+          });
         })
         .catch(() => {
           this.$message({
@@ -185,7 +224,7 @@ export default {
           });
         });
     },
-    // 修改角色操作
+    // 修改角色按钮
     updata(index) {
       // 弹出由 :visible.sync 绑定的模态框
       this.updataTab = true;
@@ -193,8 +232,22 @@ export default {
       // 获取准确 id
       var a = this.currpage - 1;
       var b = a * this.pagesize + index;
-      // 输出id
-      this.a = this.tableData[b].id;
+
+      var thisid = 0;
+      for (var i = 0; i < this.tableData.length; i++) {
+        if (this.tableData[i].roleId == this.tableData[b].roleId) {
+          thisid = i;
+          break;
+        }
+      }
+      // 添加东西
+      this.roleData.roleName = this.tableData[thisid].roleName;
+      this.roleData.roleNo = this.tableData[thisid].roleNo;
+      this.roleData.systemPropertiesValue.sysProValueName = this.tableData[
+        thisid
+      ].systemPropertiesValue.sysProValueName;
+      this.roleData.roleId = this.tableData[thisid].roleId;
+      window.console.log(this.roleData);
     },
     // 分页函数
     // 每页几条
@@ -204,12 +257,65 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+      this.LoadData();
     },
+    // 添加角色按钮
     addRole() {
       this.addRoleTab = true;
     },
+    // 检查角色编号是否重合
+    isRoleNoOk() {
+      if (this.role.roleNo == "") return;
+      window.console.log("roleNo检测");
+      this.axios
+        .get(
+          `http://192.168.6.184:8080/role/isExistsRoleNo?roleNo=${this.role.roleNo}`
+        )
+        .then(res => {
+          window.console.log(res);
+          if (res.data.code == "200") {
+            window.console.log("角色·编号通过");
+            this.roleNoOk = 1;
+          }
+        });
+    },
+    // 确认添加角色
+    getRole() {
+      // 是否符合标准
+      if (this.roleNameOk == 1 && this.roleNoOk == 1) {
+        window.console.log("开始添加角色");
+        // 等到
+        var a = "";
+        if (this.radio == "1") {
+          a = "启用";
+        } else if (this.radio == "2") {
+          a = "未启用";
+        }
+        window.console.log(window.sessionStorage.getItem("userId"));
+        this.axios
+          .get(
+            `http://192.168.6.184:8080/role/addRole?roleName=${
+              this.role.roleName
+            }&roleNo=${
+              this.role.roleNo
+            }&sysProValueName=${a}&userId=${window.sessionStorage.getItem(
+              "userId"
+            )}`
+          )
+          .then(res => {
+            window.console.log(res);
+            this.$message({
+              showClose: true,
+              message: "添加角色成功",
+              type: "success"
+            });
+            this.addRoleTab = false;
+          });
+      }
+    },
+    // 搜索内容
     getSearch() {
-      if (this.chose == '1') {
+      if (this.chose == "1") {
         if (this.search == "") {
           // 没有内容
           window.console.log("没有内容");
@@ -218,8 +324,8 @@ export default {
           window.console.log("没选择但是有内容");
         }
       }
-      if (this.chose == '2') {
-        if (this.search == '') {
+      if (this.chose == "2") {
+        if (this.search == "") {
           // 没有内容选 true
           window.console.log("没有内容选 true");
         } else {
@@ -227,7 +333,7 @@ export default {
           window.console.log("选 true 但是有内容");
         }
       }
-      if (this.chose == '3') {
+      if (this.chose == "3") {
         if (this.search == "") {
           // 没有内容选 false
           window.console.log("没有内容选 false");
@@ -236,92 +342,164 @@ export default {
           window.console.log("选 false 但是有内容");
         }
       }
+    },
+    // 加载角色f
+    LoadData() {
+      // 获取平台数据
+      var words = `http://192.168.6.184:8080/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
+      this.axios
+        .get(words)
+        .then(res => {
+          window.console.log("加载角色", res);
+          this.pages = res.data.data.count;
+          this.tableData = res.data.data.roleList;
+          for (var i = 0; i < this.tableData.length; i++) {
+            if (
+              this.tableData[i].systemPropertiesValue.sysProValueName == "启用"
+            ) {
+              this.tableData[i].isCheck = "1";
+              window.console.log(this.tableData[i].isCheck);
+            }
+            if (
+              this.tableData[i].systemPropertiesValue.sysProValueName ==
+              "未启用"
+            ) {
+              this.tableData[i].isCheck = "2";
+            }
+          }
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+    // 修改角色信息
+    updateRole() {
+      //
+      window.console.log(this.roleData.roleId);
+      window.console.log(this.roleData.roleNo);
+      window.console.log(this.roleData.roleName);
+      window.console.log(this.roleData.systemPropertiesValue.sysProValueName);
+
+      var b = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleNo=${this.roleData.roleNo}&roleName=${this.roleData.roleName}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`;
+      window.console.log(b);
+      this.axios.get(b).then(res => {
+        window.console.log("修改角色", res);
+        if (res.data.msg == "修改成功") {
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+        } else if (res.data.msg == "处理失败") {
+          this.$message({
+            type: "info",
+            message: "修改失败"
+          });
+        }
+      });
+      // 关闭窗口 一切结束后写道axios回调函数里面
+      this.updataTab = false;
     }
+  },
+  created() {
+    this.LoadData();
   },
   data() {
     return {
+      // 添加角色----------------------------------------------------1
+      // 1 为通多，2 为不通过
+      roleOk: 2,
+      // 用户名是否得体
+      roleNameOk: 1,
+      // 用户编号是否得体
+      roleNoOk: 1,
+      radio: "1",
+      role: {
+        roleName: "",
+        roleNo: "",
+        sysProValueName: ""
+      },
       // 控制添加模态框弹出
       addRoleTab: false,
+      // 修改角色---------------------------------------------------2
       // 控制修改模态框弹出
       updataTab: false,
+      // 修改数据时加入的绑定input的数据
+      roleData: {
+        roleName: "",
+        roleNo: "",
+        roleId: "",
+        systemPropertiesValue: {
+          sysProValueName: ""
+        }
+      },
+      // 搜索内容---------------------------------------------------3
       // 搜索内容
       search: "",
       chose: "1",
+      // 显示分页------------------------------------------------------4
       // 分页数据 一页显示最大数，当前页数
       pagesize: 3,
       currpage: 1,
+      pages: 3,
+      // select下拉框---------------------------------------------------5
       // select选择框取下的值
       selValue: "",
-      // 复选框选择
+      // 启用/未启用 复选框选择
       selOptions: [
         {
-          value: "true",
+          value: "启用",
           label: "启用"
         },
         {
-          value: "false",
+          value: "未启用",
           label: "未启用"
         }
       ],
+      // 表格数据渲染----------------------------------------------------6
       // 渲染表格的数据
       tableData: [
         {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: false
+          roleId: 2,
+          roleName: "二",
+          roleNo: "2222",
+          isCheck: true,
+          systemPropertiesValue: {
+            sysProValueName: "启用"
+          }
         },
         {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
+          roleId: 4,
+          roleName: "四",
+          roleNo: "4444",
+          isCheck: false,
+          systemPropertiesValue: {
+            sysProValueName: "未启用"
+          }
         }
       ],
+      // 查询需要修改的资料
       newList: []
     };
   }
 };
 </script>
+
+
+    // // 确认添加角色
+    // isRoleNameOk() {
+    //   if (this.role.roleName == "") return;
+    //   window.console.log("roleName检测");
+    //   this.axios
+    //     .get(
+    //       `http://192.168.6.184:8080/role/isExistsRoleNo?roleName=${this.role.roleName}`
+    //     )
+    //     .then(res => {
+    //       window.console.log(res);
+    //       // if(res.code ='200') {
+    //       //   window.console.log('角色·名字通过');
+    //       //   this.roleName = 1;
+    //       // }
+    //     });
+    // },
+    //
+    // 角色编号确认

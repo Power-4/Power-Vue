@@ -99,19 +99,28 @@ export default {
     },
     tijiao() {
       /* 提交数据 */
-      window.console.log(this.ruleForm);
+      window.console.log(this.ruleForm, "开始登录");
 
-      // 假登录
-      this.axios.post("http://192.168.6.184:8080/user/login", {
-        username: this.ruleForm.user,
-        userpass: this.ruleForm.pass
+      var params =
+        "userName=" + this.ruleForm.user + "&userPwd=" + this.ruleForm.pass;
+
+      this.axios({
+        url: "http://192.168.6.184:8080/user/login",
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        data: params
       })
-      .then(function (res){
-        window.console.log(res);
-      })
-      .catch(err=> {
-        window.console.log(err);
-      });
+        .then(res => {
+          window.console.log(res.data.data);
+          window.sessionStorage.setItem("token", res.data.data.token);
+          window.sessionStorage.setItem("userId", res.data.data.user.userId);
+          var role = JSON.stringify(res.data.data.user.role);
+          window.sessionStorage.setItem("role", role);
+          this.$router.replace("/a");
+        })
+        .catch(err => {
+          window.console.log(err, "为啥登录不了");
+        });
     }
   }
 };
