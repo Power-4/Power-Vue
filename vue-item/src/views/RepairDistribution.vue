@@ -602,23 +602,33 @@ export default {
     }
   },
   created: function() {
-    this.axios
-      .post("http://192.168.6.184:8080//selectFixTaskByFind", {
-        currentPage: 1,
-        pageSize: 5,
-        taskNo: 1,
-        taskName: "",
-        userName: "",
-        sysProValueId: 1,
-        startDate: "1999/2/10",
-        endDate: "2020/10/10"
-      })
-      .then(res => {
-        window.console.log(res.data.data.fix[0].task);
-      })
-      .catch(err => {
-        window.console.log(err);
-      });
+    // this.axios
+    //   .post("http://192.168.6.184:8080//selectFixTaskByFind", {
+    //     currentPage: 1,
+    //     pageSize: 5,
+    //     taskNo: 1,
+    //     taskName: "",
+    //     userName: "",
+    //     sysProValueId: 1,
+    //     startDate: "1999/2/10",
+    //     endDate: "2020/10/10"
+    //   })
+    //   .then(res => {
+    //     window.console.log(res.data.data.fix[0].task);
+    //   })
+    //   .catch(err => {
+    //     window.console.log(err);
+    //   });
+    // this.axios
+    //   .get("http://192.168.6.175:8080/fix/getfixpolebyfixid", {
+    //     fixId:1
+    //   })
+    //   .then(res => {
+    //     window.console.log(res.data);
+    //   })
+    //   .catch(err => {
+    //     window.console.log(err);
+    //   });
   }
 };
 </script>
@@ -693,7 +703,6 @@ li {
   //   height: 50px;
   // }
 }
-
 
 .el-tabs__item {
   font-size: 18px;
