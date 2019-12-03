@@ -65,13 +65,10 @@
       <!-- 插入类型 -->
       <el-form>
         <el-form-item label="手机号码">
-          <el-input v-model="role.roleName"></el-input>
+          <el-input v-model="roleData.roleName"></el-input>
         </el-form-item>
         <el-form-item label="手机号码">
-          <el-input v-model="role.sysProValueName"></el-input>
-        </el-form-item>
-        <el-form-item label="手机号码">
-          <el-input v-model="role.roleNo"></el-input>
+          <el-input v-model="roleData.roleNo"></el-input>
           <!-- roleName -->
           <!-- roleNo -->
           <!-- sysProValueName -->
@@ -80,7 +77,7 @@
         <div class="box">
           <div>
             <el-button type="button" class="ok" @click="updateRole">确认</el-button>
-            <el-button type="button" @click="addRoleTab = false">取消</el-button>
+            <el-button type="button" @click="updataTab = false">取消</el-button>
           </div>
         </div>
       </el-form>
@@ -188,7 +185,7 @@ export default {
       }
       window.console.log(this.chose);
     },
-    // 启用/禁用选项框
+    // 启用/禁用选项框的修改
     achecbox(index) {
       var words = "此操作将禁用该角色, 是否继续?";
       if (index.isCheck) words = "此操作将启用该角色, 是否继续?";
@@ -212,6 +209,13 @@ export default {
             index.systemPropertiesValue.sysProValueName = "启用";
           }
           window.console.log(index.isCheck, this.tableData);
+          // 添加东西
+          this.roleData.roleName = index.roleName;
+          this.roleData.roleNo = index.roleNo;
+          this.roleData.systemPropertiesValue.sysProValueName =
+            index.systemPropertiesValue.sysProValueName;
+          this.roleData.roleId = index.roleId;
+          window.console.log(this.roleData);
           this.updateRole();
         })
         .catch(() => {
@@ -226,7 +230,7 @@ export default {
     },
     // index 编号传入 scope.$index
     // rows 需要修改的数组
-    deleteRow(index, rows) {
+    deleteRow(index) {
       // 弹出确认窗口
       this.$confirm("此操作将永久删除该角色, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -239,12 +243,18 @@ export default {
             message: "删除成功"
           });
           // 执行删除操作
-          rows.splice(index, 1);
           // 获取准确 id
           var a = this.currpage - 1;
           var b = a * this.pagesize + index;
           // 输出id
-          this.a = this.tableData[b].id;
+          this.axios
+            .get(
+              `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleId=${this.tableData[b].roleId}`
+            )
+            .then(res => {
+              window.console.log(res);
+              this.LoadData();
+            });
         })
         .catch(() => {
           this.$message({
@@ -253,7 +263,7 @@ export default {
           });
         });
     },
-    // 修改角色操作
+    // 修改角色按钮
     updata(index) {
       // 弹出由 :visible.sync 绑定的模态框
       this.updataTab = true;
@@ -261,8 +271,22 @@ export default {
       // 获取准确 id
       var a = this.currpage - 1;
       var b = a * this.pagesize + index;
-      // 输出id
-      this.a = this.tableData[b].id;
+
+      var thisid = 0;
+      for (var i = 0; i < this.tableData.length; i++) {
+        if (this.tableData[i].roleId == this.tableData[b].roleId) {
+          thisid = i;
+          break;
+        }
+      }
+      // 添加东西
+      this.roleData.roleName = this.tableData[thisid].roleName;
+      this.roleData.roleNo = this.tableData[thisid].roleNo;
+      this.roleData.systemPropertiesValue.sysProValueName = this.tableData[
+        thisid
+      ].systemPropertiesValue.sysProValueName;
+      this.roleData.roleId = thisid;
+      window.console.log(this.roleData);
     },
     // 分页函数
     // 每页几条
@@ -272,11 +296,13 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+      this.LoadData();
     },
-    // 添加角色
+    // 添加角色按钮
     addRole() {
       this.addRoleTab = true;
     },
+    // 检查角色编号是否重合
     isRoleNoOk() {
       if (this.role.roleNo == "") return;
       window.console.log("roleNo检测");
@@ -371,23 +397,22 @@ export default {
         });
     },
     // 修改角色信息
-    updateRole(id) {
-      var thisid = 0;
-      for (var i = 0; i < this.tableData.length; i++) {
-        if (this.tableData[i].roleId == id) {
-          thisid = i;
-          break;
-        }
-      }
+    updateRole() {
       //
       this.axios
         .get(
           `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?
-      roleName=${this.tableData[thisid].roleName}&roleNo=${this.tableData[thisid].roleNo}&sysProValueName=${this.tableData[thisid].systemPropertiesValue.sysProValueName}&roleId=${id}`
+      roleName=${this.roleData.roleName}&roleNo=${this.roleData.roleNo}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`
         )
         .then(res => {
           window.console.log(res);
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
         });
+      // 关闭窗口 一切结束后写道axios回调函数里面
+      this.updataTab = false;
     }
   },
   created() {
@@ -395,7 +420,7 @@ export default {
   },
   data() {
     return {
-      // 添加角色-----------------------------------
+      // 添加角色----------------------------------------------------1
       // 1 为通多，2 为不通过
       roleOk: 2,
       // 用户名是否得体
@@ -410,16 +435,29 @@ export default {
       },
       // 控制添加模态框弹出
       addRoleTab: false,
-      // --------------------------------------------
+      // 修改角色---------------------------------------------------2
       // 控制修改模态框弹出
       updataTab: false,
+      // 修改数据时加入的绑定input的数据
+      roleData: {
+        roleName: "",
+        roleNo: "",
+        sysProValueName: "",
+        roleId: "",
+        systemPropertiesValue: {
+          sysProValueName: ""
+        }
+      },
+      // 搜索内容---------------------------------------------------3
       // 搜索内容
       search: "",
       chose: "1",
+      // 显示分页------------------------------------------------------4
       // 分页数据 一页显示最大数，当前页数
       pagesize: 3,
       currpage: 1,
       pages: 3,
+      // select下拉框---------------------------------------------------5
       // select选择框取下的值
       selValue: "",
       // 启用/未启用 复选框选择
@@ -433,21 +471,29 @@ export default {
           label: "未启用"
         }
       ],
+      // 表格数据渲染----------------------------------------------------6
       // 渲染表格的数据
       tableData: [
         {
+          roleId: 2,
+          roleName: "二",
+          roleNo: "2222",
           isCheck: true,
           systemPropertiesValue: {
             sysProValueName: "启用"
           }
         },
         {
+          roleId: 4,
+          roleName: "四",
+          roleNo: "4444",
           isCheck: false,
           systemPropertiesValue: {
             sysProValueName: "未启用"
           }
         }
       ],
+      // 查询需要修改的资料
       newList: []
     };
   }
