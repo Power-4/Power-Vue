@@ -15,6 +15,7 @@
         <span>编号查询:</span>
         <el-input v-model="submit.id" placeholder="请输入任务或者线路编号" class="in-bianhao" 
           @input="chaxun"
+          clearable=ture
         ></el-input>
       </div>
 
@@ -22,7 +23,7 @@
         <span>时间查询:</span>
         <wdtime class="wdtime" @addTime="addTime" :wdname="wdname" ></wdtime>
       </div>
-      <div class="error" v-show="wdname=='xun'">
+      <div class="error" v-show="wdname=='xun'"  @input="chaxun">
         <span>有无故障:</span>
         <el-select
           v-model="submit.error"
@@ -110,7 +111,7 @@ export default {
     },
     /* 点击查询 */
     chaxun() {
-      
+
       this.loading=true;
       this.tableData=[];
       this.total.currentPage = this.submit.currentPage; /* 页面初始值 第几页 */
@@ -188,6 +189,7 @@ export default {
 
         })
         .catch(err => {
+          this.loading=false;
           window.console.log("错误", err);
         });
     },
