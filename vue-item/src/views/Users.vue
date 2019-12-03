@@ -57,7 +57,7 @@
       <el-table-column fixed="right" label="操作" width="150">
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
-          <el-button @click="del(scope.row, scope.$index, tableData)" type="text" size="small">删除</el-button>
+          <el-button @click="del(scope.row)" type="text" size="small">删除</el-button>
           <el-button @click="seeLog(scope.$index, tableData)" type="text" size="small">日志</el-button>
         </template>
       </el-table-column>
@@ -109,10 +109,14 @@
       <!-- // joinDate -->
       <!-- // leavingDate -->
       <el-form label-position="labelPosition">
-        <el-form-item label="用户信息">
+        <el-form-item
+          prop="name"
+          label="用户账号"
+          :rules="rules.name"
+        >
           <el-input class="inpu" v-model="userData.userName"></el-input>
         </el-form-item>
-        <el-form-item label="用户编号">
+        <el-form-item label="用户密码">
           <el-input class="inpu" v-model="userData.userPwd"></el-input>
         </el-form-item>
         <el-form-item label="用户角色">
@@ -129,6 +133,7 @@
         </div>
       </el-form>
     </el-dialog>
+
     <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
       <!-- 插入类型 -->
     </el-dialog>
@@ -189,15 +194,18 @@ export default {
       // joinDate
       // leavingDate
       // sysProValueName
-      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userData.userName}&userPwd=${this.userData.userPwd}&roleName=${this.userData.roleName}&joinData=${this.userData.joinDate}&leacingDate=${this.userData.leavingDate}&sysProValueName=${this.userData.sysProValueName}`;
+      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userData.userName}&userPwd=${this.userData.userPwd}&roleName=${this.userData.roleName}&joinData=${this.userData.joinData}&leacingDate=${this.userData.leavingDate}&sysProValueName=正常`;
       this.axios.get(words).then(res => {
-        //
+        this.$message({
+          type: "success",
+          message: "修改成功"
+        });
         window.console.log(res);
         this.addDataTab = false;
       });
     },
     // 删除用户------------------------------------------------------1
-    del(obj, index, rows) {
+    del(obj) {
       this.$confirm("是否删除用户", "删除用户", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -206,16 +214,19 @@ export default {
         .then(() => {
           this.$message({
             type: "success",
-            message: "修改成功"
+            message: "删除成功"
           });
           // 通过传入 scope.row 获取 选取的对象，获得id
           window.console.log(obj);
-          rows.splice(index, 1);
+          var words = `http://192.168.6.184:8080/userManage/deleteUserMessage?userId=${obj.userId}`;
+          this.axios.get(words).then(res => {
+            window.console.log(res);
+          });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "取消修改"
+            message: "取消删除"
           });
         });
     },
@@ -330,7 +341,45 @@ export default {
       ],
       // 表格渲染数据 --------------------------------------------------7
       // 渲染表格的数据
-      tableData: []
+      tableData: [],
+      // 表单验证------------------------------------------8
+      rules: {
+        name: [
+          { required: true, message: "请输入活动名称", trigger: "blur" },
+          { min: 6, max: 10, message: "长度在 6 到 10 个字符", trigger: "blur" }
+        ],
+        region: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        date1: [
+          {
+            type: "date",
+            required: true,
+            message: "请选择日期",
+            trigger: "change"
+          }
+        ],
+        date2: [
+          {
+            type: "date",
+            required: true,
+            message: "请选择时间",
+            trigger: "change"
+          }
+        ],
+        type: [
+          {
+            type: "array",
+            required: true,
+            message: "请至少选择一个活动性质",
+            trigger: "change"
+          }
+        ],
+        resource: [
+          { required: true, message: "请选择活动资源", trigger: "change" }
+        ],
+        desc: [{ required: true, message: "请填写活动形式", trigger: "blur" }]
+      }
     };
   }
 };
