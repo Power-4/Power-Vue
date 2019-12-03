@@ -112,9 +112,9 @@ export default {
       })
         .then(res => {
           window.console.log(res.data.data);
-          window.sessionStorage.setItem('token', res.data.data.token);
-          window.sessionStorage.setItem('userId',res.data.data.user.userId);
-          window.sessionStorage.setItem('userId',res.data.data.user.role);
+          window.sessionStorage.setItem("token", res.data.data.token);
+          window.sessionStorage.setItem("userId", res.data.data.user.userId);
+          window.sessionStorage.setItem("userId", res.data.data.user.role);
         })
         .catch(err => {
           window.console.log(err, "为啥登录不了");

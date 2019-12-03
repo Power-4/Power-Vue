@@ -60,13 +60,43 @@
     </el-dialog>
 
     <!-- 模态框 -->
-    <el-dialog title="添加角色" :visible.sync="addRoleTab">
+    <el-dialog title="添加角色" :visible.sync="addRoleTab" class="addbox">
       <!-- 插入类型 -->
+      <el-form>
+        <el-form-item label="角色名称">
+          <el-input v-model="role.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色编号">
+          <el-input v-model="role.roleNo"></el-input>
+        </el-form-item>
+        <el-radio v-model="radio" label="1">启用</el-radio>
+        <el-radio v-model="radio" label="2">未启用</el-radio>
+        <div class="box">
+          <div>
+            <el-button type="button" class="ok">确认</el-button>
+            <el-button type="button" @click="addRoleTab = false">取消</el-button>
+          </div>
+        </div>
+      </el-form>
     </el-dialog>
   </div>
 </template>
 
 <style>
+.el-radio__input.is-checked .el-radio__inner {
+  border-color: #5ee4e4;
+  background-color: #5ee4e4;
+}
+.ok {
+  background-color: #5ee4e4;
+}
+.box {
+  height: 45px;
+  margin-top: 20px;
+}
+.box > div {
+  float: right;
+}
 .addusers {
   float: right;
   margin-right: 20px;
@@ -250,17 +280,23 @@ export default {
           window.console.log(err);
         });
     },
-    updateRole () {
-
-    }
+    updateRole() {}
   },
   created() {
     this.LoadData();
   },
   data() {
     return {
+      // 添加角色-----------------------------------
+      radio: "1",
+      role: {
+        roleName: "",
+        roleNo: "",
+        sysProValueName: ""
+      },
       // 控制添加模态框弹出
       addRoleTab: false,
+      // --------------------------------------------
       // 控制修改模态框弹出
       updataTab: false,
       // 搜索内容
