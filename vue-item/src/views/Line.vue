@@ -130,6 +130,12 @@
             <el-option label="停用" value="停用"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="运行状态" :label-width="formLabelWidth">
+          <el-select v-model="revaTable.state" placeholder="请选运行状态" style="width:202px">
+            <el-option label="正常" value="正常"></el-option>
+            <el-option label="检修中" value="检修中"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -138,7 +144,7 @@
     </el-dialog>
 
     <!-- 线路表单 -->
-    <el-table :data="tableData" stripe style="width: 100%" align="center">
+    <el-table :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)" stripe style="width: 100%" align="center">
       <el-table-column prop="lineid" label="线路编号" width="100" align="center"></el-table-column>
       <el-table-column prop="name" label="线路名称" width="100" align="center"></el-table-column>
       <el-table-column prop="startid" label="起始杆号" width="100" align="center"></el-table-column>
@@ -153,7 +159,13 @@
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination layout="prev, pager, next" :total="50" class="pages"></el-pagination>
+      <el-pagination 
+        :page-size="4"
+        layout="prev, pager, next" 
+        :total="10" 
+        class="pages"
+        @current-change="handleCurrentChange"
+        ></el-pagination>
     </div>
   </div>
 </template>
@@ -167,6 +179,8 @@ export default {
       title: "线路",
       name: "xun",
       submit: { id: "", error: "" },
+      currentPage: 1, //初始页
+      pagesize: 4, //    每页的数据
       //模拟表格数据
       tableData: [
         {
@@ -204,6 +218,24 @@ export default {
           run: "正常",
           name: "西渭线",
           state: "停用"
+        },
+        {
+          lineid: "XW00001",
+          startid: "XW00010",
+          endid: "XW00250",
+          base: "440",
+          run: "检修中",
+          name: "西渭线",
+          state: "启用"
+        },
+        {
+          lineid: "XW00001",
+          startid: "XW00010",
+          endid: "XW00250",
+          base: "440",
+          run: "检修中",
+          name: "西渭线",
+          state: "启用"
         }
       ],
       //修改和添加
@@ -283,7 +315,11 @@ export default {
             message: "已取消停用/启用"
           });
         });
-    }
+    },
+    handleCurrentChange: function(currentPage) {
+      this.currentPage = currentPage;
+      window.console.log(this.currentPage); //点击第几页
+    },
   }
 };
 </script>

@@ -87,7 +87,7 @@
     </el-dialog>
 
     <!-- 杆塔表单 -->
-    <el-table :data="tableData" stripe style="width: 100%" align="center">
+    <el-table :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)" stripe style="width: 100%" align="center">
       <el-table-column prop="id" label="杆塔编号" width="300" align="center"></el-table-column>
       <el-table-column prop="name" label="所属路线" width="200" align="center"></el-table-column>
       <el-table-column prop="state" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
@@ -97,7 +97,13 @@
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination layout="prev, pager, next" :total="50" class="pages"></el-pagination>
+      <el-pagination 
+      :page-size="4"
+      layout="prev, pager, next" 
+      :total="7" 
+      class="pages"
+      @current-change="handleCurrentChange"
+    ></el-pagination>
     </div>
   </div>
 </template>
@@ -112,6 +118,8 @@ export default {
       name: "xun",
       submit: { id: "", error: "" },
       //模拟表格数据
+      currentPage: 1, //初始页
+      pagesize: 4, //    每页的数据
       tableData: [
         {
           id: "XW00001",
@@ -132,6 +140,21 @@ export default {
           id: "XW00001",
           name: "西渭线",
           state: "启用"
+        },
+        {
+          id: "XW00001",
+          name: "西渭线",
+          state: "启用"
+        },
+        {
+          id: "XW00001",
+          name: "西渭线",
+          state: "启用"
+        },
+        {
+          id: "XW00001",
+          name: "西渭线",
+          state: "启用"
         }
       ],
       options: [
@@ -140,23 +163,12 @@ export default {
           label: "西渭线"
         },
         {
-          value: "XW00001",
-          label: "西渭线"
-        },
-        {
-          value: "XW00001",
-          label: "西渭线"
-        },
-        {
-          value: "XW00001",
-          label: "西渭线"
-        },
-        {
-          value: "XW00001",
-          label: "西渭线"
+          value: "XW00002",
+          label: "东渭线"
         }
       ],
       value: "",
+      
       //添加
       dialogFormVisible: false,
       dialogVisible: false,
@@ -199,6 +211,23 @@ export default {
             type: "info",
             message: "已取消删除"
           });
+        });
+    },
+    handleCurrentChange: function(currentPage) {
+      this.currentPage = currentPage;
+      window.console.log(this.currentPage); //点击第几页
+    },
+    fenClick() {
+      this.axios
+        .post("http://192.168.6.184:8080/fix/getallfix", {
+          currentPage: 1,
+          pageSize: 4
+        })
+        .then(res => {
+          window.console.log(res.data);
+        })
+        .catch(err => {
+          window.console.log(err);
         });
     }
   }
