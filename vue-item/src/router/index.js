@@ -70,6 +70,14 @@ const routes = [
             meta: {
               auth: true
             }
+          },
+          {
+            path: 'config',
+            name: 'config',
+            component: () => import('../views/config.vue'),
+            meta: {
+              auth: true
+            }
           }
         ]
       },
