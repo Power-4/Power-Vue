@@ -144,14 +144,14 @@
     </el-dialog>
 
     <!-- 线路表单 -->
-    <el-table :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)" stripe style="width: 100%" align="center">
-      <el-table-column prop="lineid" label="线路编号" width="100" align="center"></el-table-column>
-      <el-table-column prop="name" label="线路名称" width="100" align="center"></el-table-column>
-      <el-table-column prop="startid" label="起始杆号" width="100" align="center"></el-table-column>
-      <el-table-column prop="endid" label="终止杆号" width="100" align="center"></el-table-column>
+    <el-table :data="tableData" stripe style="width: 100%" align="center">
+      <el-table-column prop="circuitryNo" label="线路编号" width="100" align="center"></el-table-column>
+      <el-table-column prop="circuitryName" label="线路名称" width="100" align="center"></el-table-column>
+      <el-table-column prop="startPole.poleNo" label="起始杆号" width="100" align="center"></el-table-column>
+      <el-table-column prop="endPole.poleNo" label="终止杆号" width="100" align="center"></el-table-column>
       <el-table-column prop="base" label="塔基数" width="100" align="center"></el-table-column>
-      <el-table-column prop="run" label="运行状态" width="100" align="center"></el-table-column>
-      <el-table-column prop="state" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
+      <el-table-column prop="runningStatus" label="运行状态" width="100" align="center"></el-table-column>
+      <el-table-column prop="poleNumber" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
         <el-button type="text" @click="block">停用</el-button>
         <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
@@ -160,10 +160,10 @@
     </el-table>
     <div class="block">
       <el-pagination 
-        :page-size="4"
-        layout="prev, pager, next" 
-        :total="10" 
         class="pages"
+        layout="prev, pager, next" 
+        :total="countPage" 
+        :page-size="pageSize"
         @current-change="handleCurrentChange"
         ></el-pagination>
     </div>
@@ -178,66 +178,15 @@ export default {
       //查询
       title: "线路",
       name: "xun",
-      submit: { id: "", error: "" },
-      currentPage: 1, //初始页
+      submit: {
+        id: "",
+        error: "",
+        currentPage: 1
+        },
+      countPage:5, //初始页
       pagesize: 4, //    每页的数据
       //模拟表格数据
-      tableData: [
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "正常",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "检修中",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "正常",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "正常",
-          name: "西渭线",
-          state: "停用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "检修中",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "检修中",
-          name: "西渭线",
-          state: "启用"
-        }
-      ],
+      tableData: [],
       //修改和添加
       dialogFormVisible: false,
       dialogVisible: false,
@@ -275,6 +224,27 @@ export default {
     },
     onSubmit() {
       window.console.log("submit!");
+    },
+    //分页
+    handleCurrentChange: function(currentPage) {
+      window.console.log(currentPage); //点击第几页
+      this.submit.currentPage = currentPage;
+      this.fenClick();
+    },
+    fenClick() {
+      this.axios
+        .post("http://192.168.6.184:8080/circuitryOrchid/getCirByPage", {
+          currentPage:this.submit.currentPage,
+          pageSize:this.pageSize
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     //删除
     del() {
