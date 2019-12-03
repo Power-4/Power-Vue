@@ -38,8 +38,7 @@
       <el-table-column label="状态(启用/未启用)">
         <template slot-scope="scope">
           <!-- // 添加一个多选框,控制选中与否 -->
-          <el-radio v-model="scope.row.isCheck" label="1" @change="achecbox(scope.row, '1')">启用</el-radio>
-          <el-radio v-model="scope.row.isCheck" label="2" @change="achecbox(scope.row, '2')">未启用</el-radio>
+          <el-checkbox v-model="scope.row.isCheck" @change="achecbox(scope.row)"></el-checkbox>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
@@ -187,9 +186,64 @@ export default {
       window.console.log(this.chose);
     },
     // 启用/禁用选项框的修改
-    achecbox(obj, index) {
+    achecbox(index) {
       this.addRoleTab = true;
-      window.console.log(index.isCheck);
+      this.addRoleTab = false;
+      var words = "此操作将禁用该角色, 是否继续?";
+      if (index.isCheck) words = "此操作将启用该角色, 是否继续?";
+
+      this.$confirm(words, "启用/禁用", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+          // 通过传入 scope.row 获取 选取的对象，获得id
+          // 修改状态, 还要传入修改后的值
+          if (index.systemPropertiesValue.sysProValueName == "启用") {
+            index.systemPropertiesValue.sysProValueName = "未启用";
+          } else if (index.systemPropertiesValue.sysProValueName == "未启用") {
+            index.systemPropertiesValue.sysProValueName = "启用";
+          }
+          window.console.log(
+            "确认改变",
+            index.isCheck,
+            index.systemPropertiesValue.sysProValueName
+          );
+          // 添加东西
+          this.roleData.roleName = index.roleName;
+          this.roleData.roleNo = index.roleNo;
+          this.roleData.systemPropertiesValue.sysProValueName =
+            index.systemPropertiesValue.sysProValueName;
+          this.roleData.roleId = index.roleId;
+          window.console.log(this.roleData);
+          this.updateRole();
+        })
+        .catch(() => {
+          // if (index.systemPropertiesValue.sysProValueName == "启用") {
+          //   index.isCheck = true;
+          // } else if (index.systemPropertiesValue.sysProValueName == "未启用") {
+          //   index.isCheck = false;
+          // }
+          this.$message({
+            type: "info",
+            message: "取消修改"
+          });
+          index.isCheck = !index.isCheck;
+          this.addRoleTab = true;
+          this.addRoleTab = false;
+          // 取消修改如何进行
+          // if (index.isCheck == "1") {
+          //   index.isCheck = "2";
+          // } else {
+          //   index.isCheck = "1";
+          // }
+          window.console.log("取消后的isCheck", index.isCheck);
+        });
     },
     // index 编号传入 scope.$index
     // rows 需要修改的数组
@@ -357,14 +411,14 @@ export default {
             if (
               this.tableData[i].systemPropertiesValue.sysProValueName == "启用"
             ) {
-              this.tableData[i].isCheck = "1";
+              this.tableData[i].isCheck = true;
               window.console.log(this.tableData[i].isCheck);
             }
             if (
               this.tableData[i].systemPropertiesValue.sysProValueName ==
               "未启用"
             ) {
-              this.tableData[i].isCheck = "2";
+              this.tableData[i].isCheck = false;
             }
           }
         })

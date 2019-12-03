@@ -21,7 +21,7 @@
               <el-option
                 v-for="item in stateOptions"
                 :key="item.id"
-                :label="item.label"
+                :label="item.sysProValueName"
                 :value="item.id"
               ></el-option>
             </el-select>
@@ -35,13 +35,13 @@
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>下发人：</label>
-            <el-input placeholder="请输入内容" v-model="userId" clearable></el-input>
+            <el-input placeholder="请输入内容" v-model="userName" clearable></el-input>
           </div>
         </el-col>
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="createDate" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker v-model="createDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="3">
@@ -71,20 +71,20 @@
         <el-form-item label="巡检线路">
           <el-select v-model="addform.circuitryName" clearable placeholder="请选择">
             <el-option
-              v-for="item in addform.nameOptions"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id">
+              v-for="item in circuitryNames"
+              :key="item.circuitryId"
+              :label="item.circuitryName"
+              :value="item.circuitryId">
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="巡检员">
           <el-select v-model="addform.inspectPerson" multiple placeholder="请选择">
             <el-option
-              v-for="item in addform.personOptions"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id">
+              v-for="item in Inspectors"
+              :key="item.userId"
+              :label="item.userName"
+              :value="item.userId">
             </el-option>
           </el-select>
         </el-form-item>
@@ -152,20 +152,20 @@
         <el-form-item label="巡检线路">
           <el-select v-model="modifyform.circuitryName" clearable placeholder="请选择">
             <el-option
-              v-for="item in modifyform.nameOptions"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id">
+              v-for="item in circuitryNames"
+              :key="item.circuitryId"
+              :label="item.circuitryName"
+              :value="item.circuitryId">
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="巡检员">
           <el-select v-model="modifyform.inspectPerson" multiple placeholder="请选择">
             <el-option
-              v-for="item in addform.personOptions"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id">
+              v-for="item in Inspectors"
+              :key="item.userId"
+              :label="item.userName"
+              :value="item.userId">
             </el-option>
           </el-select>
         </el-form-item>
@@ -225,13 +225,13 @@
       <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
       <el-table-column prop="systemPropertiesValue.sysProValueName" label="任务状态" align="center"></el-table-column>
       <el-table-column prop="finishDate" label="任务完成时间" align="center"></el-table-column>
-      <el-table-column prop="isCancel" label="任务是否取消" align="center" ></el-table-column>
+      <el-table-column prop="isCancel" label="任务是否取消" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" width="180px" fixed="right" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="viewInspectTask(scope.$index,scope.row)">查看</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'? !edit : edit" @click="allot(scope.row, dialogVisible = true)">分配任务</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'? !edit : edit" @click="modifyInspectTask(scope.$index, scope.row, modifydialogVisible = true)">修改</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'||'已分配'? !edit : edit" @click="del(scope.row)">删除</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'||'已分配'? !edit : edit" @click="del(scope.row)">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -249,85 +249,63 @@
 <script>
 export default {
   data() {
-    const generateData = function() {
-      const datas = [];
-      const testPerson = [
-        '巡检员测试用户1',
-        '巡检员测试用户2',
-        '巡检员测试用户3',
-        '巡检员测试用户4',
-        '巡检员测试用户5',
-        '巡检员测试用户6',
-        '巡检员测试用户7',
-        '巡检员测试用户8',
-        '巡检员测试用户9',
-      ];
-      for (let i = 0; i <testPerson.length; i++) {
-        datas.push({
-          key: i,
-          label: testPerson[i],
-          disabled: i % 3 === 0
-        });
-      }
-      return datas;
-    };
+    // const generateData = function() {
+    //   const datas = [];
+    //   const testPerson = [
+    //     '巡检员测试用户1',
+    //     '巡检员测试用户2',
+    //     '巡检员测试用户3',
+    //     '巡检员测试用户4',
+    //     '巡检员测试用户5',
+    //     '巡检员测试用户6',
+    //     '巡检员测试用户7',
+    //     '巡检员测试用户8',
+    //     '巡检员测试用户9',
+    //   ];
+    //   // const testPerson = this.Inspectors;
+    //   for (let i = 0; i <testPerson.length; i++) {
+    //     datas.push({
+    //       key: i,
+    //       label: testPerson[i],
+    //     });
+    //   }
+    //   return datas;
+    // };
     return {
-    tableData: {
-        taskNo: '',
-        taskName: '',
-        circuitry: {
-          circuitryName: '',
-          startPole: {
-            circuitry: ''
-          },
-          endPole: {
-            circuitry: ''
-          }
-        },
-        users: {
-          userName: ''
-        },
-        systemPropertiesValue: {
-          sysProValueName: ''
-        },
-      },
+      tableData: [],
+      // tableData: {
+      //   taskNo: '',
+      //   taskName: '',
+      //   circuitry: {
+      //     circuitryName: '',
+      //     startPole: {
+      //       circuitry: ''
+      //     },
+      //     endPole: {
+      //       circuitry: ''
+      //     }
+      //   },
+      //   users: {
+      //     userName: ''
+      //   },
+      //   systemPropertiesValue: {
+      //     sysProValueName: ''
+      //   },
+      // },
       count: null,
       pageSize: 5,
       currentPage: 1,
       taskNo: "",
       circuitryNo: "",
-      userId: "",
+      userName: "",
       createDate: "",
       taskState: "",
-      stateOptions: [
-        {
-          id: 1,
-          label: "待分配"
-        },
-        {
-          id: 2,
-          label: "已分配"
-        },
-        {
-          id: 3,
-          label: "执行中"
-        },
-        {
-          id: 4,
-          label: "审核中"
-        },
-        {
-          id: 5,
-          label: "已完成"
-        },
-        {
-          id: 6,
-          label: "驳回"
-        }
-      ],
+      stateOptions: [],
+      circuitryNames: [],
       dialogVisible: false,
       adddialogVisible: false,
       modifydialogVisible: false,
+
       addform: {
         taskNo: '',
         taskName: '',
@@ -415,7 +393,8 @@ export default {
         describe: ''
       },
       edit: true,
-      datas: generateData(),
+      Inspectors: [],
+      datas: '',
       value: [],
       nowTaskId: null,
       isQuery: false
@@ -427,20 +406,58 @@ export default {
     // headers:{ Authorization: window.localStorage.token};
 
     // 请求列表数据
-    // this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
-    //   params: {
-    //     currentPage: this.currentPage,
-    //     pageSize: this.pageSize
-    //   }
-    // })
-    // .then((res) => {
-    //   this.tableData = res.data.data.tasks;
-    //   this.count = res.data.data.count;
-    //   window.console.log(res.data);
-    // })
-    // .catch((err) => {
-    //   window.console.log("错误",err)
-    // })
+    this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+      params: {
+        currentPage: this.currentPage,
+        pageSize: this.pageSize
+      }
+    })
+    .then((res) => {
+      this.tableData = res.data.data.tasks;
+      for(var i = 0; i< res.data.data.tasks.length; i++) {
+        if(res.data.data.tasks[i].isCancel == 1) {
+          res.data.data.tasks[i].isCancel = '是'
+        } else if (res.data.data.tasks[i].isCancel == 0) {
+          res.data.data.tasks[i].isCancel = '否'
+        }
+      }
+      this.count = res.data.data.count;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log("错误",err)
+    })
+
+    // 查询巡检员
+    this.axios.get('http://192.168.6.184:8080/showInspectorsNamesS?')
+    .then((res) => {
+      this.Inspectors = res.data.data.inspectorNames;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log("错误",err)
+    })
+
+
+    // 请求任务状态值
+    this.axios.get('http://192.168.6.184:8080/selectAllFixState?')
+    .then((res) => {
+      this.stateOptions = res.data.data.fixState;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
+
+    // 查询所有巡检路线
+    this.axios.get('http://192.168.6.184:8080/showCircuitryNamesS?')
+    .then((res) => {
+      this.circuitryNames = res.data.data.circuitryNames;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
 
     // this.axios.get('http://192.168.6.184:8080/showInspectorsByTaskIdS?',{ 
     //   params: {
@@ -463,22 +480,47 @@ export default {
     // 页面加载完后显示当前时间
     this.addform.createDate = this.addDate()
     this.modifyform.createDate = this.addDate()
-    // 定时刷新时间
-    let _this = this
-    // 定时器
-    this.timer = setInterval(function () {
-      _this.findDate = _this.addDate() // 修改数据date
-    })
+    this.datas = this.generateData()
+    // // 定时刷新时间
+    // let _this = this
+    // // 定时器
+    // this.timer = setInterval(function () {
+    //   _this.createDate = _this.addDate() // 修改数据date
+    // })
   },
   methods: {
-    addDate() {
-      var nowDate = new Date();
-      let date = {
-        year: nowDate.getFullYear(),
-        month: nowDate.getMonth() + 1,
-        date: nowDate.getDate(),
+    generateData() {
+      const datas = [];
+      // const testPerson = [];
+      // const testPerson = [
+      //   '巡检员测试用户1',
+      //   '巡检员测试用户2',
+      //   '巡检员测试用户3',
+      //   '巡检员测试用户4',
+      //   '巡检员测试用户5',
+      //   '巡检员测试用户6',
+      //   '巡检员测试用户7',
+      //   '巡检员测试用户8',
+      //   '巡检员测试用户9',
+      // ];
+      const testPerson = this.Inspectors;
+      for (let i = 0; i < testPerson.length; i++) {
+        datas.push({
+          key: i,
+          label: testPerson[i].userName,
+        });
       }
-      let systemDate = date.year + '-' + date.month + '-' + date.date;
+      return datas;
+    },
+    addDate() {
+      var nowDate = new Date()
+      var year = nowDate.getFullYear()
+      var month = nowDate.getMonth() + 1;
+      month = month < 10 ? '0' + month:month;
+      var today = nowDate.getDate();
+      today = today < 10? '0' + today:today;
+
+      let systemDate = year + '-' + month + '-' + today;
       return systemDate;
     },
 
@@ -486,23 +528,24 @@ export default {
     enactQuery() {
       this.isQuery = true;
 
-      // this.axios.get('http://192.168.6.184:8080/selectTasksByConditionS?',{
-      //   params: {
-      //     currentPage: this.currentPage,
-      //     pageSize: this.pageSize,
-      //     // userName: localStorage.getItem()
-      //     startTime: this.createDate,
-      //     taskNo: this.taskNo,
-      //     circuitryNo: this.circuitryNo,
-      //     Id: this.taskState
-      //   }
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+      this.axios.get('http://192.168.6.184:8080/selectTasksByConditionS?',{
+        params: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          userName: this.userName,
+          startDate: this.createDate,
+          taskNo: this.taskNo,
+          circuitryNo: this.circuitryNo,
+          id: this.taskState
+        }
+      })
+      .then((res) => {
+        this.tableData = res.data.data.tasks;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
       
 
     },
@@ -558,19 +601,19 @@ export default {
     },
     // 分配提交
     allotSubmit() {
-      window.console.log(this.value);
-      // this.axios.get('http://192.168.6.184:8080/assignTaskS?',{
-      //   params: {
-      //     userId: this.value,
-      //     taskId: this.nowTaskId,
-      //   }
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+      // window.console.log(this.value.toString());
+      this.axios.get('http://192.168.6.184:8080/assignTaskS?',{
+        params: {
+          userId: this.value.toString(),
+          taskId: this.nowTaskId,
+        }
+      })
+      .then((res) => {
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
 
     },
 
@@ -579,7 +622,7 @@ export default {
       this.nowTaskId = row.taskId;
       this.modifyform.taskNo = this.tableData[index].taskNo;
       this.modifyform.taskName = this.tableData[index].taskName;
-      this.modifyform.circuitryName = this.tableData[index].circuitryName;
+      this.modifyform.circuitryName = this.tableData[index].circuitry.circuitryName;
     },
 
     // 修改重置
@@ -627,7 +670,7 @@ export default {
           params: {
             currentPage: this.currentPage,
             pageSize: this.pageSize,
-            // userName: localStorage.getItem()
+            userName: this.userName,
             startTime: this.createDate,
             taskNo: this.taskNo,
             circuitryNo: this.circuitryNo,
@@ -635,6 +678,15 @@ export default {
           }
         })
         .then((res) => {
+          this.tableData = res.data.data.tasks;
+          for(var i = 0; i< res.data.data.tasks.length; i++) {
+            if(res.data.data.tasks[i].isCancel == 1) {
+              res.data.data.tasks[i].isCancel = '是'
+            } else if (res.data.data.tasks[i].isCancel == 0) {
+              res.data.data.tasks[i].isCancel = '否'
+            }
+          }
+
           window.console.log(res.data);
         })
         .catch((err) => {
@@ -651,6 +703,13 @@ export default {
       })
       .then((res) => {
         this.tableData = res.data.data.tasks;
+        for(var i = 0; i< res.data.data.tasks.length; i++) {
+          if(res.data.data.tasks[i].isCancel == 1) {
+            res.data.data.tasks[i].isCancel = '是'
+          } else if (res.data.data.tasks[i].isCancel == 0) {
+            res.data.data.tasks[i].isCancel = '否'
+          }
+        }
         this.count = res.data.data.count;
         window.console.log(res.data);
       })
@@ -689,11 +748,11 @@ export default {
         });
     }
   },
-  destroyed () {
-    if (this.timer) { 
-      clearInterval(this.timer)
-    }
-  }
+  // destroyed () {
+  //   if (this.timer) { 
+  //     clearInterval(this.timer)
+  //   }
+  // }
 };
 </script>
 

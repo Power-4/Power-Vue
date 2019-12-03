@@ -14,6 +14,9 @@
       </div>
       <div class="details">
         <el-form>
+          <el-form-item label="任务编号：">
+            <el-input v-model="form.taskNo" :disabled="edit"></el-input>
+          </el-form-item>
           <el-form-item label="线路编码：">
             <el-input v-model="form.circuitryNo" :disabled="edit"></el-input>
           </el-form-item>
@@ -24,19 +27,9 @@
             <el-select v-model="form.defectsName" clearable placeholder="请选择">
               <el-option
                 v-for="item in form.typeOptions"
-                :key="item.id"
-                :label="item.label"
-                :value="item.label">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="缺陷级别：">
-            <el-select v-model="form.defectsLevel" clearable placeholder="请选择">
-              <el-option
-                v-for="item in form.levelOptions"
-                :key="item.id"
-                :label="item.label"
-                :value="item.label">
+                :key="item.defectsId"
+                :label="item.defectsName"
+                :value="item.defectsId">
               </el-option>
             </el-select>
           </el-form-item>
@@ -52,7 +45,6 @@
         </el-form>
       </div>
     </div>
-    <!-- <el-button type="primary" @click="upLoad">上传回执</el-button> -->
     <el-button v-if="isadd" type="primary" @click="addSave">新增保存</el-button>
     <el-button v-else type="primary" @click="modifySave">修改保存</el-button>
     <el-button type="primary" @click="backto">返回</el-button>
@@ -79,46 +71,14 @@ export default {
         label: 'label'
       },
       form: {
+        taskNo: '111',
         circuitryNo: 'XW001',
         poleNo: '',
         findDate: '',
         foundPerson: '巡检员01',
         defectsDescribe: '',
         defectsName: '',
-        typeOptions: [
-          {
-            id: 1,
-            label: '叉梁断裂'
-          }, {
-            id: 2,
-            label: '拦河线断裂'
-          }, {
-            id: 3,
-            label: '绝缘子爆破'
-          }, {
-            id: 4,
-            label: '杆塔倾斜'
-          }, {
-            id: 5,
-            label: '吊杆变形'
-          }, {
-            id: 6,
-            label: '其他'
-          }
-        ],
-        defectsLevel: '',
-        levelOptions: [
-          {
-            id: 1,
-            label: '一般'
-          }, {
-            id: 2,
-            label: '严重'
-          }, {
-            id: 3,
-            label: '其他'
-          } 
-        ],
+        typeOptions: []
       },
       edit:true,
       timer: null
@@ -127,7 +87,8 @@ export default {
   created() {
     this.getParams();
     this.isadd = this.isAdd;
-
+    
+    // 渲染页面数据
     this.axios.get('http://192.168.6.184:8080/showTaskandPoles?',{params:{taskId: this.taskId}})
     .then((res) => {
       res.data.data.taskAndPoles.poles.forEach((item)=> {
@@ -142,6 +103,16 @@ export default {
     .catch((err) => { 
       window.console.log("错误",err)
     })
+
+    // 请求缺陷类型
+    this.axios.get('http://192.168.6.184:8080/getDefectsName?')
+    .then((res) => {
+      this.form.typeOptions = res.data.data.defects;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
   },
   computed: {
     ...mapState([
@@ -154,26 +125,22 @@ export default {
   mounted() {
     // 页面加载完后显示当前时间
     this.form.findDate = this.addDate()
-    // 定时刷新时间
-    let _this = this
-    // 定时器
-    this.timer = setInterval(function () {
-      _this.findDate = _this.addDate() // 修改数据date
-    })
   },
   methods: {
     //  获取基本信息
     getParams() {
       this.taskId = this.$route.query.taskId;
+      this.form.taskNo =  this.$route.query.taskId;
     },
     addDate() {
-      var nowDate = new Date();
-      let date = {
-        year: nowDate.getFullYear(),
-        month: nowDate.getMonth() + 1,
-        date: nowDate.getDate(),
-      }
-      let systemDate = date.year + '-' + date.month + '-' + date.date;
+      var nowDate = new Date()
+      var year = nowDate.getFullYear()
+      var month = nowDate.getMonth() + 1;
+      month = month < 10 ? '0' + month:month;
+      var today = nowDate.getDate();
+      today = today < 10? '0' + today:today;
+
+      let systemDate = year + '-' + month + '-' + today;
       return systemDate;
     },
     // 返回上一页
@@ -204,22 +171,25 @@ export default {
         }
 
         if(flags==false) {
-          this.form.defectName = '';
-          this.form.defectLevel = '';
+          this.form.defectsName = '';
           this.form.defectsDescribe = '';
         }
       }
 
-      // this.axios.get('http://192.168.6.184:8080/selectRecord',{params:{poleId: lines.id}})
-      // .then((res) => {
-      //     this.form.defectsName = res.data.data.circuitryPoleRecordVO.damageRecord.defects.defectsName;
-      //     this.form.defectsLevel = res.data.data.circuitryPoleRecordVO.damageRecord.defectsLevel;
-      //     this.form.defectsDescribe = res.data.data.circuitryPoleRecordVO.damageRecord.defectsDescribe;
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+      
+      if(!this.isadd) {
+        // this.axios.get('http://192.168.6.184:8080/selectRecord',{params:{poleId: lines.id}})
+        // .then((res) => {
+        //     this.form.defectsName = res.data.data.circuitryPoleRecordVO.damageRecord.defects.defectsName;
+        //     this.form.defectsDescribe = res.data.data.circuitryPoleRecordVO.damageRecord.defectsDescribe;
+        //   window.console.log(res.data);
+        // })
+        // .catch((err) => {
+        //   window.console.log("错误",err)
+        // })
+
+      }
+
     },
 
 
@@ -227,8 +197,7 @@ export default {
     addSave() {
       let msg = {
         poleNo: this.form.poleNo,
-        defectsName: this.form.defectName,
-        defectsLevel: this.form.defectLevel,
+        defectsName: this.form.defectsName,
         defectsDescribe: this.form.defectsDescribe
       }
 
@@ -251,11 +220,10 @@ export default {
 
 
       // this.axios.post('http://192.168.6.184:8080/insertRecord',{
-      //   poleId: this.lines[0].children.poleId,
-      //   defectsId: this.form.typeOptions.defectsId,
-      //   defectsLevel: this.defectLevel,
-      //   findDate: this.findDate,
-      //   defectsDescribe: this.defectsDescribe
+      //   poleId: this.form.poleNo,
+      //   defectsId: this.form.defectsName,
+      //   findDate: this.form.findDate,
+      //   defectsDescribe: this.form.defectsDescribe
       // })
       // .then((res) => {
       //   window.console.log(res.data);
@@ -304,12 +272,6 @@ export default {
       //   window.console.log("错误",err)
       // })
     },
-    // 注意在vue实例销毁前，清除我们的定时器。
-    destroyed () {
-      if (this.timer) { 
-        clearInterval(this.timer)
-      }
-    }
   }
 }
 </script>
