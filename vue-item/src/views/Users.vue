@@ -40,7 +40,7 @@
       <!-- userPwd: null -->
       <el-table-column prop="userId" label="用户ID" width="130"></el-table-column>
       <el-table-column prop="userName" label="用户账号" width="150"></el-table-column>
-      <el-table-column prop="roleName" label="角色" width="100"></el-table-column>
+      <el-table-column prop="roleName" label="用户角色" width="100"></el-table-column>
       <el-table-column prop="phone" label="电话" width="150"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
       <el-table-column prop="isCheck" label="状态" width="180"></el-table-column>
@@ -80,16 +80,30 @@
 
     <el-dialog title="添加用户信息" :visible.sync="addDataTab">
       <!-- 插入类型 -->
-      <el-form>
+      <!-- // userName -->
+      <!-- // userPwd -->
+      <!-- // roleName -->
+      <!-- // joinDate -->
+      <!-- // leavingDate -->
+      <el-form label-position="labelPosition">
         <el-form-item label="用户信息">
-          <el-input></el-input>
+          <el-input class="inpu" v-model="userData.userName"></el-input>
         </el-form-item>
         <el-form-item label="用户编号">
-          <el-input></el-input>
+          <el-input class="inpu" v-model="userData.userPwd"></el-input>
         </el-form-item>
-        <el-form-item label>
-          <el-input></el-input>
+        <el-form-item label="用户角色">
+          <el-input class="inpu" v-model="userData.roleName"></el-input>
         </el-form-item>
+        <el-form-item label="加入日期">
+          <el-input class="inpu" v-model="userData.joinData"></el-input>
+        </el-form-item>
+        <div class="box">
+          <div>
+            <el-button class="coloraaa" @click="userAdd">确认</el-button>
+            <el-button @click="addDataTab = false">取消</el-button>
+          </div>
+        </div>
       </el-form>
     </el-dialog>
     <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
@@ -106,7 +120,10 @@ export default {
       this.updataTab = true;
     },
     // 修改用户信息
-    updataUser() {},
+    updataUser() {
+      
+      this.updataTab = false;
+    },
     // 查看日志按钮--------------------------------------------------
     seeLog() {
       this.seeLogTab = true;
@@ -118,8 +135,21 @@ export default {
       this.addDataTab = true;
     },
     // 添加用户
-    userAdd() {},
-    // 删除用户------------------------------------------------------
+    userAdd() {
+      // userName
+      // userPwd
+      // roleName
+      // joinDate
+      // leavingDate
+      // sysProValueName
+      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userData.userName}&userPwd=${this.userData.userPwd}&roleName=${this.userData.roleName}&joinData=${this.userData.joinDate}&leacingDate=${this.userData.leavingDate}&sysProValueName=${this.userData.sysProValueName}`;
+      this.axios.get(words).then(res => {
+        //
+        window.console.log(res);
+        this.addDataTab = false;
+      });
+    },
+    // 删除用户------------------------------------------------------1
     del(obj, index, rows) {
       this.$confirm("是否删除用户", "删除用户", {
         confirmButtonText: "确定",
@@ -142,7 +172,7 @@ export default {
           });
         });
     },
-    // 启用/禁用选项框------------------------------------------------
+    // 启用/禁用选项框------------------------------------------------2
     achecbox(index) {
       var words = "此操作将禁用该角色, 是否继续?";
       if (index.isCheck) words = "此操作将启用该角色, 是否继续?";
@@ -168,7 +198,7 @@ export default {
           index.isCheck = !index.isCheck;
         });
     },
-    // 分页函数------------------------------------------------------
+    // 分页函数------------------------------------------------------3
     // 每页几条
     handleSizeChange(val) {
       this.pagesize = val;
@@ -177,7 +207,7 @@ export default {
     handleCurrentChange(val) {
       this.currpage = val;
     },
-    // 加载页面----------------------------------------------------------
+    // 加载页面----------------------------------------------------------4
     loadData() {
       var words = `http://192.168.6.184:8080/userManage/showAllUsers?pagesize=${this.pagesize}&currpage=${this.currpage}`;
       this.axios.get(words).then(res => {
@@ -196,21 +226,29 @@ export default {
   },
   data() {
     return {
-      // 修改用户数据模态框---------------------------------------------
+      // 修改用户数据模态框----------------------------------------------1
       updataTab: false,
-      // 添加用户模态框控制----------------------------------------------
+      // 添加用户模态框控制----------------------------------------------2
       addDataTab: false,
+      userData: {
+        userName: "",
+        userPwd: "",
+        roleName: "",
+        joinDate: "",
+        leavingDate: "",
+        sysProValueName: "启用"
+      },
       // 添加的用户名字
       neeUser: {},
-      // 查看日志模态框控制----------------------------------------------
+      // 查看日志模态框控制----------------------------------------------3
       seeLogTab: false,
-      // 搜索框内容-----------------------------------------------------
+      // 搜索框内容-----------------------------------------------------4
       search: "",
-      // 分页数据 一页显示最大数，当前页数-------------------------------
+      // 分页数据 一页显示最大数，当前页数-------------------------------5
       pagesize: 3,
       currpage: 1,
       pages: 0,
-      // select选择框取下的值-------------------------------------------
+      // select选择框取下的值-------------------------------------------6
       selValue: "",
       selOptions: [
         {
@@ -222,7 +260,7 @@ export default {
           label: "未冻结"
         }
       ],
-      // 表格渲染数据 --------------------------------------------------
+      // 表格渲染数据 --------------------------------------------------7
       // 渲染表格的数据
       tableData: []
     };
@@ -231,6 +269,20 @@ export default {
 </script>
 
 <style>
+.inpu {
+  margin-left: 50px;
+  width: 400px;
+}
+.coloraaa {
+  background-color: #5ee4e4;
+}
+.box {
+  margin-top: 20px;
+  height: 50px;
+}
+.box > div {
+  float: right;
+}
 .addusers {
   float: right;
   margin-right: 20px;

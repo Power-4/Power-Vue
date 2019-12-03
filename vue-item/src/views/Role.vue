@@ -205,8 +205,8 @@ export default {
           // 通过传入 scope.row 获取 选取的对象，获得id
           // 修改状态, 还要传入修改后的值
           if (index.systemPropertiesValue.sysProValueName == "启用") {
-            index.systemPropertiesValue.sysProValueName = "未启用";
-          } else if (index.systemPropertiesValue.sysProValueName == "未启用") {
+            index.systemPropertiesValue.sysProValueName = "停用";
+          } else if (index.systemPropertiesValue.sysProValueName == "停用") {
             index.systemPropertiesValue.sysProValueName = "启用";
           }
           window.console.log(
