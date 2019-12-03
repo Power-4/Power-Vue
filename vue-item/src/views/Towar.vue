@@ -111,7 +111,7 @@
 
 <script>
 export default {
-  name: "total",
+  name: "towar",
   data() {
     return {
       title: "杆塔",
@@ -128,7 +128,9 @@ export default {
       
       //模拟表格数据
       
-      tableData: [],
+      tableData: [
+        
+      ],
       options: [
         {
           value: "XW00001",
@@ -163,7 +165,21 @@ export default {
   methods: {
     //查询
     chaxun() {
-      window.console.log(this.submit);
+      this.axios
+        .post("http://192.168.6.184:8080/poleOrchid/getPolePageByCirIdAndActivate", {
+          currentPage:this.submit.currentPage,
+          pageSize:this.pageSize,
+          circuitryName:this.submit.circuitryName,
+          activate:this.submit.activate
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     //删除
     del() {
@@ -198,27 +214,11 @@ export default {
           pageSize:this.pageSize
         })
         .then(res => {
+          window.console.log(this.submit.currentPage);
           window.console.log(res.data);
           this.countPage = res.data.data.count;
           this.tableData = res.data.data.poles
-        })
-        .catch(err => {
-          window.console.log(err);
-        });
-    },
-    //查询
-    chaClick() {
-      this.axios
-        .post("http://192.168.6.184:8080/poleOrchid/getPolePageByCirIdAndActivate", {
-          currentPage:this.submit.currentPage,
-          pageSize:this.pageSize,
-          circuitryName:this.submit.circuitryName,
-          activate:this.submit.activate
-        })
-        .then(res => {
-          window.console.log(res.data);
-          this.countPage = res.data.data.count;
-          this.tableData = res.data.data.poles
+          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);

@@ -149,9 +149,9 @@
       <el-table-column prop="circuitryName" label="线路名称" width="100" align="center"></el-table-column>
       <el-table-column prop="startPole.poleNo" label="起始杆号" width="100" align="center"></el-table-column>
       <el-table-column prop="endPole.poleNo" label="终止杆号" width="100" align="center"></el-table-column>
-      <el-table-column prop="base" label="塔基数" width="100" align="center"></el-table-column>
+      <el-table-column prop="poleNumber" label="塔基数" width="100" align="center"></el-table-column>
       <el-table-column prop="runningStatus" label="运行状态" width="100" align="center"></el-table-column>
-      <el-table-column prop="poleNumber" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
+      <el-table-column prop="systemPropertiesValue.sysProValueName" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
         <el-button type="text" @click="block">停用</el-button>
         <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
@@ -172,7 +172,7 @@
 
 <script>
 export default {
-  name: "total",
+  name: "towar",
   data() {
     return {
       //查询
@@ -184,9 +184,11 @@ export default {
         currentPage: 1
         },
       countPage:5, //初始页
-      pagesize: 4, //    每页的数据
+      pageSize: 5, //    每页的数据
       //模拟表格数据
-      tableData: [],
+      tableData: [
+        
+      ],
       //修改和添加
       dialogFormVisible: false,
       dialogVisible: false,
@@ -240,12 +242,14 @@ export default {
         .then(res => {
           window.console.log(res.data);
           this.countPage = res.data.data.count;
-          this.tableData = res.data.data.poles
+          this.tableData = res.data.data.circuitries
+          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
         });
     },
+ 
     //删除
     del() {
       this.$confirm("是否删除", "提示", {
@@ -286,10 +290,9 @@ export default {
           });
         });
     },
-    handleCurrentChange: function(currentPage) {
-      this.currentPage = currentPage;
-      window.console.log(this.currentPage); //点击第几页
-    },
+  },
+  created() {
+    this.fenClick();   
   }
 };
 </script>
