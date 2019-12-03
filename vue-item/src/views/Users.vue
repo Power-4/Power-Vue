@@ -56,7 +56,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="150">
         <template slot-scope="scope">
-          <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
+          <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
           <el-button @click="del(scope.row, scope.$index, tableData)" type="text" size="small">删除</el-button>
           <el-button @click="seeLog(scope.$index, tableData)" type="text" size="small">日志</el-button>
         </template>
@@ -76,6 +76,29 @@
 
     <el-dialog title="修改用户信息" :visible.sync="updataTab">
       <!-- 插入类型 -->
+      <el-form class="form-box" label-position="labelPosition" label-width="120px">
+        <el-form-item label="用户编号">
+          <el-input class="inpu" v-model="obj.userId" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="用户账号">
+          <el-input class="inpu" v-model="obj.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="用户角色">
+          <el-input class="inpu" v-model="obj.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="加入日期">
+          <el-input class="inpu" v-model="obj.joinData" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="离职日期">
+          <el-input class="inpu" v-model="obj.leavingData"></el-input>
+        </el-form-item>
+        <div class="box">
+          <div>
+            <el-button class="coloraaa" @click="userAdd">确认</el-button>
+            <el-button @click="addDataTab = false">取消</el-button>
+          </div>
+        </div>
+      </el-form>
     </el-dialog>
 
     <el-dialog title="添加用户信息" :visible.sync="addDataTab">
@@ -111,17 +134,41 @@
     </el-dialog>
   </div>
 </template>
-
+index
 <script>
 export default {
   methods: {
     // 修改用户按钮--------------------------------------------------
-    updata() {
+    updata(index) {
       this.updataTab = true;
+      this.obj.age = index.age;
+      this.obj.email = index.email;
+      this.obj.isCheck = index.isCheck;
+      this.obj.joinDate = index.joinDate;
+      this.obj.leavingDate = index.leavingDate;
+      this.obj.phone = index.phone;
+      this.obj.roleName = index.roleName;
+      this.obj.sex = index.sex;
+      this.obj.systemPropertiesValue = index.systemPropertiesValue;
+      this.obj.userId = index.userId;
+      this.obj.userName = index.userName;
+      this.obj.userPwd = index.userPwd;
+      window.console.log(this.obj);
+      // age: null -->
+      // email: "Orchid_phy@outlook.com" -->
+      // isCheck: "启用" -->
+      // joinDate: null -->
+      // leavingDate: null -->
+      // phone: null -->
+      // role: Object -->
+      // sex: null -->
+      // systemPropertiesValue: null -->
+      // userId: 10000001 -->
+      // userName: "Orchid" -->
+      // userPwd: null -->
     },
     // 修改用户信息
     updataUser() {
-      
       this.updataTab = false;
     },
     // 查看日志按钮--------------------------------------------------
@@ -228,6 +275,27 @@ export default {
     return {
       // 修改用户数据模态框----------------------------------------------1
       updataTab: false,
+      obj: {
+        // userId
+        // userName
+        // userPwd
+        // roleName
+        // joinDate
+        // leavingDate
+        // sysProValueName
+        age: "",
+        email: "",
+        isCheck: "",
+        joinDate: "",
+        leavingDate: "",
+        phone: "",
+        role: "",
+        sex: "",
+        systemPropertiesValue: "",
+        userId: "",
+        userName: "",
+        userPwd: ""
+      },
       // 添加用户模态框控制----------------------------------------------2
       addDataTab: false,
       userData: {
@@ -269,10 +337,11 @@ export default {
 </script>
 
 <style>
-.inpu {
-  margin-left: 50px;
-  width: 400px;
+.form-box {
+  widows: 800px;
+  margin: 0 auto;
 }
+
 .coloraaa {
   background-color: #5ee4e4;
 }
