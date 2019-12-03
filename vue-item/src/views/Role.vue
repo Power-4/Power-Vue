@@ -219,12 +219,16 @@ export default {
           this.updateRole();
         })
         .catch(() => {
+          if (index.systemPropertiesValue.sysProValueName == "启用") {
+            index.isCheck = true;
+          } else if (index.systemPropertiesValue.sysProValueName == "未启用") {
+            index.isCheck = false;
+          }
           this.$message({
             type: "info",
             message: "取消修改"
           });
           // 取消修改如何进行
-          index.isCheck = !index.isCheck;
           window.console.log("取消后的isCheck", index.isCheck);
         });
     },
@@ -247,14 +251,12 @@ export default {
           var a = this.currpage - 1;
           var b = a * this.pagesize + index;
           // 输出id
-          this.axios
-            .get(
-              `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleId=${this.tableData[b].roleId}`
-            )
-            .then(res => {
-              window.console.log(res);
-              this.LoadData();
-            });
+          var c = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleId=${this.tableData[b].roleId}`;
+          window.console.log(c);
+          this.axios.get(c).then(res => {
+            window.console.log(res);
+            this.LoadData();
+          });
         })
         .catch(() => {
           this.$message({
@@ -285,7 +287,7 @@ export default {
       this.roleData.systemPropertiesValue.sysProValueName = this.tableData[
         thisid
       ].systemPropertiesValue.sysProValueName;
-      this.roleData.roleId = thisid;
+      this.roleData.roleId = this.tableData[thisid].roleId;
       window.console.log(this.roleData);
     },
     // 分页函数
@@ -323,9 +325,23 @@ export default {
       // 是否符合标准
       if (this.roleNameOk == 1 && this.roleNoOk == 1) {
         window.console.log("开始添加角色");
+        // 等到
+        var a = "";
+        if (this.radio == "1") {
+          a = "启用";
+        } else if (this.radio == "2") {
+          a = "未启用";
+        }
+        window.console.log(window.sessionStorage.getItem("userId"));
         this.axios
           .get(
-            `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleName=${this.role.roleName}&roleNo=${this.role.roleNo}`
+            `http://192.168.6.184:8080/role/addRole?roleName=${
+              this.role.roleName
+            }&roleNo=${
+              this.role.roleNo
+            }&sysProValueName=${a}&userId=${window.sessionStorage.getItem(
+              "userId"
+            )}`
           )
           .then(res => {
             window.console.log(res);
@@ -399,18 +415,27 @@ export default {
     // 修改角色信息
     updateRole() {
       //
-      this.axios
-        .get(
-          `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?
-      roleName=${this.roleData.roleName}&roleNo=${this.roleData.roleNo}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`
-        )
-        .then(res => {
-          window.console.log(res);
+      window.console.log(this.roleData.roleId);
+      window.console.log(this.roleData.roleNo);
+      window.console.log(this.roleData.roleName);
+      window.console.log(this.roleData.systemPropertiesValue.sysProValueName);
+
+      var b = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleNo=${this.roleData.roleNo}&roleName=${this.roleData.roleName}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`;
+      window.console.log(b);
+      this.axios.get(b).then(res => {
+        window.console.log("修改角色", res);
+        if (res.data.msg == "修改成功") {
           this.$message({
             type: "success",
             message: "修改成功"
           });
-        });
+        } else if (res.data.msg == "处理失败") {
+          this.$message({
+            type: "info",
+            message: "修改失败"
+          });
+        }
+      });
       // 关闭窗口 一切结束后写道axios回调函数里面
       this.updataTab = false;
     }
@@ -426,7 +451,7 @@ export default {
       // 用户名是否得体
       roleNameOk: 1,
       // 用户编号是否得体
-      roleNoOk: 2,
+      roleNoOk: 1,
       radio: "1",
       role: {
         roleName: "",
@@ -442,7 +467,6 @@ export default {
       roleData: {
         roleName: "",
         roleNo: "",
-        sysProValueName: "",
         roleId: "",
         systemPropertiesValue: {
           sysProValueName: ""
