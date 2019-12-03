@@ -24,10 +24,17 @@
       style="width: 100%"
       :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
     >
-      <el-table-column prop="date" label="角色编号" width="180"></el-table-column>
-      <el-table-column prop="name" label="角色名称" width="180"></el-table-column>
-      <el-table-column prop="address" label="创建人"></el-table-column>
-      <el-table-column prop="address" label="创建时间"></el-table-column>
+      <!-- roleId:  -->
+      <!-- roleName:  -->
+      <!-- roleNo:  -->
+      <!-- systemProperties:  -->
+      <!-- systemPropertiesValue:  -->
+      <!-- updateDate:  -->
+      <!-- users:  -->
+      <el-table-column prop="roleNo" label="角色编号" width="180"></el-table-column>
+      <el-table-column prop="roleName" label="角色名称" width="180"></el-table-column>
+      <el-table-column prop="users" label="创建人"></el-table-column>
+      <el-table-column prop="updateDate" label="创建时间"></el-table-column>
       <el-table-column label="状态(启用/未启用)">
         <template slot-scope="scope">
           <el-checkbox v-model="scope.row.isCheck" @change="achecbox(scope.row)"></el-checkbox>
@@ -37,7 +44,6 @@
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
-
           <el-button @click="deleteRow(scope.$index, tableData)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -54,26 +60,48 @@
       ></el-pagination>
     </div>
 
-    <!-- 模态框 -->
+    <!-- 修改模态框 -->
     <el-dialog title="修改角色信息" :visible.sync="updataTab">
       <!-- 插入类型 -->
+      <el-form>
+        <el-form-item label="手机号码">
+          <el-input v-model="role.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <el-input v-model="role.sysProValueName"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <el-input v-model="role.roleNo"></el-input>
+          <!-- roleName -->
+          <!-- roleNo -->
+          <!-- sysProValueName -->
+          <!-- roleId -->
+        </el-form-item>
+        <div class="box">
+          <div>
+            <el-button type="button" class="ok" @click="updateRole">确认</el-button>
+            <el-button type="button" @click="addRoleTab = false">取消</el-button>
+          </div>
+        </div>
+      </el-form>
     </el-dialog>
 
-    <!-- 模态框 -->
+    <!-- 添加模态框 -->
     <el-dialog title="添加角色" :visible.sync="addRoleTab" class="addbox">
       <!-- 插入类型 -->
       <el-form>
         <el-form-item label="角色名称">
+          <!-- @blur="isRoleNameOk" -->
           <el-input v-model="role.roleName"></el-input>
         </el-form-item>
         <el-form-item label="角色编号">
-          <el-input v-model="role.roleNo"></el-input>
+          <el-input v-model="role.roleNo" @blur="isRoleNoOk" minlength="4" maxlength="10"></el-input>
         </el-form-item>
         <el-radio v-model="radio" label="1">启用</el-radio>
         <el-radio v-model="radio" label="2">未启用</el-radio>
         <div class="box">
           <div>
-            <el-button type="button" class="ok">确认</el-button>
+            <el-button type="button" class="ok" @click="getRole">确认</el-button>
             <el-button type="button" @click="addRoleTab = false">取消</el-button>
           </div>
         </div>
@@ -175,15 +203,25 @@ export default {
             message: "修改成功"
           });
           // 通过传入 scope.row 获取 选取的对象，获得id
+          // 修改状态, 还要传入修改后的值
+          if (index.systemPropertiesValue.sysProValueName == "启用") {
+            index.isCheck = false;
+            index.systemPropertiesValue.sysProValueName = "未启用";
+          } else if (index.systemPropertiesValue.sysProValueName == "未启用") {
+            index.isCheck = true;
+            index.systemPropertiesValue.sysProValueName = "启用";
+          }
+          window.console.log(index.isCheck, this.tableData);
+          this.updateRole();
         })
         .catch(() => {
           this.$message({
             type: "info",
             message: "取消修改"
           });
-          window.console.log(index.name);
-          // 传入的值是已经修改过的
+          // 取消修改如何进行
           index.isCheck = !index.isCheck;
+          window.console.log("取消后的isCheck", index.isCheck);
         });
     },
     // index 编号传入 scope.$index
@@ -235,9 +273,46 @@ export default {
     handleCurrentChange(val) {
       this.currpage = val;
     },
+    // 添加角色
     addRole() {
       this.addRoleTab = true;
     },
+    isRoleNoOk() {
+      if (this.role.roleNo == "") return;
+      window.console.log("roleNo检测");
+      this.axios
+        .get(
+          `http://192.168.6.184:8080/role/isExistsRoleNo?roleNo=${this.role.roleNo}`
+        )
+        .then(res => {
+          window.console.log(res);
+          if (res.data.code == "200") {
+            window.console.log("角色·编号通过");
+            this.roleNoOk = 1;
+          }
+        });
+    },
+    // 确认添加角色
+    getRole() {
+      // 是否符合标准
+      if (this.roleNameOk == 1 && this.roleNoOk == 1) {
+        window.console.log("开始添加角色");
+        this.axios
+          .get(
+            `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleName=${this.role.roleName}&roleNo=${this.role.roleNo}`
+          )
+          .then(res => {
+            window.console.log(res);
+            this.$message({
+              showClose: true,
+              message: "添加角色成功",
+              type: "success"
+            });
+            this.addRoleTab = false;
+          });
+      }
+    },
+    // 搜索内容
     getSearch() {
       if (this.chose == "1") {
         if (this.search == "") {
@@ -267,20 +342,53 @@ export default {
         }
       }
     },
-    // 加载角色
+    // 加载角色f
     LoadData() {
       // 获取平台数据
       var words = `http://192.168.6.184:8080/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
       this.axios
         .get(words)
         .then(res => {
-          window.console.log(res);
+          window.console.log("加载角色", res);
+          this.pages = res.data.data.count;
+          this.tableData = res.data.data.roleList;
+          for (var i = 0; i < this.tableData.length; i++) {
+            if (
+              this.tableData[i].systemPropertiesValue.sysProValueName == "启用"
+            ) {
+              this.tableData[i].isCheck = true;
+            }
+            if (
+              this.tableData[i].systemPropertiesValue.sysProValueName ==
+              "未启用"
+            ) {
+              this.tableData[i].isCheck = false;
+            }
+          }
         })
         .catch(err => {
           window.console.log(err);
         });
     },
-    updateRole() {}
+    // 修改角色信息
+    updateRole(id) {
+      var thisid = 0;
+      for (var i = 0; i < this.tableData.length; i++) {
+        if (this.tableData[i].roleId == id) {
+          thisid = i;
+          break;
+        }
+      }
+      //
+      this.axios
+        .get(
+          `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?
+      roleName=${this.tableData[thisid].roleName}&roleNo=${this.tableData[thisid].roleNo}&sysProValueName=${this.tableData[thisid].systemPropertiesValue.sysProValueName}&roleId=${id}`
+        )
+        .then(res => {
+          window.console.log(res);
+        });
+    }
   },
   created() {
     this.LoadData();
@@ -288,6 +396,12 @@ export default {
   data() {
     return {
       // 添加角色-----------------------------------
+      // 1 为通多，2 为不通过
+      roleOk: 2,
+      // 用户名是否得体
+      roleNameOk: 1,
+      // 用户编号是否得体
+      roleNoOk: 2,
       radio: "1",
       role: {
         roleName: "",
@@ -308,72 +422,30 @@ export default {
       pages: 3,
       // select选择框取下的值
       selValue: "",
-      // 复选框选择
+      // 启用/未启用 复选框选择
       selOptions: [
         {
-          value: "true",
+          value: "启用",
           label: "启用"
         },
         {
-          value: "false",
+          value: "未启用",
           label: "未启用"
         }
       ],
       // 渲染表格的数据
       tableData: [
         {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: false
+          isCheck: true,
+          systemPropertiesValue: {
+            sysProValueName: "启用"
+          }
         },
         {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          isCheck: true
+          isCheck: false,
+          systemPropertiesValue: {
+            sysProValueName: "未启用"
+          }
         }
       ],
       newList: []
@@ -381,3 +453,23 @@ export default {
   }
 };
 </script>
+
+
+    // // 确认添加角色
+    // isRoleNameOk() {
+    //   if (this.role.roleName == "") return;
+    //   window.console.log("roleName检测");
+    //   this.axios
+    //     .get(
+    //       `http://192.168.6.184:8080/role/isExistsRoleNo?roleName=${this.role.roleName}`
+    //     )
+    //     .then(res => {
+    //       window.console.log(res);
+    //       // if(res.code ='200') {
+    //       //   window.console.log('角色·名字通过');
+    //       //   this.roleName = 1;
+    //       // }
+    //     });
+    // },
+    //
+    // 角色编号确认

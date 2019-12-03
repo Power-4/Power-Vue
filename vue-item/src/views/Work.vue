@@ -166,7 +166,7 @@ export default {
         .get(words)
         .then(res => {
           window.console.log("asd");
-          this.pages = res.data.data.countPage;
+          this.pages = res.data.data.count;
           this.tableData = res.data.data.tasks;
         })
         .catch(err => {

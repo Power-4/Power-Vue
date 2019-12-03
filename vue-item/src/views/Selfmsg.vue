@@ -78,8 +78,7 @@ export default {
         this.userClone.phone = this.user.phone;
         this.userClone.role = this.user.role;
         this.userClone.sex = this.user.sex;
-        this.userClone.systemPropertiesValue =
-          this.user.systemPropertiesValue;
+        this.userClone.systemPropertiesValue = this.user.systemPropertiesValue;
         this.userClone.userId = this.user.userId;
         this.userClone.userName = this.user.userName;
         this.userClone.role.roleName = this.user.role.roleName;
