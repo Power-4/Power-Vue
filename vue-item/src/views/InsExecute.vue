@@ -20,9 +20,9 @@
             <el-select v-model="taskState" clearable placeholder="请选择">
               <el-option
                 v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                :key="item.id"
+                :label="item.sysProValueName"
+                :value="item.id"
               ></el-option>
             </el-select>
           </div>
@@ -41,7 +41,7 @@
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="createDate" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker v-model="createDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="3">
@@ -77,8 +77,8 @@
       <el-table-column prop="operate" label="操作" width="200px" fixed="right" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="view(scope.$index,scope.row)">查看</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.taskState == '执行中'? !edit : edit" @click="add(scope.$index,scope.row)">回执录入</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.taskState == '已分配'? !edit : edit" @click="execute">执行</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '执行中'? !edit : edit" @click="add(scope.$index,scope.row)">回执录入</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '已分配'? !edit : edit" @click="execute(scope.row)">执行</el-button>
           <el-button type="text" size="small" @click="modifys(scope.$index,scope.row)">修改</el-button>
         </template>
       </el-table-column>
@@ -108,24 +108,7 @@ export default {
       userName: "",
       createDate: "",
       taskState: "",
-      options: [
-        {
-          value: "选项1",
-          label: "待分配"
-        },
-        {
-          value: "选项2",
-          label: "已分配"
-        },
-        {
-          value: "选项3",
-          label: "执行中"
-        },
-        {
-          value: "选项4",
-          label: "已完成"
-        }
-      ],
+      options: [],
       edit: true,
       isQuery: false
     };
@@ -147,6 +130,19 @@ export default {
     .catch((err) => {
       window.console.log('错误是', err);
     })
+
+
+    // 请求任务状态值
+    this.axios.get('http://192.168.6.184:8080/selectAllFixState?')
+    .then((res) => {
+      this.options = res.data.data.fixState;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
+
+    
   },
   computed: {
     ...mapState([
@@ -160,19 +156,23 @@ export default {
     taskQuery() {
       this.isQuery = true;
       // 请求列表数据
-      // this.axios.post('http://192.168.6.184:8080/getAllTaskByCondition?',{
-      //   taskNo: this.taskNo,
-      //   circuitryNo: this.circuitryNo,
-      //   taskState: this.taskState,
-      //   userName: this.userName,
-      //   startDate: this.startDate
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+      this.axios.get('http://192.168.6.184:8080/getAllTaskByConditionL?',{ params:{
+        // taskNo: this.taskNo,
+        // circuitryNo: this.circuitryNo,
+        // taskState: this.taskState,
+        // userName: this.userName,
+        startDate: this.createDate,
+        pageSize: this.pageSize,
+        currentPage: this.currentPage
+      }})
+      .then((res) => {
+        this.tableData = res.data.data.tasks;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
+
     },
     //回执录入
     add(index, row) {
@@ -190,6 +190,7 @@ export default {
         query: { taskId }
       });
     },
+    // 执行
     execute(row) {
       window.console.log(row.taskId)
       this.$confirm("你确定执行此任务吗?", "提示", {
@@ -197,15 +198,15 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       })
-      // .then(() => {
-      //   this.axios.get('http://192.168.6.184:8080/changeTaskSateToRunning?',{params:{taskId: row.taskId}})
-      //   .then((res) => {
-      //     window.console.log(res.data);
-      //   })
-      //   .catch((err) => {
-      //     window.console.log("错误",err)
-      //   })
-      // })
+      .then(() => {
+        this.axios.get('http://192.168.6.184:8080/changeTaskSateToRunning?',{params:{taskId: row.taskId}})
+        .then((res) => {
+          window.console.log(res.data);
+        })
+        .catch((err) => {
+          window.console.log("错误",err)
+        })
+      })
       .catch(() => {});
     },
     modifys(index, row) {

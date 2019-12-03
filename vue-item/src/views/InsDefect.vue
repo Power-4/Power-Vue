@@ -45,13 +45,13 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>发现时间：</label>
-            <el-date-picker v-model="findStartDate" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker v-model="findStartDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="performStartDate" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker v-model="performStartDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
