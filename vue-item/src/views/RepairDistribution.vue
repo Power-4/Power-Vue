@@ -53,7 +53,7 @@
             ></el-date-picker>
           </div>
         </el-col>
-        <el-button type="primary" class="repair-query">查询</el-button>
+        <el-button type="primary" class="repair-query" @click="selectByFind()">查询</el-button>
         <el-button
           type="primary"
           icon="el-icon-edit"
@@ -417,114 +417,7 @@ export default {
       value2: "",
       currentPage: 1, //初始页
       pagesize: 5, //    每页的数据
-      tableData: [
-        {
-          taskNum: "RW0245",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0246",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0247",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0248",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0249",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0250",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0251",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0252",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0253",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0254",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        }
-      ],
+      tableData: [],
       tableData2: [
         {
           lineNum: 123456,
@@ -552,9 +445,69 @@ export default {
     };
   },
   methods: {
+    selectByFind: function() {
+      this.axios
+        .get("http://192.168.6.184:8080/selectFixTaskByFind", {
+          params: {
+            currentPage: 1,
+            pageSize: 5,
+            taskNo: 1,
+            taskName: "任务",
+            userName: "Zhang",
+            sysProValueId: 1,
+            startDate: "1999/2/10",
+            endDate: "2020/10/10"
+          }
+        })
+        .then(res => {
+          window.console.log(res.data.data.fix);
+          
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
     handleCurrentChange: function(currentPage) {
       this.currentPage = currentPage;
       window.console.log(this.currentPage); //点击第几页
+      this.axios
+        .get("http://192.168.6.184:8080/selectFixTask", {
+          params: {
+            userId: 10000007,
+            currentPage: this.currentPage,
+            pageSize: 5
+          }
+        })
+        .then(res => {
+          // window.console.log(res.data.data.fix);
+          var work = res.data.data.fix.map(function(item) {
+            return item.workForm.workFormName;
+          });
+          // window.console.log(work);
+          var taskArr = res.data.data.fix.map(function(item) {
+            return item.task;
+          });
+          // window.console.log(taskArr);
+          var newArr = taskArr.map(function(item) {
+            return {
+              taskNum: item.taskNo,
+              taskName: item.taskName,
+              issuedPeople: item.users.userName,
+              issuedDate: item.createDate,
+              taskStatus: item.systemPropertiesValue.sysProValueName,
+              completionTime: item.finishDate
+            };
+          });
+          // window.console.log(newArr);
+          for (var i = 0; i < newArr.length; i++) {
+            newArr[i].workDocuments = work[i];
+            this.tableData.push(newArr[i]);
+          }
+          // window.console.log(newArr);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     chakanClick(row) {
       this.checkTask = true;
@@ -602,33 +555,44 @@ export default {
     }
   },
   created: function() {
-    // this.axios
-    //   .post("http://192.168.6.184:8080//selectFixTaskByFind", {
-    //     currentPage: 1,
-    //     pageSize: 5,
-    //     taskNo: 1,
-    //     taskName: "",
-    //     userName: "",
-    //     sysProValueId: 1,
-    //     startDate: "1999/2/10",
-    //     endDate: "2020/10/10"
-    //   })
-    //   .then(res => {
-    //     window.console.log(res.data.data.fix[0].task);
-    //   })
-    //   .catch(err => {
-    //     window.console.log(err);
-    //   });
-    // this.axios
-    //   .get("http://192.168.6.175:8080/fix/getfixpolebyfixid", {
-    //     fixId:1
-    //   })
-    //   .then(res => {
-    //     window.console.log(res.data);
-    //   })
-    //   .catch(err => {
-    //     window.console.log(err);
-    //   });
+    this.axios
+      .get("http://192.168.6.184:8080/selectFixTask", {
+        params: {
+          userId: 10000007,
+          currentPage: 1,
+          pageSize: 5
+        }
+      })
+      .then(res => {
+        // window.console.log(res.data.data.fix);
+        var work = res.data.data.fix.map(function(item) {
+          return item.workForm.workFormName;
+        });
+        // window.console.log(work);
+        var taskArr = res.data.data.fix.map(function(item) {
+          return item.task;
+        });
+        // window.console.log(taskArr);
+        var newArr = taskArr.map(function(item) {
+          return {
+            taskNum: item.taskNo,
+            taskName: item.taskName,
+            issuedPeople: item.users.userName,
+            issuedDate: item.createDate,
+            taskStatus: item.systemPropertiesValue.sysProValueName,
+            completionTime: item.finishDate
+          };
+        });
+        // window.console.log(newArr);
+        for (var i = 0; i < newArr.length; i++) {
+          newArr[i].workDocuments = work[i];
+          this.tableData.push(newArr[i]);
+        }
+        // window.console.log(newArr);
+      })
+      .catch(err => {
+        window.console.log(err);
+      });
   }
 };
 </script>
