@@ -8,6 +8,7 @@ const routes = [
     // 主路径
     path: '/',
     name: 'home',
+    redirect: '/login',
     component: () => import('../views/Home.vue'),
     children: [
       // 个人信息平台
@@ -259,6 +260,22 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
-})
+});
+
+// // 路由拦截
+// router.beforeEach((to, from, next) => {
+//   var token = sessionStorage.getItem("token");
+//   if (to.meta.auth) {
+//     if (token) {
+//       next()
+//     } else {
+//       next({
+//         path: "/login",
+//       })
+//     }
+//   } else {
+//     next()
+//   }
+// });
 
 export default router

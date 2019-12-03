@@ -114,7 +114,9 @@ export default {
           window.console.log(res.data.data);
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
-          window.sessionStorage.setItem("userId", res.data.data.user.role);
+          var role = JSON.stringify(res.data.data.user.role);
+          window.sessionStorage.setItem("role", role);
+          this.$router.replace("/a");
         })
         .catch(err => {
           window.console.log(err, "为啥登录不了");
