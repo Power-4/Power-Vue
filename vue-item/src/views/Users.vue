@@ -23,13 +23,31 @@
     <el-table
       stripe
       style="width: 100%"
+      border
       :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
     >
-      <el-table-column prop="date" label="用户账号" width="150"></el-table-column>
-      <el-table-column prop="name" label="用户名称" width="150"></el-table-column>
-      <el-table-column prop="address" label="角色"></el-table-column>
-      <el-table-column prop="address" label="邮箱"></el-table-column>
-      <el-table-column prop="address" label="最后登录时间"></el-table-column>
+      <!-- age: null -->
+      <!-- email: "Orchid_phy@outlook.com" -->
+      <!-- isCheck: "启用" -->
+      <!-- joinDate: null -->
+      <!-- leavingDate: null -->
+      <!-- phone: null -->
+      <!-- role: Object -->
+      <!-- sex: null -->
+      <!-- systemPropertiesValue: null -->
+      <!-- userId: 10000001 -->
+      <!-- userName: "Orchid" -->
+      <!-- userPwd: null -->
+      <el-table-column prop="userId" label="用户ID" width="130"></el-table-column>
+      <el-table-column prop="userName" label="用户账号" width="150"></el-table-column>
+      <el-table-column prop="roleName" label="角色" width="100"></el-table-column>
+      <el-table-column prop="phone" label="电话" width="150"></el-table-column>
+      <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
+      <el-table-column prop="isCheck" label="状态" width="180"></el-table-column>
+      <el-table-column prop="role" label="性别"></el-table-column>
+      <el-table-column prop="age" label="年龄"></el-table-column>
+      <el-table-column prop="joinData" label="入职日期"></el-table-column>
+      <el-table-column prop="leavingDate" label="离职日期"></el-table-column>
       <el-table-column label="状态(冻结/未冻结)">
         <template slot-scope="scope">
           <el-checkbox v-model="scope.row.isCheck" @change="achecbox(scope.row)"></el-checkbox>
@@ -48,7 +66,7 @@
     <div class="block">
       <el-pagination
         layout="prev, pager, next"
-        :total="tableData.length"
+        :total="pages"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :page-size="pagesize"
@@ -150,7 +168,7 @@ export default {
           index.isCheck = !index.isCheck;
         });
     },
-    // 分页函数
+    // 分页函数------------------------------------------------------
     // 每页几条
     handleSizeChange(val) {
       this.pagesize = val;
@@ -158,7 +176,23 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+    },
+    // 加载页面----------------------------------------------------------
+    loadData() {
+      var words = `http://192.168.6.184:8080/userManage/showAllUsers?pagesize=${this.pagesize}&currpage=${this.currpage}`;
+      this.axios.get(words).then(res => {
+        this.tableData = res.data.data.usersList;
+        this.pages = res.data.data.count;
+        for (var i = 0; i < this.tableData.length; i++) {
+          this.tableData[i].isCheck = res.data.data.userStates[i];
+          this.tableData[i].roleName = this.tableData[i].role.roleName;
+        }
+        window.console.log(this.tableData);
+      });
     }
+  },
+  created() {
+    this.loadData();
   },
   data() {
     return {
@@ -175,6 +209,7 @@ export default {
       // 分页数据 一页显示最大数，当前页数-------------------------------
       pagesize: 3,
       currpage: 1,
+      pages: 0,
       // select选择框取下的值-------------------------------------------
       selValue: "",
       selOptions: [
