@@ -6,31 +6,31 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
-            <span></span>  
+            <span>{{lineBasic.taskNo}}</span>  
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务名称：</label>
-            <span></span>  
+            <span>{{lineBasic.taskName}}</span>  
           </div>
           </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>巡检线路：</label>
-            <span></span> 
+            <span>{{lineBasic.circuitry.circuitryName}}</span> 
           </div>
         </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>起始杆号：</label>
-            <span></span> 
+            <span>{{lineBasic.circuitry.startPole.circuitry}}</span> 
           </div>
         </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>终止杆号：</label>
-            <span></span> 
+            <span>{{lineBasic.circuitry.endPole.circuitry}}</span> 
           </div>
         </el-col>
       </el-row>
@@ -38,30 +38,30 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>下发人：</label>
-            <span></span>  
+            <span>{{lineBasic.users.userName}}</span>  
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <span></span>  
+            <span>{{lineBasic.createDate}}</span>  
           </div>
           </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务状态：</label>
-            <span></span> 
+            <span>{{lineBasic.systemPropertiesValue.sysProValueName}}</span> 
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>任务完成时间：</label>
-            <span></span> 
+            <span>{{lineBasic.finishDate}}</span> 
           </div>
         </el-col>
       </el-row>
       <el-row :gutter="20">
-        <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span></span></div></el-col>
+        <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span>{{lineBasic.taskNote}}</span></div></el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span></span></div></el-col>
@@ -73,6 +73,7 @@
       <div class="lines">
         <el-tree
           :data="lines"
+          default-expand-all
           :props="defaultProps"
           accordion
           @node-click="handleNodeClick">
@@ -80,30 +81,30 @@
       </div>
       <div class="details">
         <el-row :gutter="20">
-          <el-col :span="10"><div class="grid-content bg-purple"><label>线路编码：</label><span></span></div></el-col>
-          <el-col :span="14"><div class="grid-content bg-purple"><label>杆塔编码：</label><span></span></div></el-col>
+          <el-col :span="10"><div class="grid-content bg-purple"><label>线路编码：</label><span>{{lineDetail.circuitryNo}}</span></div></el-col>
+          <el-col :span="14"><div class="grid-content bg-purple"><label>杆塔编码：</label><span>{{lineDetail.poleNo}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="10"><div class="grid-content bg-purple"><label>有无故障：</label><span></span></div></el-col>
-          <el-col :span="14"><div class="grid-content bg-purple"><label>完好率：</label><span></span></div></el-col>
+          <el-col :span="10"><div class="grid-content bg-purple"><label>有无故障：</label><span>{{lineDetail.hasDefects}}</span></div></el-col>
+          <el-col :span="14"><div class="grid-content bg-purple"><label>完好率：</label><span>{{lineDetail.completionRate}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="10"><div class="grid-content bg-purple"><label>缺陷类型：</label><span></span></div></el-col>
-          <el-col :span="14"><div class="grid-content bg-purple"><label>缺陷级别：</label><span></span></div></el-col>
+          <el-col :span="10"><div class="grid-content bg-purple"><label>缺陷类型：</label><span>{{lineDetail.defectsName}}</span></div></el-col>
+          <el-col :span="14"><div class="grid-content bg-purple"><label>缺陷级别：</label><span>{{lineDetail.defectsLevel}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="24"><div class="grid-content bg-purple"><label>巡检时间：</label><span></span></div></el-col>
+          <el-col :span="24"><div class="grid-content bg-purple"><label>巡检时间：</label><span>{{lineDetail.checkDate}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="10"><div class="grid-content bg-purple"><label>缺陷发现人：</label><span></span></div></el-col>
-          <el-col :span="14"><div class="grid-content bg-purple"><label>发现时间：</label><span></span></div></el-col>
+          <el-col :span="10"><div class="grid-content bg-purple"><label>缺陷发现人：</label><span>{{lineDetail.findUserName}}</span></div></el-col>
+          <el-col :span="14"><div class="grid-content bg-purple"><label>发现时间：</label><span>{{lineDetail.findDate}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="10"><div class="grid-content bg-purple"><label>下发人员：</label><span></span></div></el-col>
-          <el-col :span="14"><div class="grid-content bg-purple"><label>下发时间：</label><span></span></div></el-col>
+          <el-col :span="10"><div class="grid-content bg-purple"><label>下发人员：</label><span>{{lineDetail.createUserName}}</span></div></el-col>
+          <el-col :span="14"><div class="grid-content bg-purple"><label>下发时间：</label><span>{{lineDetail.createDate}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="24"><div class="grid-content bg-purple"><label>缺陷描述：</label><span></span></div></el-col>
+          <el-col :span="24"><div class="grid-content bg-purple"><label>缺陷描述：</label><span>{{lineDetail.defectsDescribe}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span></span></div></el-col>
@@ -111,9 +112,6 @@
       </div>
     </div>
     <el-button type="primary" @click="backto">返回</el-button>
-
-
-
   </div>
 </template>
 
@@ -121,49 +119,101 @@
 export default {
   data() {
     return {
+      lineBasic: {
+        taskNo: '',
+        taskName: '',
+        circuitry: {
+          circuitryName: '',
+          startPole: {
+            circuitry: ''
+          },
+          endPole: {
+            circuitry: ''
+          }
+        },
+        users: {
+          userName: ''
+        },
+        systemPropertiesValue: {
+          sysProValueName: ''
+        },
+      },
+      
       lines: [
         {
-          label: '一号线',
-          children: [
-            {
-              id: 1,
-              label: 'xw0001'
-            },
-            {
-              id: 2,
-              label: 'xw0002'
-            },
-            {
-              id: 3,
-              label: 'xw0003'
-            },
-            {
-              id: 4,
-              label: 'xw0004'
-            },
-            {
-              id: 5,
-              label: 'xw0005'
-            },
-            {
-              id: 6,
-              label: 'xw0006'
-            }
-          ]
+          id: 0,
+          label: '',
+          children: []
         }
       ],
       defaultProps: {
         children: 'children',
         label: 'label'
+      },
+      lineDetail: {
+        circuitryNo: '',
+        poleNo: '',
+        hasDefects: '',
+        completionRate: '',
+        defectsName: '',
+        defectsLevel: '',
+        checkDate: '',
+        findUserName: '',
+        findDate: '',
+        createUserName: '',
+        createDate: '',
+        defectsDescribe: ''
       }
 
     }
   },
+  created() {
+    this.getParams();
+
+    this.axios.get('http://192.168.6.184:8080/showTaskandPoles?',{params:{taskId: this.lineBasic.taskId}})
+    .then((res) => {
+      this.lineBasic = res.data.data.taskAndPoles.task;
+      res.data.data.taskAndPoles.poles.forEach((item)=> {
+        var i = {};
+        i.id = item.poleId,
+        i.label = item.poleNo;
+        this.lines[0].children.push(i)
+      })
+      
+      this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
+      window.console.log(res.data);
+    })
+    .catch((err) => { 
+      window.console.log("错误",err)
+    })
+  },
+  watch: {
+    '$route': 'getParams'
+  },
   methods: {
+    getParams() {
+      this.lineBasic.taskId = this.$route.query.taskId;
+    },
     backto() {
       this.$router.go(-1)
     },
-    handleNodeClick() {
+    handleNodeClick(lines) {
+
+      // 判断点击的杆塔编号
+      if(lines.id !== 0) {
+        this.lineDetail.poleNo = lines.label;
+      } else {
+        this.lineDetail.poleNo= '';
+      }
+
+      this.axios.get('http://192.168.6.184:8080/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
+      .then((res) => {
+        this.lineDetail = res.data.data.taskAndPoles;
+        window.console.log(res.data);
+      })
+      .catch((err) => { 
+        window.console.log("错误",err)
+      })
 
     }
   }
@@ -175,21 +225,27 @@ export default {
 .enact-view {
   padding: 0 30px 0;
 
-  p {
-    margin: 30px 0 10px;
+  .view-title {
+    font-weight: 600;
+    margin: 15px 0;
   }
 
   .base-info {
     width: 100%;
     height: 150px;
-    padding: 10px 0 0 0;
+    padding: 10px 5px 0;
     margin-bottom: 10px;
+    box-sizing: border-box;
     border: 1px solid #000;
 
     .el-row {
       margin-bottom: 15px;
 
       label {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      span {
         font-size: 14px;
       }
     }
@@ -205,11 +261,19 @@ export default {
     .lines {
       width: 20%;
       height: 100%;
+      padding: 0 22px;
+      overflow: auto;
+      box-sizing: border-box;
       border: 1px solid #000;
 
       .el-tree {
         margin-top: 10px;
+        height: 250px;
         text-align: center;
+
+        &>div:first-child {
+          height: 100%;
+        }
       }
     }
 
