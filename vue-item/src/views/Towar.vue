@@ -98,9 +98,9 @@
     </el-table>
     <div class="block">
       <el-pagination 
-      :page-size="4"
+      :page-size="pagesize"
       layout="prev, pager, next" 
-      :total="7" 
+      :total="tableData.length" 
       class="pages"
       @current-change="handleCurrentChange"
     ></el-pagination>
@@ -219,7 +219,7 @@ export default {
     },
     fenClick() {
       this.axios
-        .post("http://192.168.6.184:8080/fix/getallfix", {
+        .post("http://192.168.6.184:8080/poleOrchid/getPoleByPage", {
           currentPage: 1,
           pageSize: 4
         })
