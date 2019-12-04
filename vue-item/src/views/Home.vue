@@ -144,6 +144,7 @@ export default {
  
   background-color: #5ee4e4;
   margin: 0 auto;
+  margin-bottom: 20px;
 }
 .top-body {
   width: 1200px;

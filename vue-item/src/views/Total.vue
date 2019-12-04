@@ -5,6 +5,7 @@
       <el-breadcrumb-item>信息统计</el-breadcrumb-item>
       <el-breadcrumb-item>{{title}}</el-breadcrumb-item>
     </el-breadcrumb>
+    
     <div class="chaxun">
       <div class="bianhao">
         <span>编号查询:</span>
@@ -41,8 +42,8 @@
     </div>
 
     <div class="daochu">
-      <el-button type="primary" class="excel " :disabled="true" > 打印</el-button>
-      <el-button type="primary" class="excel" @click="downloadExcel">导出为EXCEL</el-button>
+      <el-button type="primary" class="excel " :disabled="true" > <i class="el-icon-printer"></i> 打印</el-button>
+      <el-button type="primary" class="excel" @click="downloadExcel"><i class="el-icon-download"></i> 导出为EXCEL</el-button>
     </div>
     <div class="table">
       <wdtable :tableData="tableData" class="wdtable" :wdname="wdname" :loading="loading"></wdtable>
@@ -435,6 +436,9 @@ export default {
     background-color: @mainColor;
     &:active {
       background-color: #51bdbd;
+      background: #56d3d3;
+      background: #2a6363;
+    
     }
   }
 }
