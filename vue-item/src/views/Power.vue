@@ -14,7 +14,7 @@
     </div>
     <div class="abc">
       <div class="elbtnel">
-        <el-button class="elb">取消修改</el-button>
+        <el-button class="elb" @click="canselUpdata">取消修改</el-button>
         <el-button class="elb" @click="sendPower">保存修改</el-button>
       </div>
     </div>
@@ -24,6 +24,7 @@
 <script>
 export default {
   methods: {
+    // ====================获取角色和全选============================
     getPowerSelect() {
       var words = `http://192.168.6.184:8080/permission/getAllRoleName`;
       this.axios.get(words).then(res => {
@@ -34,7 +35,7 @@ export default {
     // 获取角色信息
     getRolePower() {
       // 获取角色权限信息
-      // ==========================================================
+
       this.axios
         .get(
           "http://192.168.6.184:8080/permission/getResourcesByRoleName?roleName=" +
@@ -58,16 +59,23 @@ export default {
       this.axios.get(words).then(res => {
         window.console.log(res);
       });
+    },
+    // ============================================================
+    // 取消修改
+    canselUpdata() {
+      this.getPowerSelect();
     }
   },
   data() {
     return {
+      // ============================================================
       // select 容器
       powerSelect: ["地主", "师爷", "家丁", "长工", "短工", "佃户"],
       // 获取的角色权限
       role: "",
       // 角色权限 容器,
       rolePower: []
+      // ============================================================
     };
   },
   created() {

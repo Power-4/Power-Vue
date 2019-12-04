@@ -29,8 +29,30 @@
       </el-form-item>
       <el-button class="butt" @click="cancel">取消</el-button>
       <el-button class="butt a" @click="saveBtn">保存修改</el-button>
-      <el-button class="butt" @click="changePwd">修改密码</el-button>
+      <el-button class="butt" @click="openPwd">修改密码</el-button>
     </el-form>
+
+    <el-dialog :visible.sync="pwdDialog" title="修改面膜">
+      <!-- 密码模态框 -->
+      <el-form :model="pass" :rules="passRules" ref="ruleForm">
+        <el-form-item label="旧密码" prop="oldPass">
+          <el-input v-model="pass.oldPass" show-password></el-input>
+        </el-form-item>
+        <el-form-item label="新密码" prop="pass">
+          <el-input v-model="pass.pass" show-password></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="newPass">
+          <el-input v-model="pass.newPass" show-password></el-input>
+        </el-form-item>
+        <div class="pwdBTN">
+          <div>
+            <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+            <el-button @click="resetForm('ruleForm')">重置</el-button>
+            <el-button @click="canselPwd">取消</el-button>
+          </div>
+        </div>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -56,8 +78,6 @@ export default {
         this.ok("取消成功");
       }
     },
-    // 修改密码
-    changePwd() {},
     // 弹出成功提示
     ok(msg) {
       this.$message({
@@ -146,6 +166,62 @@ export default {
           window.console.log(res);
           return;
         });
+    },
+    // ==================修改密码===============================
+    // 打开密码
+    openPwd() {
+      this.pwdDialog = true;
+    },
+    // 发送请求
+    sendPwd() {
+      var token = window.sessionStorage.getItem("token");
+      var params =
+        "srcUserPwd=" +
+        this.pass.oldPass +
+        "&newUserPwd=" +
+        this.pass.pass +
+        "&token=" +
+        token;
+      window.console.log(params);
+      this.axios({
+        url: "http://192.168.6.184:8080/user/modifyPassword",
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        data: params
+      })
+        .then(res => {
+          window.console.log(res.data.data);
+          this.$message({
+            showClose: true,
+            message: "修改信息发送成功",
+            type: "success"
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+      this.pwdDialog = false;
+    },
+    // 取消发送
+    canselPwd() {
+      this.pwdDialog = false;
+      this.pass = "";
+      this.newPass = "";
+      this.oldPass = "";
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          window.console.log("发送修改密码");
+          this.sendPwd();
+        } else {
+          window.console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     }
   },
   created() {
@@ -184,13 +260,49 @@ export default {
         name: ""
       },
       // 是否修改的状态存储 false 为未修改，true为修改
-      saveC: false
+      saveC: false,
+      // =======================修改密码===============================
+      // 打开密码模态框
+      pwdDialog: false,
+      // 修改密码两次一致
+      pass: {
+        oldPass: "",
+        pass: "",
+        newPass: ""
+      },
+      // 密码是否一致
+      // 输入验证
+      passRules: {
+        oldPass: [
+          { required: true, message: "请输入现在的密码", trigger: "blur" }
+          // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+        ],
+        pass: [
+          {
+            required: true,
+            pattern: /^[a-zA-Z0-9]{6,22}$/,
+            message: "请输入新密码，6-22由数字或字母组成的字符",
+            trigger: "blur"
+          }
+          // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+        ],
+        newPass: [
+          { required: true, message: "请再次输入新密码", trigger: "blur" }
+          // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+        ]
+      }
     };
   }
 };
 </script>
 
 <style lang="less" scoped>
+.pwdBTN {
+  height: 50px;
+}
+.pwdBTN > div {
+  float: right;
+}
 .abc {
   margin-top: 30px;
   float: left;

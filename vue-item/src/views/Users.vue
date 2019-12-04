@@ -87,10 +87,29 @@
           <el-input class="inpu" v-model="obj.roleName"></el-input>
         </el-form-item>
         <el-form-item label="加入日期">
-          <el-input class="inpu" v-model="obj.joinData" disabled></el-input>
+          <el-form-item>
+            <el-date-picker
+              type="date"
+              placeholder="选择日期"
+              v-model="obj.joinDate"
+              style="width: 100%;"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              disabled
+            ></el-date-picker>
+          </el-form-item>
         </el-form-item>
         <el-form-item label="离职日期">
-          <el-input class="inpu" v-model="obj.leavingData"></el-input>
+          <el-form-item>
+            <el-date-picker
+              type="date"
+              placeholder="选择日期"
+              v-model="obj.leavingDate"
+              style="width: 100%;"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
         </el-form-item>
         <div class="box">
           <div>
@@ -105,7 +124,7 @@
       <!-- 插入类型 -->
     </el-dialog>
 
-    <el-dialog title="修改角色信息" :visible.sync="addUserDialog">
+    <el-dialog title="添加用户" :visible.sync="addUserDialog">
       <el-form :model="userSubForm" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="用户编号">
           <el-input v-model="userSubForm.userNo"></el-input>
@@ -128,12 +147,14 @@
           </el-select>
         </el-form-item>
         <el-form-item label="活动时间" required>
-          <el-form-item prop="date1">
+          <el-form-item>
             <el-date-picker
               type="date"
               placeholder="选择日期"
               v-model="userSubForm.joinDate"
               style="width: 100%;"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
         </el-form-item>
@@ -179,7 +200,7 @@ export default {
       // userName: "Orchid" -->
       // userPwd: null -->
     },
-    // 修改用户信息
+    // 修改用户信息关闭
     updataUser() {
       this.updataTab = false;
     },
@@ -208,7 +229,9 @@ export default {
     },
     // 发送添加用户请求
     sendAddUser() {
-      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinData=${this.userSubForm.joinData}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=17`;
+      window.console.log("添加用户");
+      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinData=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
+      window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
         this.$message({
@@ -216,6 +239,8 @@ export default {
           message: "添加用户成功"
         });
       });
+      // 重新加载
+      this.loadData();
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {

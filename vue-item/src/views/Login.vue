@@ -111,7 +111,7 @@ export default {
         data: params
       })
         .then(res => {
-          window.console.log(res.data.data);
+          window.console.log(res);
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
           var role = JSON.stringify(res.data.data.user.role);
