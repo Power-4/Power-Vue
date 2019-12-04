@@ -3,13 +3,13 @@
     <p class="view-title">查看巡检任务</p>
     <div class="base-info">
       <el-row :gutter="1">
-        <el-col :span="6">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
             <span>{{lineBasic.taskNo}}</span>  
           </div>
         </el-col>
-        <el-col :span="5">
+        <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>任务名称：</label>
             <span>{{lineBasic.taskName}}</span>  
@@ -24,24 +24,24 @@
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>起始杆号：</label>
-            <span>{{lineBasic.circuitry.startPole.circuitry}}</span> 
+            <span>{{lineBasic.circuitry.startPole.poleId}}</span> 
           </div>
         </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>终止杆号：</label>
-            <span>{{lineBasic.circuitry.endPole.circuitry}}</span> 
+            <span>{{lineBasic.circuitry.endPole.poleId}}</span> 
           </div>
         </el-col>
       </el-row>
       <el-row :gutter="1">
-        <el-col :span="6">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发人：</label>
             <span>{{lineBasic.users.userName}}</span>  
           </div>
         </el-col>
-        <el-col :span="5">
+        <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
             <span>{{lineBasic.createDate}}</span>  
@@ -62,9 +62,6 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span>{{lineBasic.taskNote}}</span></div></el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span></span></div></el-col>
       </el-row>
 
 
@@ -107,7 +104,7 @@
           <el-col :span="24"><div class="grid-content bg-purple"><label>缺陷描述：</label><span>{{lineDetail.defectsDescribe}}</span></div></el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span></span></div></el-col>
+          <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span>{{lineDetail.defectUserName}}</span></div></el-col>
         </el-row>
       </div>
     </div>
@@ -169,6 +166,7 @@ export default {
   },
   created() {
     this.getParams();
+    window.console.log(this.lineBasic.taskId)
 
     this.axios.get('http://192.168.6.184:8080/showTaskandPoles?',{params:{taskId: this.lineBasic.taskId}})
     .then((res) => {
@@ -209,6 +207,12 @@ export default {
       this.axios.get('http://192.168.6.184:8080/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
       .then((res) => {
         this.lineDetail = res.data.data.taskAndPoles;
+  
+        if(res.data.data.taskAndPoles.hasDefects == 1) {
+          res.data.data.taskAndPoles.hasDefects = '有'
+        } else if (res.data.data.taskAndPoles.hasDefects == 0) {
+          res.data.data.taskAndPoles.hasDefects = '无'
+        }
         window.console.log(res.data);
       })
       .catch((err) => { 
@@ -233,7 +237,7 @@ export default {
   .base-info {
     width: 100%;
     height: 150px;
-    padding: 10px 5px 0;
+    padding: 22px 5px 0;
     margin-bottom: 10px;
     box-sizing: border-box;
     border: 1px solid #000;
@@ -261,7 +265,6 @@ export default {
     .lines {
       width: 20%;
       height: 100%;
-      padding: 0 22px;
       overflow: auto;
       box-sizing: border-box;
       border: 1px solid #000;

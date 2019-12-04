@@ -20,9 +20,9 @@
             <el-select v-model="defectsName" clearable placeholder="请选择">
               <el-option
                 v-for="item in typeOptions"
-                :key="item.id"
-                :label="item.label"
-                :value="item.label"
+                :key="item.defectsId"
+                :label="item.defectsName"
+                :value="item.defectsId"
               ></el-option>
             </el-select>
           </div>
@@ -67,7 +67,7 @@
       </el-row>
     </div>
 
-    <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe style="width: 100%">
+    <el-table :data="tableData" stripe style="width: 100%">
       <el-table-column prop="taskNo" label="任务编号" align="center"></el-table-column>
       <el-table-column prop="circuitryNo" label="线路编号" align="center"></el-table-column>
       <el-table-column prop="poleNo" label="杆塔编号" align="center"></el-table-column>
@@ -83,7 +83,7 @@
     <div class="pagination">
       <el-pagination 
       layout="prev, pager, next"
-      :total="tableData.length"
+      :total="count"
       @current-change="handleCurrentChange"
       :page-size="pageSize">
       </el-pagination>
@@ -102,32 +102,7 @@ export default {
       taskNo: "",
       circuitryNo: "",
       defectsName: "",
-      typeOptions: [
-        {
-          id: 1,
-          label: "叉梁断裂"
-        },
-        {
-          id: 2,
-          label: "拦河线断裂"
-        },
-        {
-          id: 3,
-          label: "绝缘子爆破"
-        },
-        {
-          id: 4,
-          label: "杆塔倾斜"
-        },
-        {
-          id: 5,
-          label: "吊杆变形"
-        },
-        {
-          id: 6,
-          label: "其他"
-        }
-      ],
+      typeOptions: [],
       defectsLevel: "",
       levelOptions: [
         {
@@ -140,15 +115,18 @@ export default {
         },
         {
           id: 3,
-          label: "其他"
+          label: "紧急"
         }
       ],
       findStartDate: "",
-      performStartDate: ""
+      performStartDate: "",
+      count: null,
+      isQuery: false
     };
   },
   created() {
-    this.axios.get('http://192.168.6.184:8080/selectDefectsByCondition', {
+    // 渲染页面数据
+    this.axios.get('http://192.168.6.184:8080/selectAllDefects', {
       params: {
         currentPage: this.currentPage, 
         pageSize: this.pageSize
@@ -156,6 +134,18 @@ export default {
     })
     .then((res) => {
       this.tableData = res.data.data.defectsVO;
+      this.count = res.data.data.count;
+      window.console.log(res.data);
+    })
+    .catch((err) => {
+      window.console.log('错误是', err);
+    })
+
+
+    // 请求缺陷类型
+    this.axios.get('http://192.168.6.184:8080/getDefectsName?')
+    .then((res) => {
+      this.typeOptions = res.data.data.defects;
       window.console.log(res.data);
     })
     .catch((err) => {
@@ -166,27 +156,71 @@ export default {
   methods: {
     // 查询
     defectQuery() {
-      // this.axios.post('http://192.168.6.184:8080/selectDefectsByCondition', {
-      //   taskNo: this.taskNo,
-      //   circuitryNo: this.circuitryNo,
-      //   defectsName: this.defectsName,
-      //   defectsLevel: this.defectsLevel,
-      //   findStartDate: this.findStartDate,
-      //   performStartDate: this.performStartDate,
-      //   currentPage: this.currentPage,
-      //   pageSize: this.pageSize
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log('错误是', err);
-      // })
+      window.console.log(this.taskNo)
+      window.console.log(this.circuitryNo)
+      window.console.log(this.defectsName)
+      window.console.log(this.defectsLevel)
+      window.console.log(this.taskNo)
+      this.axios.get('http://192.168.6.184:8080/selectDefectsByCondition?', {params:{
+        taskNo: this.taskNo,
+        circuitryNo: this.circuitryNo,
+        defectsName: this.defectsName,
+        defectsLevel: this.defectsLevel,
+        findStartDate: this.findStartDate==''?'1970/01/01':this.findStartDate,
+        performStartDate: this.performStartDate==''?'1970/01/01':this.performStartDate,
+        currentPage: this.currentPage,
+        pageSize: this.pageSize
+      }})
+      .then((res) => {
+        this.tableData = res.data.data.defectsVO;
+        this.count = res.data.data.count;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
 
     },
     // 分页点击事件
     handleCurrentChange(val) {
-      this.currentPage = val;
+       if(this.isQuery) {
+          this.axios.get('http://192.168.6.184:8080/selectDefectsByCondition?', {params: {
+            taskNo: this.taskNo,
+            circuitryNo: this.circuitryNo,
+            defectsName: this.defectsName,
+            defectsLevel: this.defectsLevel,
+            findStartDate: this.findStartDate,
+            performStartDate: this.performStartDate,
+            currentPage: this.currentPage,
+            pageSize: this.pageSize
+        }})
+        .then((res) => {
+          this.count = res.data.data.count;
+          this.tableData = res.data.data.defectsVO;
+          window.console.log(res.data);
+        })
+        .catch((err) => {
+          window.console.log('错误是', err);
+        })
+
+      }
+
+
+      this.axios.get('http://192.168.6.184:8080/selectAllDefects', {
+        params: {
+          currentPage: val, 
+          pageSize: this.pageSize
+        }
+      })
+      .then((res) => {
+        this.tableData = res.data.data.defectsVO;
+        this.count = res.data.data.count;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
+      
     },
     // 导出excel表
     downloadExcel() {

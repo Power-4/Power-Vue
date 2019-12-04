@@ -68,8 +68,8 @@
       </el-table-column>
       <el-table-column prop="taskName" label="任务名称" align="center"></el-table-column>
       <el-table-column prop="circuitry.circuitryName" label="巡检线路" align="center"></el-table-column>
-      <el-table-column prop="circuitry.startPole.circuitry" label="起始杆号" align="center"></el-table-column>
-      <el-table-column prop="circuitry.endPole.circuitry" label="终止杆号" align="center"></el-table-column>
+      <el-table-column prop="circuitry.startPole.poleNo" label="起始杆号" align="center"></el-table-column>
+      <el-table-column prop="circuitry.endPole.poleNo" label="终止杆号" align="center"></el-table-column>
       <el-table-column prop="users.userName" label="下发人" align="center"></el-table-column>
       <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
       <el-table-column prop="systemPropertiesValue.sysProValueName" label="任务状态" align="center"></el-table-column>
@@ -157,16 +157,17 @@ export default {
       this.isQuery = true;
       // 请求列表数据
       this.axios.get('http://192.168.6.184:8080/getAllTaskByConditionL?',{ params:{
-        // taskNo: this.taskNo,
-        // circuitryNo: this.circuitryNo,
-        // taskState: this.taskState,
-        // userName: this.userName,
-        startDate: this.createDate,
+        taskNo: this.taskNo,
+        circuitryNo: this.circuitryNo,
+        taskState: this.taskState,
+        userName: this.userName,
+        startDate: this.createDate==''?'1970/01/01':this.createDate,
         pageSize: this.pageSize,
         currentPage: this.currentPage
       }})
       .then((res) => {
         this.tableData = res.data.data.tasks;
+        this.count = res.data.data.count;
         window.console.log(res.data);
       })
       .catch((err) => {
@@ -220,14 +221,16 @@ export default {
     // 分页点击事件
     handleCurrentChange(val) {
       if(this.isQuery) {
-        this.axios.post('http://192.168.6.184:8080/getAllTaskByCondition?',{
+        this.axios.get('http://192.168.6.184:8080/getAllTaskByCondition?',{params:{
           taskNo: this.taskNo,
           circuitryNo: this.circuitryNo,
           taskState: this.taskState,
           userName: this.userName,
           startDate: this.startDate
-        })
+        }})
         .then((res) => {
+          this.tableData = res.data.data.tasks;
+          this.count = res.data.data.count;
           window.console.log(res.data);
         })
         .catch((err) => {
