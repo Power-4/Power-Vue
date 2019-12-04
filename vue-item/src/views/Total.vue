@@ -14,8 +14,11 @@
       <div class="bianhao">
         <span>编号查询:</span>
         <el-input v-model="submit.id" placeholder="请输入任务或者线路编号" class="in-bianhao" 
-          @input="chaxun"
-          clearable=ture
+          
+           @change="chaxun"
+          
+          :clearable="true" 
+
         ></el-input>
       </div>
 
@@ -30,6 +33,7 @@
           placeholder="请选择"
           class="in-error"
           :class="{inErrorMin:submit.error=='1'||submit.error=='2'}"
+          @change="chaxun"
         >
           <el-option label="全部" value></el-option>
           <el-option label="有" value="1"></el-option>
@@ -42,7 +46,7 @@
     </div>
 
     <div class="daochu">
-      <el-button type="primary" class="excel" disabled="ture"> 打印</el-button>
+      <el-button type="primary" class="excel " :disabled="true" > 打印</el-button>
       <el-button type="primary" class="excel" @click="downloadExcel">导出为EXCEL</el-button>
     </div>
     <div class="table">
@@ -68,6 +72,7 @@ import wdtable from "../components/wdtable";
 export default {
   name: "total",
   data() {
+    
     return {
       title: "巡检记录",
       wdname: "xun",
@@ -118,13 +123,13 @@ export default {
       this.total.pageSize = this.pageSize; /* 页面显示条数 */
 
       /* 时间赋值 */
-      this.total.startDate = this.submit.time[0];
-      this.total.endDate = this.submit.time[1];
+      this.total.startDate = this.submit.time[0]||"1700/01/01";
+      this.total.endDate = this.submit.time[1]||"3000/01/01";
 
       if (this.wdname == "xun") {
-        this.total.error = this.submit.error; /* 赋 error 值*/
+        this.total.hasDefects = this.submit.error; /* 赋 error 值*/
       } else {
-        delete this.total.error; // 删除 error 值
+        delete this.total.hasDefects; // 删除 error 值
       }
 
       /* 判断是任务编号还是线路编号*/
@@ -146,7 +151,7 @@ export default {
       window.console.log(this.total);
 
       var url = "http://192.168.6.184:8080";
-      this.wdname == "xun" ? "" : (url = url + "/selectFixRecordByFind");
+      this.wdname == "xun" ? (url += "/showCensusRecordsS") : (url += "/selectFixRecordByFind");
 
       this.axios
         .get(url, {
@@ -155,35 +160,81 @@ export default {
         .then(res => {
          
          this.countPage = res.data.data.count; //初始化分页
-         this.tableData=[] //初始化表格数据 ;
-          window.console.log(res.data)
-          
-          var wdData = res.data.data.fixRecord;
-      
-        
 
-          /* 赋值 */
+         this.tableData=[] //初始化表格数据 ;
+
+         window.console.log(res.data)
+        
+        var wdData = res.data.data.fixRecord||res.data.data.censusRecords;
+        
+        if(res.data.data.fixRecord)
+        {
+          
+                    /* 赋值 */
           wdData.forEach((item)=>{
+          
           var tableData={};
            
+            item.poleFixRelation.fix.task.taskNo
            // 各种赋值
-           tableData.taskNo=item.poleFixRelation.fix.task.taskNo;
-           tableData.taskName=item.poleFixRelation.fix.task.taskName;
+           tableData.taskNo = item.poleFixRelation.fix.task.taskNo; //任务编号
            
-           tableData.line=`${item.poleFixRelation.fix.task.circuitry.circuitryNo}
+           tableData.taskName = item.poleFixRelation.fix.task.taskName; // 任务名称
+           
+           // 线路编号（起始编号-终止编号）
+           tableData.line = `${item.poleFixRelation.fix.task.circuitry.circuitryNo}
            (${item.poleFixRelation.fix.task.circuitry.startPole.poleNo}-${ item.poleFixRelation.fix.task.circuitry.endPole.poleNo})`
           
-           tableData.poleNo=item.pole.poleNo;
-           tableData.defectsLevel=item.defectsLevel;
-           tableData.defectsName=item.defects.defectsName;
-           tableData.finishDate=item.poleFixRelation.fix.task.finishDate;
-           tableData.findDate=item.findDate;
-           tableData.defectsDescribe=item.defectsDescribe;
+         
+           tableData.poleNo = item.pole.poleNo;  //杆塔编号
+           tableData.defectsLevel = item.defectsLevel; //缺陷级别
+           tableData.defectsName = item.defects.defectsName; //缺陷类型
+           tableData.findDate = item.findDate; //发现时间
+           tableData.finishDate = item.poleFixRelation.fix.task.finishDate;  // 消缺时间   
+          
+
+           tableData.defectsDescribe = item.defectsDescribe; // 缺陷描述
            
            this.tableData.push(tableData);
          
 
          })
+          
+        }
+        else
+        {
+          
+          /* 赋值 */
+          wdData.forEach((item)=>{
+          var tableData={};
+           
+           // 各种赋值
+           tableData.taskNo =  item.taskNo; //任务编号
+           
+           tableData.taskName = item.taskName; // 任务名称
+           
+           // 线路编号（起始编号-终止编号）
+           tableData.line = `${item.circuitryNo}(${item.startPole.poleNo}-${item.endPole.poleNo})`
+          
+         
+           tableData.poleNo = item.poleNo;  //杆塔编号
+           tableData.defectsLevel =item.defectsLevel; //缺陷级别
+           tableData.defectsName = '没有'; //缺陷类型
+           tableData.findDate = item.findDate; //发现时间
+       
+           item.hasDefects == 1?tableData.error = "有" : tableData.error= "无"; // 错误
+
+           tableData.defectsDescribe = item.defectsDescribe||item.defectsDescribe; // 缺陷描述
+           
+           this.tableData.push(tableData);
+         
+
+         })
+
+        }
+
+          
+        
 
           this.loading=false;
 
@@ -224,7 +275,7 @@ export default {
         if(this.wdname=="xun")
         {
           arr1 = ["任务编号", "任务名称", "线路编号（起始编号-终止编号","杆塔编号","有无故障","缺陷级别","缺陷类型","发现时间","缺陷描述"];
-          arr2 = ["taskNo","taskName","line","poleNo","error","poleNo","defectsLevel","defectsName","findDate","defectsDescribe"];
+          arr2 = ["taskNo","taskName","line","poleNo","error","defectsLevel","defectsName","findDate","defectsDescribe"];
         }
 
         else 
