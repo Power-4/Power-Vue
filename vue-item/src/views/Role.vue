@@ -420,6 +420,7 @@ export default {
             ) {
               this.tableData[i].isCheck = false;
             }
+            this.tableData[i].users = res.data.data.roleList[i].users.userName;
           }
         })
         .catch(err => {
