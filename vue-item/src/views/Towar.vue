@@ -8,20 +8,26 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>所属线路:</span>
-        <el-input v-model="submit.circuitryName" placeholder="请输入线路" class="in-bianhao"></el-input>
+        <el-input
+          v-model="submit.circuitryName"
+          placeholder="请输入线路"
+          class="in-bianhao"
+          @change="chaxun"
+        ></el-input>
       </div>
 
-      <div class="error">
+      <div class="activate" @input="chaxun">
         <span>是否启用:</span>
         <el-select
           v-model="submit.activate"
           placeholder="请选择"
           class="in-error"
           :class="{inErrorMin:submit.activate}"
+          @change="chaxun"
         >
-          <el-option label="启用" value="yes"></el-option>
+          <el-option label="启用" value="启用"></el-option>
 
-          <el-option label="停用" value="no"></el-option>
+          <el-option label="停用" value="停用"></el-option>
         </el-select>
       </div>
 
@@ -91,20 +97,25 @@
     <el-table :data="tableData" stripe style="width: 100%" align="center">
       <el-table-column prop="poleNo" label="杆塔编号" width="300" align="center"></el-table-column>
       <el-table-column prop="circuitry.circuitryName" label="所属路线" width="200" align="center"></el-table-column>
-      <el-table-column prop="systemPropertiesValue.sysProValueName" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
+      <el-table-column
+        prop="systemPropertiesValue.sysProValueName"
+        label="状态(启动/未启动)"
+        width="300"
+        align="center"
+      ></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
         <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
         <el-button type="text" @click="del">删除</el-button>
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination 
-      class="pages"
-      layout="prev, pager, next" 
-      :total="countPage"
-      :page-size="pageSize" 
-      @current-change="handleCurrentChange"
-    ></el-pagination>
+      <el-pagination
+        class="pages"
+        layout="prev, pager, next"
+        :total="countPage"
+        :page-size="pageSize"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
     </div>
   </div>
 </template>
@@ -116,21 +127,19 @@ export default {
     return {
       title: "杆塔",
       name: "xun",
-      submit: { 
+      submit: {
         id: "",
         error: "",
         currentPage: 1,
-        circuitryName:"",
-        activate:""
-      },     
-      countPage:5,
-      pageSize:5,
-      
+        circuitryName: "",
+        activate: ""
+      },
+      countPage: null,
+      pageSize: 5,
+
       //模拟表格数据
-      
-      tableData: [
-        
-      ],
+
+      tableData: [],
       options: [
         {
           value: "XW00001",
@@ -142,11 +151,11 @@ export default {
         }
       ],
       value: "",
-      
-      //添加
+
+     
       dialogFormVisible: false,
       dialogVisible: false,
-      revaTable: { id: "",state: "" },
+      revaTable: { id: "", state: "" },
       form: {
         id: "",
         region: "",
@@ -166,11 +175,13 @@ export default {
     //查询
     chaxun() {
       this.axios
-        .post("http://192.168.6.184:8080/poleOrchid/getPolePageByCirIdAndActivate", {
-          currentPage:this.submit.currentPage,
-          pageSize:this.pageSize,
-          circuitryName:this.submit.circuitryName,
-          activate:this.submit.activate
+        .get("http://192.168.6.184:8080/poleOrchid/getPolePageByCirIdAndActivate",{
+          params: {
+            currentPage: this.submit.currentPage,
+            pageSize: this.pageSize,
+            circuitryName: this.submit.circuitryName,
+            activate: this.submit.activate
+          }
         })
         .then(res => {
           window.console.log(this.submit.circuitryName);
@@ -178,7 +189,30 @@ export default {
           window.console.log(res.data);
           window.console.log(this.tableData);
           this.countPage = res.data.data.count;
-          this.tableData = res.data.data.poles
+          this.tableData = res.data.data.poles;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+    //修改
+    xiugai() {
+      this.axios
+        .get("http://192.168.6.184:8080/poleOrchid/updatePoleById",{
+          params: {
+            currentPage: this.submit.currentPage,
+            pageSize: this.pageSize,
+            circuitryName: this.submit.circuitryName,
+            activate: this.submit.activate
+          }
+        })
+        .then(res => {
+          window.console.log(this.submit.circuitryName);
+          window.console.log(this.submit.activate);
+          window.console.log(res.data);
+          window.console.log(this.tableData);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles;
         })
         .catch(err => {
           window.console.log(err);
@@ -213,20 +247,20 @@ export default {
     fenClick() {
       this.axios
         .post("http://192.168.6.184:8080/poleOrchid/getPoleByPage", {
-          currentPage:this.submit.currentPage,
-          pageSize:this.pageSize
+          currentPage: this.submit.currentPage,
+          pageSize: this.pageSize
         })
         .then(res => {
           window.console.log(this.submit.currentPage);
           window.console.log(res.data);
           this.countPage = res.data.data.count;
-          this.tableData = res.data.data.poles
+          this.tableData = res.data.data.poles;
           window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
         });
-    },
+    }
   },
   created() {
     this.fenClick();
