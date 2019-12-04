@@ -1,129 +1,120 @@
 <template>
-  <div id="hoverButton">
-    <router-link
-      :class="[boolset ? c1 : c2]"
-      :to="'/' + item"
-      id="butt"
-    > <span class="aaa">{{ wordsValue }}<span class="eng"> {{ item == 'a' ? 'PERSON' : item.toUpperCase() }}</span></span></router-link>
+  <div>
+    <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
+      <el-radio-button :label="false">展开</el-radio-button>
+      <el-radio-button :label="true">收起</el-radio-button>
+    </el-radio-group>
+    <el-menu
+      class="el-menu-vertical-demo"
+      @open="handleOpen"
+      @close="handleClose"
+      :collapse="isCollapse"
+      :router="true"
+      :unique-opened="true"
+    >
+      <el-submenu index="1">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">个人信息</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/a">待办列表</el-menu-item>
+          <el-menu-item index="/a/selfmsg">个人资料修改</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+
+      <el-submenu index="2">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">系统管理</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/system">角色管理</el-menu-item>
+          <el-menu-item index="/system/users">用户管理</el-menu-item>
+          <el-menu-item index="/system/power">角色权限管理</el-menu-item>
+          <el-menu-item index="/system/config">系统配置</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+
+      <el-menu-item index="3" route="/towar">
+        <i class="el-icon-menu"></i>
+        <span slot="title" >杆塔管理</span>
+      </el-menu-item>
+
+      <el-menu-item index="4" route="/line">
+        <i class="el-icon-menu"></i>
+        <span slot="title" >杆塔管理</span>
+      </el-menu-item>
+
+      <el-submenu index="5">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">缺陷管理</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/defect">缺陷类型名称</el-menu-item>
+          <el-menu-item index="/defectLevel">缺陷等级确认</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+
+      <el-submenu index="6">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">巡检管理</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/inspect">巡检任务制定与分配</el-menu-item>
+          <el-menu-item index="/inspect/insexecute">巡检任务执行与回执</el-menu-item>
+           <el-menu-item index="/inspect/insdefect">缺陷查询</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+     
+      <el-submenu index="7">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">消缺管理</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/repair">消缺任务制定与分配</el-menu-item>
+          <el-menu-item index="/repairperform">消缺任务执行与回执</el-menu-item>
+           <el-menu-item index="/repairquery">消缺查询</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+      <el-submenu index="8">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">信息统计</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/total?name=xun">巡检记录</el-menu-item>
+          <el-menu-item index="/total?name=xiao">消缺记录</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+    </el-menu>
   </div>
 </template>
 
+<style>
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+  width: 200px;
+  min-height: 400px;
+}
+</style>
+
 <script>
 export default {
-  name: "hoverButton",
-  props: {
-    item: String
-  },
   data() {
     return {
-      wordsValue: "请传入值",
-      c1: "butt-click",
-      c2: "SlowAlterBac",
-      boolset: false
+      isCollapse: true
     };
   },
   methods: {
-    initWords() {
-      switch (this.item) {
-        case "a":
-          this.wordsValue = "个人信息";
-          break;
-        case "system":
-          this.wordsValue = "系统管理";
-          break;
-        case "towar":
-          this.wordsValue = "杆塔管理";
-          break;
-        case "line":
-          this.wordsValue = "线路管理";
-          break;
-        case "defect":
-          this.wordsValue = "缺陷管理";
-          break;
-        case "inspect":
-          this.wordsValue = "巡检管理";
-          break;
-        case "repair":
-          this.wordsValue = "消缺管理";
-          break;
-        case "total":
-          this.wordsValue = "信息统计";
-          break;
-
-        default:
-          break;
-      }
+    handleOpen(key, keyPath) {
+      window.console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      window.console.log(key, keyPath);
     }
-  },
-  created() {
-    this.initWords();
   }
 };
 </script>
-
-<style lang="less" scoped>
-#hoverButton {
-  height: 60px;
-}
-.aaa {
-  float: left;
-  margin-left: 15px;
-  line-height: 60px;
-}
-.eng {
-
-  font-size: 14px;
-}
-.butt-click {
-  display: inline-block;
-  text-align: center;
-  cursor: pointer;
-  background: #5ee4e4;
-  color: white;
-  margin: 0;
-  width: 200px;
-  font-size: 20px;
-  text-decoration: none;
-  border: none;
-}
-.SlowAlterBac {
-  display: inline-block;
-  text-align: center;
-  cursor: pointer;
-  background: #e1e1e1;
-  color: #999;
-  margin: 0;
-  width: 200px;
-  font-size: 20px;
-  text-decoration: none;
-  border: none;
-
-  transform: translateZ(0);
-  position: relative;
-  transition-property: color;
-  transition-duration: 0.3s;
-}
-.SlowAlterBac:before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #5ee4e4;
-  transform-origin: 0 50%;
-  transform: scaleX(0);
-  transition: transform 0.5s ease-out;
-}
-.SlowAlterBac:hover,
-.SlowAlterBac:focus,
-.SlowAlterBac:active {
-  color: white;
-}
-.SlowAlterBac:hover:before,
-.SlowAlterBac:focus:before,
-.SlowAlterBac:active:before {
-  transform: scaleX(1);
-}
-</style>

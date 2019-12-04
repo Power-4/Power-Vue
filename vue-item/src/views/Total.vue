@@ -1,10 +1,5 @@
 <template>
   <div class="total">
-    <div class="nav">
-      <span :class="{select:wdname=='xiao'}" @click="wdname='xiao'">消缺记录</span>
-      <span :class="{select:wdname=='xun'}" @click="wdname='xun'">巡检记录</span>
-      <!-- 这个在左边 -->
-    </div>
 
     <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
       <el-breadcrumb-item>信息统计</el-breadcrumb-item>
@@ -92,7 +87,14 @@ export default {
     wdname() {
       /* 当 wdname 发生变化时 调用重置函数 */
       this.chongzhii();
+    },
+    '$route.query':{
+        handler()
+        {
+          this.wdname=this.$route.query.name
+        }
     }
+
   },
   methods: {
     addTime(time) {
@@ -302,6 +304,10 @@ export default {
   },
   /*创建开始时*/
   created() {
+
+    this.wdname=this.$route.query.name;
+
+    
     this.chaxun();
   }
 };
