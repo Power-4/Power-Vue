@@ -173,7 +173,10 @@ export default {
           activate:this.submit.activate
         })
         .then(res => {
+          window.console.log(this.submit.circuitryName);
+          window.console.log(this.submit.activate);
           window.console.log(res.data);
+          window.console.log(this.tableData);
           this.countPage = res.data.data.count;
           this.tableData = res.data.data.poles
         })
