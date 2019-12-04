@@ -13,7 +13,7 @@
             ></el-option>
           </el-select>
           <el-button class="btn-sea">搜索</el-button>
-          <el-button class="addusers" @click="addUsers">
+          <el-button class="addusers" @click="openAddUserBTN">
             <i class="el-icon-circle-plus-outline"></i>添加用户
           </el-button>
         </el-form-item>
@@ -94,40 +94,7 @@
         </el-form-item>
         <div class="box">
           <div>
-            <el-button class="coloraaa" @click="userAdd">确认</el-button>
-            <el-button @click="addDataTab = false">取消</el-button>
-          </div>
-        </div>
-      </el-form>
-    </el-dialog>
-
-    <el-dialog title="添加用户信息" :visible.sync="addDataTab">
-      <!-- 插入类型 -->
-      <!-- // userName -->
-      <!-- // userPwd -->
-      <!-- // roleName -->
-      <!-- // joinDate -->
-      <!-- // leavingDate -->
-      <el-form label-position="labelPosition">
-        <el-form-item
-          prop="name"
-          label="用户账号"
-          :rules="rules.name"
-        >
-          <el-input class="inpu" v-model="userData.userName"></el-input>
-        </el-form-item>
-        <el-form-item label="用户密码">
-          <el-input class="inpu" v-model="userData.userPwd"></el-input>
-        </el-form-item>
-        <el-form-item label="用户角色">
-          <el-input class="inpu" v-model="userData.roleName"></el-input>
-        </el-form-item>
-        <el-form-item label="加入日期">
-          <el-input class="inpu" v-model="userData.joinData"></el-input>
-        </el-form-item>
-        <div class="box">
-          <div>
-            <el-button class="coloraaa" @click="userAdd">确认</el-button>
+            <el-button class="coloraaa">确认</el-button>
             <el-button @click="addDataTab = false">取消</el-button>
           </div>
         </div>
@@ -137,9 +104,49 @@
     <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
       <!-- 插入类型 -->
     </el-dialog>
+
+    <el-dialog title="修改角色信息" :visible.sync="addUserDialog">
+      <el-form :model="userSubForm" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="用户编号">
+          <el-input v-model="userSubForm.userNo"></el-input>
+        </el-form-item>
+        <el-form-item label="用户名称">
+          <el-input v-model="userSubForm.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="用户密码">
+          <el-input v-model="userSubForm.userPwd"></el-input>
+        </el-form-item>
+        <el-form-item label="用户角色" prop="region">
+          <el-select v-model="userSubForm.roleName" placeholder="请选择角色">
+            <el-option
+              v-for="item in powerSelect"
+              :label="item"
+              :key="item"
+              :value="item"
+              style="width: 100%;"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间" required>
+          <el-form-item prop="date1">
+            <el-date-picker
+              type="date"
+              placeholder="选择日期"
+              v-model="userSubForm.joinDate"
+              style="width: 100%;"
+            ></el-date-picker>
+          </el-form-item>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+          <el-button @click="resetForm('ruleForm')">重置</el-button>
+          <el-button @click="addUserDialog = false">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
-index
+
 <script>
 export default {
   methods: {
@@ -183,26 +190,50 @@ export default {
     // 获取日志
     loadLog() {},
     // 添加用户按钮--------------------------------------------------
-    addUsers() {
-      this.addDataTab = true;
-    },
-    // 添加用户
-    userAdd() {
-      // userName
-      // userPwd
-      // roleName
-      // joinDate
-      // leavingDate
-      // sysProValueName
-      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userData.userName}&userPwd=${this.userData.userPwd}&roleName=${this.userData.roleName}&joinData=${this.userData.joinData}&leacingDate=${this.userData.leavingDate}&sysProValueName=正常`;
+    // 获取角色类型select数据的函数
+    getPowerSelect() {
+      var words = `http://192.168.6.184:8080/permission/getAllRoleName`;
       this.axios.get(words).then(res => {
+        window.console.log(res);
+        this.powerSelect = res.data.data.roleNames;
+      });
+    },
+
+    // 点击按钮弹出添加角色函数
+    openAddUserBTN() {
+      this.addUserDialog = true;
+      window.console.log("ok");
+      // 加载角色类型 select
+      this.getPowerSelect();
+    },
+    // 发送添加用户请求
+    sendAddUser() {
+      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinData=${this.userSubForm.joinData}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=17`;
+      this.axios.get(words).then(res => {
+        window.console.log(res);
         this.$message({
           type: "success",
-          message: "修改成功"
+          message: "添加用户成功"
         });
-        window.console.log(res);
-        this.addDataTab = false;
       });
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          this.sendAddUser();
+          // 关闭模态框
+          this.addUserDialog = false;
+        } else {
+          this.$message({
+            type: "info",
+            message: "请输入正确的值"
+          });
+          return false;
+        }
+      });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     },
     // 删除用户------------------------------------------------------1
     del(obj) {
@@ -221,6 +252,7 @@ export default {
           var words = `http://192.168.6.184:8080/userManage/deleteUserMessage?userId=${obj.userId}`;
           this.axios.get(words).then(res => {
             window.console.log(res);
+            this.loadData();
           });
         })
         .catch(() => {
@@ -256,7 +288,7 @@ export default {
           index.isCheck = !index.isCheck;
         });
     },
-    // 分页函数------------------------------------------------------3
+    // 分页函数----------------------------------------------------------3
     // 每页几条
     handleSizeChange(val) {
       this.pagesize = val;
@@ -308,15 +340,20 @@ export default {
         userPwd: ""
       },
       // 添加用户模态框控制----------------------------------------------2
-      addDataTab: false,
-      userData: {
-        userName: "",
-        userPwd: "",
+      // 新增角色---------------------------------------------------
+      // 提交表单
+      userSubForm: {
         roleName: "",
+        userName: "",
         joinDate: "",
-        leavingDate: "",
-        sysProValueName: "启用"
+        userPwd: "",
+        leavingDate: ""
       },
+      //
+      // 角色类型select数据
+      powerSelect: ["地主", "师爷", "家丁", "长工", "短工", "佃户"],
+      // 模态框开启
+      addUserDialog: false,
       // 添加的用户名字
       neeUser: {},
       // 查看日志模态框控制----------------------------------------------3
@@ -341,45 +378,7 @@ export default {
       ],
       // 表格渲染数据 --------------------------------------------------7
       // 渲染表格的数据
-      tableData: [],
-      // 表单验证------------------------------------------8
-      rules: {
-        name: [
-          { required: true, message: "请输入活动名称", trigger: "blur" },
-          { min: 6, max: 10, message: "长度在 6 到 10 个字符", trigger: "blur" }
-        ],
-        region: [
-          { required: true, message: "请选择活动区域", trigger: "change" }
-        ],
-        date1: [
-          {
-            type: "date",
-            required: true,
-            message: "请选择日期",
-            trigger: "change"
-          }
-        ],
-        date2: [
-          {
-            type: "date",
-            required: true,
-            message: "请选择时间",
-            trigger: "change"
-          }
-        ],
-        type: [
-          {
-            type: "array",
-            required: true,
-            message: "请至少选择一个活动性质",
-            trigger: "change"
-          }
-        ],
-        resource: [
-          { required: true, message: "请选择活动资源", trigger: "change" }
-        ],
-        desc: [{ required: true, message: "请填写活动形式", trigger: "blur" }]
-      }
+      tableData: []
     };
   }
 };

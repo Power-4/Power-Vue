@@ -2,23 +2,20 @@
   <div class="power">
     <div class="slec">
       <span>选择角色：</span>
-      <el-select v-model="slecRole" @change="getPower" placeholder="--请选择要修改的权限--">
-        <el-option v-for="item in roles" :label="item.name" :value="item.roleId" :key="item.roleId"></el-option>
+      <el-select placeholder="--请选择要修改的权限--" v-model="role" @change="getRolePower">
+        <el-option
+          v-for="item in powerSelect"
+          :label="item"
+          :key="item"
+          :value="item"
+          style="width: 100%;"
+        ></el-option>
       </el-select>
     </div>
     <div class="abc">
-      <el-checkbox class="cBox" v-model="power.role">角色管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">用户管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">角色权限管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">杆塔管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">线路管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">缺陷管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">线路管理</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">信息统计</el-checkbox>
-      <el-checkbox class="cBox" v-model="power.role">消缺管理</el-checkbox>
       <div class="elbtnel">
-        <el-button class="elb" @click="cancel">取消修改</el-button>
-        <el-button class="elb" @click="saveBtn">保存修改</el-button>
+        <el-button class="elb">取消修改</el-button>
+        <el-button class="elb" @click="sendPower">保存修改</el-button>
       </div>
     </div>
   </div>
@@ -27,55 +24,54 @@
 <script>
 export default {
   methods: {
-    // 根据角色id roleId加载权限
-    getPower(slecRole) {
-      window.console.log(slecRole);
-    },
-    // 取消按钮
-    cancel() {
-      this.power.role = this.power2.role;
-    },
-    // 弹出成功提示
-    ok(msg) {
-      this.$message({
-        showClose: true,
-        message: msg,
-        type: "success"
+    getPowerSelect() {
+      var words = `http://192.168.6.184:8080/permission/getAllRoleName`;
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+        this.powerSelect = res.data.data.roleNames;
       });
     },
-    // 完成提示
-    saveBtn() {
-      this.ok("修改成功");
+    // 获取角色信息
+    getRolePower() {
+      // 获取角色权限信息
+      // ==========================================================
+      this.axios
+        .get(
+          "http://192.168.6.184:8080/permission/getResourcesByRoleName?roleName=" +
+            this.role
+        )
+        .then(res => {
+          // res.data.data.resourcesName名字
+          // sysProValueName启用 / 停用
+          // resourceId 权限Id
+          for (var i = 0; i < res.data.data.resourceList.length; i++) {
+            this.rolePower.push({
+              resourcesName: res.data.data.resourceList[i].resourcesName,
+              sysProValueName: res.data.data.resourceList[i].sysProValueName,
+              resourcesId: res.data.data.resourceList[i].resourcesId
+            });
+          }
+        });
+    },
+    sendPower() {
+      var words = `http://192.168.6.184:8080/`;
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+      });
     }
   },
   data() {
     return {
-      // select 选择的角色
-      slecRole: "",
-      // 角色列表，需要包括名字和Id
-      roles: [
-        {
-          name: "王波管理员",
-          roleId: "1"
-        },
-        {
-          name: "管理员",
-          roleId: "2"
-        },
-        {
-          name: "员",
-          roleId: "3"
-        }
-      ],
-      // 获取的用户权限信息
-      power: {
-        role: true
-      },
-      // 获取的用户权限信息
-      power2: {
-        role: true
-      }
+      // select 容器
+      powerSelect: ["地主", "师爷", "家丁", "长工", "短工", "佃户"],
+      // 获取的角色权限
+      role: "",
+      // 角色权限 容器,
+      rolePower: []
     };
+  },
+  created() {
+    this.getPowerSelect();
   }
 };
 </script>
