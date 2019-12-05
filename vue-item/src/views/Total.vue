@@ -200,8 +200,8 @@ export default {
               tableData.taskName = item.poleFixRelation.fix.task.taskName; // 任务名称
 
               // 线路编号（起始编号-终止编号）
-              tableData.line = `${item.poleFixRelation.fix.task.circuitry.circuitryNo}
-           (${item.poleFixRelation.fix.task.circuitry.startPole.poleNo}-${item.poleFixRelation.fix.task.circuitry.endPole.poleNo})`;
+            tableData.line = `${item.pole.circuitry.circuitryNo}
+           (${item.pole.circuitry.startPole.poleNo}-${item.pole.circuitry.endPole.poleNo})`;
 
               tableData.poleNo = item.pole.poleNo; //杆塔编号
               tableData.defectsLevel = item.defectsLevel; //缺陷级别
