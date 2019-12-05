@@ -88,6 +88,8 @@
 </template>
 
 <script>
+
+
 export default {
   name: "DefectType",
   data() {
@@ -110,7 +112,7 @@ export default {
     //初始化加载函数
     Init(){
       this.axios
-      .post("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
+      .post("/defectsOrchid/getDefectsByPage", {
         currentPage: this.currpage,
         pageSize: this.pagesize
       })
@@ -137,7 +139,7 @@ export default {
     amend() {
       window.console.log(this.revaTable.type, this.revaTable.state);
       window.console.log("当前所修改的id", this.defectsId);
-        this.axios.get("http://192.168.6.184:8080/defectsOrchid/updateDefectsState", {
+        this.axios.get("/defectsOrchid/updateDefectsState", {
           params:{
             defectsState:this.revaTable.state,
             defectsId:this.defectsId,
@@ -169,7 +171,7 @@ export default {
     addType() {
       window.console.log(this.addTable.name, this.addTable.region);
       
-      this.axios.get("http://192.168.6.184:8080/defectsOrchid/addDefects", {
+      this.axios.get("/defectsOrchid/addDefects", {
         params:{
           defectsName:this.addTable.name,
           defectsState:this.addTable.region
@@ -191,8 +193,8 @@ export default {
           });
         });
 
-        // this.addTable.name="",
-        // this.addTable.region=""
+        this.addTable.name="",
+        this.addTable.region=""
     },
     // 分页函数
     // 每页几条
@@ -205,9 +207,9 @@ export default {
       this.currpage = val;
 
       window.console.log(`当前页: ${val}`);
-      //分页请求
+      // 分页请求
       this.axios
-        .post("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
+        .post("/defectsOrchid/getDefectsByPage", {
           currentPage: val,
           pageSize: this.pagesize
         })
@@ -230,7 +232,7 @@ export default {
       })
         .then(() => {
         window.console.log("当前所删除的id",this.defectsId);
-        this.axios.get("http://192.168.6.184:8080/defectsOrchid/deleteDefectsById", {
+        this.axios.get("/defectsOrchid/deleteDefectsById", {
           params:{
             defectsId:this.defectsId,
           }
@@ -260,28 +262,23 @@ export default {
     }
   },
   created() {
-    // ("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
-    //     currentPage: this.currpage,
-    //     pageSize: this.pagesize
-    //   })
-    
-    // window.console.log(window.sessionStorage['userId'])
-    // window.console.log(window.sessionStorage['token'])
+  
     this.axios({
-      methods:"POST",
-      url:"http://192.168.6.184:8080/defectsOrchid/getDefectsByPage",
-      headers:{
-        'Token':window.sessionStorage['token']
+      url: "/defectsOrchid/getDefectsByPage",
+      method:"get",
+      params:{
+        currentPage:this.currpage,
+        pageSize:this.pagesize
       }
     })
-      .then(res => {
-        window.console.log(res.data);
-        this.tableData = res.data.data.defects;
-        this.count = res.data.data.count;
-      })
-      .catch(err => {
-        window.console.log(err);
-      });
+    .then(res => {
+      window.console.log(res.data);
+      this.tableData = res.data.data.defects;
+      this.count = res.data.data.count;
+    })
+    .catch(err => {
+      window.console.log(err);
+    });
   }
 };
 </script>

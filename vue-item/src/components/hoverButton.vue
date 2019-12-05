@@ -91,8 +91,8 @@
           <i class="el-icon-tickets myIc"></i>
           <span slot="title">信息统计</span>
         </template>
-        <el-menu-item-group>
-          <el-menu-item index="/total?name=xun">巡检记录</el-menu-item>
+        <el-menu-item-group >
+          <el-menu-item index="/total?name=xun" class="color">巡检记录</el-menu-item>
           <el-menu-item index="/total?name=xiao">消缺记录</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
@@ -107,6 +107,9 @@
 }
 .myIc::before{
   color: rgb(255, 255, 255);
+}
+.color {
+  color: red
 }
 </style>
 

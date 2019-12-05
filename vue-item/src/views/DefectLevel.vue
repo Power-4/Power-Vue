@@ -147,7 +147,7 @@ export default {
     //初始化加载函数
     Init() {
       this.axios
-        .post("http://192.168.6.184:8080/selectAllDefectsIsNull", {
+        .post("/selectAllDefectsIsNull", {
           currentPage: this.currpage,
           pageSize: this.pagesize
         })
@@ -165,7 +165,7 @@ export default {
       window.console.log("所查询的信息", this.submit);
       this.ischeck = true;
       this.axios
-        .get("http://192.168.6.184:8080/selectAllDefectsIsNullByCondition", {
+        .get("/selectAllDefectsIsNullByCondition", {
           params: {
             taskNo: this.submit.taskNo,
             circuitryNo: this.submit.circuitryNo,
@@ -200,7 +200,7 @@ export default {
       this.tableData.forEach((item, index) => {
         if (index < this.pagesize) {
           window.console.log("当前保存", item);
-          this.axios.get("http://192.168.6.184:8080/changeDefectsLevel", {
+          this.axios.get("/changeDefectsLevel", {
             params: {
               defectsLevel:item.selectOne,
               DamageRecordId:item.damageRecordId
@@ -235,7 +235,7 @@ export default {
       window.console.log("当前页", val);
       if (this.ischeck == true) {
         window.console.log("当前是查询分页", this.ischeck);
-        this.axios.get("http://192.168.6.184:8080/selectAllDefectsIsNullByCondition", {
+        this.axios.get("/selectAllDefectsIsNullByCondition", {
           params: {
             askNo: this.submit.taskNo,
             circuitryNo: this.submit.circuitryNo,
@@ -258,7 +258,7 @@ export default {
       } else {
         window.console.log("当前是初始化分页", this.ischeck);
         this.axios
-          .get("http://192.168.6.184:8080/selectAllDefectsIsNull", {
+          .get("/selectAllDefectsIsNull", {
             params: {
               currentPage: val,
               pageSize: this.pagesize
@@ -278,7 +278,7 @@ export default {
   created() {
     //初始化页面请求
     this.axios
-      .post("http://192.168.6.184:8080/selectAllDefectsIsNull", {
+      .post("/selectAllDefectsIsNull", {
         currentPage: this.currpage,
         pageSize: this.pagesize
       })
@@ -293,7 +293,7 @@ export default {
 
     //缺陷类型请求
     this.axios
-      .get("http://192.168.6.184:8080/getDefectsName")
+      .get("/getDefectsName")
       .then(res => {
         this.typeOptions = res.data.data.defects;
         window.console.log(res.data);

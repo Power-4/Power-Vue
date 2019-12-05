@@ -8,11 +8,12 @@ import 'element-ui/lib/theme-chalk/index.css';
 import vueAxios from 'vue-axios';
 import http from './utils/http';
 
+
 import VueParticles from 'vue-particles'
 
 Vue.use(VueParticles)
 
-Vue.use(vueAxios, http)
+Vue.use(vueAxios, http,)
 
 Vue.use(ElementUI);
 Vue.config.productionTip = false

@@ -38,7 +38,7 @@
       </el-table>
     </div>
 
-    <div class="icon" @click="icon(one=!one)">
+    <div class="icon" @click="icon(one)">
       <i class="el-icon-caret-right" :class="{on:one}" ></i>
     </div>
 
@@ -124,11 +124,15 @@ export default {
     //父页面选择框
     handleSelectionChange(val) {
       this.check=!this.check;
-      // if(this.isShow == true) {
-      //   window.console.log(this.check)
-      // } else{
-      //   this.icon();
-      // }
+      window.console.log(this.check,"点击父集")
+      
+      if(this.check == true) {
+        this.isShow = true
+        window.console.log(this.isShow,"子打开")
+      } else{
+        this.isShow = false
+        window.console.log(this.isShow,"子关闭")
+      }
       
       this.multipleSelection = val;
       window.console.log(val);
@@ -155,7 +159,7 @@ export default {
             // window.console.log("子集的id",i.sysProId);
             if (i.sysProId == this.Data[0]) {
               this.tableConnect = item.sysProValues;
-              window.console.log( this.tableConnect);
+              // window.console.log( this.tableConnect);
             }
           });
         }
@@ -181,7 +185,7 @@ export default {
         // window.console.log(massage[0].sysProDescribe);
 
         this.axios
-          .get("http://192.168.6.184:8080/syspro/addchangeSysPro", {
+          .get("/syspro/addchangeSysPro", {
             params: {
               sysProId: item,
               sysProName: massage[0].sysProName,
@@ -201,12 +205,13 @@ export default {
     },
     icon() {
       this.isShow = !this.isShow;
-      window.console.log(this.isShow)
+      this.one = !this.one ;
+      window.console.log(this.isShow,"子集打开")
     }
   },
   created() {
     this.axios
-      .post("http://192.168.6.184:8080/syspro/getAllSysProl")
+      .post("/syspro/getAllSysProl")
 
       .then(res => {
         window.console.log(res.data);
