@@ -99,10 +99,13 @@
 
               <!-- 工作单据制定 -->
               <el-form-item label="工作单据:">
-                <el-select v-model="form.workDocuments" placeholder="请选择工作单据">
-                  <el-option label="任务单" value="renwudan"></el-option>
-                  <el-option label="第一张单据" value="one"></el-option>
-                  <el-option label="第二种单据" value="two"></el-option>
+                <el-select v-model="value1" placeholder="请选择工作单据">
+                  <el-option
+                    v-for="item in workDan"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
                 </el-select>
               </el-form-item>
 
@@ -219,18 +222,18 @@
                 <el-table-column prop="issuedPeople" label="下发人" width="178"></el-table-column>
                 <el-table-column prop="issuedDate" label="下发时间" width="178"></el-table-column>
                 <el-table-column prop="taskLeader" label="任务负责人" width="178"></el-table-column>
-                <el-table-column prop=" taskDescription" label="任务描述" width="178"></el-table-column>
+                <el-table-column prop="taskDescription" label="任务描述" width="178"></el-table-column>
               </el-table>
 
               <el-table :data="chakanForm" border style="width: 99%" size="small">
                 <el-table-column prop="fixuser" label="消缺员" width="178"></el-table-column>
                 <el-table-column prop="fixDate" label="消缺时间" width="178"></el-table-column>
-                <el-table-column prop label="负责人审查意见" width="178"></el-table-column>
+                <el-table-column prop="leaderOption" label="负责人审查意见" width="178"></el-table-column>
                 <el-table-column prop label="完成情况描述" width="178"></el-table-column>
               </el-table>
 
               <el-table :data="chakanForm" border style="width: 99%" size="small">
-                <el-table-column prop label="下发人审查意见" width="178"></el-table-column>
+                <el-table-column prop="issuedOption" label="下发人审查意见" width="178"></el-table-column>
               </el-table>
 
               <p>缺陷列表:</p>
@@ -310,22 +313,23 @@
               <!-- 第三列表格 -->
               <el-table :data="shenTable1" border style="width: 100%" size="mini">
                 <el-table-column prop="eliminateVacancies" label="消缺员" width="180"></el-table-column>
-                <el-table-column prop="endTime" label="任务完成时间" width="180"></el-table-column>
+                <el-table-column prop="fixDate" label="任务完成时间" width="180"></el-table-column>
                 <el-table-column prop="wanDes" label="完成情况描述"></el-table-column>
               </el-table>
 
               <!-- 审查意见 -->
               <el-form ref="form" :model="shenform" label-width="80px" size="mini">
                 <el-form-item label="下发人意见">
-                  <el-input type="textarea" v-model="shenform.issued"></el-input>
+                  <el-input type="textarea" v-model="shenform.yijian1" :disabled="issuedShen"></el-input>
                 </el-form-item>
 
                 <el-form-item label="负责人意见">
-                  <el-input type="textarea" v-model="shenform.leader"></el-input>
+                  <el-input type="textarea" v-model="shenform.yijian2" :disabled="leaderShen"></el-input>
                 </el-form-item>
               </el-form>
-              <!--  -->
-              <el-select v-model="value" placeholder="请选择" size="mini">
+              <!-- 是否通过 -->
+              下发人审核是否通过:
+              <el-select v-model="value" placeholder="请选择" size="mini" :disabled="shenStatus">
                 <el-option
                   v-for="item in isPass"
                   :key="item.value"
@@ -335,7 +339,7 @@
               </el-select>
 
               <!-- 缺陷信息列表 -->
-              <el-table :data="fixList" border style="width: 100%" size="mini">
+              <el-table :data="fixList" border style="width: 100%" size="mini" height="150">
                 <el-table-column prop="lineNum" label="线路编号" width="70"></el-table-column>
                 <el-table-column prop="poleNum" label="塔杆编号" width="70"></el-table-column>
                 <el-table-column prop="defectLevels" label="缺陷等级" width="50"></el-table-column>
@@ -344,6 +348,14 @@
                 <el-table-column prop="quot" label="发现人" width="85"></el-table-column>
                 <el-table-column prop="findTime" label="发现时间" width="100"></el-table-column>
               </el-table>
+
+              <!-- 确认审核按钮 -->
+              <el-button
+                type="primary"
+                class="shenCofim"
+                @click="shenCofim()"
+                :disabled="shenCofimBtn"
+              >确认</el-button>
             </el-dialog>
 
             <!-- 修改时的模态框 -->
@@ -371,7 +383,7 @@
 
                   <!-- 工作单据修改 -->
                   <el-form-item label="工作单据:">
-                    <el-select v-model="form.workDocuments" placeholder="请选择工作单据">
+                    <el-select v-model="xiuForm.workDocuments" placeholder="请选择工作单据">
                       <el-option
                         v-for="item in options4"
                         :key="item.value"
@@ -422,27 +434,41 @@
 
                   <!-- 任务消缺员修改 -->
                   <el-form-item label="消缺员:">
-                    <el-input type="textarea" v-model="xiuForm.eliminateVacancies"></el-input>
+                    <el-table
+                      @selection-change="changeFun"
+                      height="100"
+                      :data="xiuxiaoPeople"
+                      border
+                      style="width: 100%"
+                      size="mini"
+                    >
+                      <el-table-column type="selection" width="40"></el-table-column>
+                      <el-table-column prop="id" label="消缺员id" width="100"></el-table-column>
+                      <el-table-column prop="name" label="消缺员" width="180"></el-table-column>
+                    </el-table>
                   </el-form-item>
 
                   <!--  -->
                 </el-form>
                 <!-- 添加缺陷按钮 -->
-                <el-button type="primary" size="small">添加缺陷</el-button>
-                <!-- 缺陷列表 -->
                 <el-table
+                  class="xiuTable"
+                  lazy
+                  v-infinite-scroll="load"
+                  height="150"
+                  @selection-change="fixchangeFun"
                   ref="multipleTable"
-                  :data="tableData4"
+                  :data="tableDataXiu"
                   tooltip-effect="dark"
                   style="width: 100%"
                   size="mini"
                 >
                   <el-table-column type="selection" width="40"></el-table-column>
-
+                  <el-table-column prop="deId" label="id" width="48"></el-table-column>
                   <el-table-column prop="lineNum" label="线路编号" width="70"></el-table-column>
                   <el-table-column prop="poleNum" label="塔杆编号" width="70"></el-table-column>
                   <el-table-column prop="defectLevels" label="缺陷等级" width="50"></el-table-column>
-                  <el-table-column prop="defectTypes" label="缺陷类型" width="100"></el-table-column>
+                  <el-table-column prop="defectTypes" label="缺陷类型" width="80"></el-table-column>
                   <el-table-column prop="defectDes" label="缺陷描述" width="100"></el-table-column>
                   <el-table-column prop="quot" label="发现人" width="85"></el-table-column>
                   <el-table-column prop="findTime" label="发现时间" width="100"></el-table-column>
@@ -469,7 +495,7 @@
       <el-pagination
         :page-size="5"
         layout="prev, pager, next"
-        :total="10"
+        :total="countPage"
         class="pagination"
         @current-change="handleCurrentChange"
       ></el-pagination>
@@ -487,9 +513,19 @@ export default {
       fneValue: [],
       fneArr: [],
       chakanForm: [],
-      xiuForm: {},
+      xiuForm: {
+        taskName: "",
+        workDocuments: "",
+        taskLeader: "",
+        issuedPeople: "",
+        issuedDate: "",
+        taskDescription: "",
+        taskNote: "",
+        eliminateVacancies: ""
+      },
       shenform: {},
       xiaoPeople: [],
+      xiuxiaoPeople: [],
       form: {
         taskName: "",
         workDocuments: "",
@@ -503,6 +539,8 @@ export default {
       input1: "",
       input2: "",
       taskName: "",
+      value1: "",
+
       options: [
         {
           value: "选项1",
@@ -515,6 +553,20 @@ export default {
         {
           value: "选项3",
           label: "第二种单据"
+        }
+      ],
+      workDan: [
+        {
+          value: 1,
+          label: "抬头单据"
+        },
+        {
+          value: 2,
+          label: "银行票据"
+        },
+        {
+          value: 3,
+          label: "邮递单据"
         }
       ],
       taskLeader: [],
@@ -578,11 +630,12 @@ export default {
       fixId: "",
       currentPage: 1, //初始页
       pagesize: 5, //    每页的数据
-      loadCurrentPage: 1, //懒加载初始页
+      countPage: "",
       tableData: [],
       tableData2: [],
       tableData3: [],
       tableData4: [],
+      tableDataXiu: [],
       fixList: [], //审查时缺陷列表
       shenTable1: [], //审查时表格
       dialogFormVisible: false,
@@ -591,6 +644,12 @@ export default {
       fenTask: false,
       shenTask: false,
       isCofim: true,
+      issuedShen: true,
+      leaderShen: true,
+      shenStatus: true,
+      shenCofimBtn: false,
+      issuedId: "",
+      mangerId: "",
       checkList: []
     };
   },
@@ -603,6 +662,61 @@ export default {
         return item.deId;
       }); // 返回的是选中的列的数组集合
       window.console.log(this.fixSelection.join(","));
+    },
+    shenCofim() {
+      window.console.log(this.shenform);
+      window.console.log(this.value);
+      window.console.log(this.fixId);
+
+      window.console.log(this.issuedId);
+      window.console.log(this.mangerId);
+      //发送确认请求
+      if (10000004 == this.issuedId) {
+        this.axios
+          .get("http://192.168.6.184:8080/creatAuditTask", {
+            params: {
+              fixId: this.fixId,
+              createUserOpinion: this.shenform.yijian1,
+              passAudit: this.value
+            }
+          })
+          .then(res => {
+            window.console.log(res);
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
+      } else if (10000004 == this.mangerId) {
+        this.axios
+          .get("http://192.168.6.184:8080/manageAuditTask", {
+            params: {
+              fixId: this.fixId,
+              headUserOpinion: this.shenform.yijian2
+            }
+          })
+          .then(res => {
+            window.console.log(res);
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
+      } else if (10000004 == this.mangerId && 10000003 == this.issuedId) {
+        this.axios
+          .get("http://192.168.6.184:8080/cbossAuditTask", {
+            params: {
+              fixId: this.fixId,
+              createUserOpinion: this.shenform.yijian1,
+              headUserOpinion: this.shenform.yijian2,
+              passAudit: this.value
+            }
+          })
+          .then(res => {
+            window.console.log(res);
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
+      }
     },
     changeFun(val) {
       this.multipleSelection = val.map(function(item) {
@@ -701,13 +815,12 @@ export default {
       this.axios
         .get("http://192.168.6.184:8080/selectFixTask", {
           params: {
-            userId: 10000007,
             currentPage: this.currentPage,
             pageSize: 5
           }
         })
         .then(res => {
-          // window.console.log(res.data.data.fix);
+          window.console.log(res);
           var work = res.data.data.fix.map(function(item) {
             return item.workForm.workFormName;
           });
@@ -770,7 +883,9 @@ export default {
               issuedDate: item.task.createDate,
               taskLeader: item.users.userName,
               taskDescription: item.task.taskDescribe,
-              fixDate: item.task.finishDate
+              fixDate: item.task.finishDate,
+              leaderOption: item.headUserOpinion,
+              issuedOption: item.createUserOpinion
             };
           });
           this.chakanForm = first.map(function(item) {
@@ -867,12 +982,10 @@ export default {
     },
     xiuClick(row) {
       this.xiuTask = true;
-      window.console.log(row);
-    },
-    shenClick(row) {
-      this.shenTask = true;
       window.console.log(row.fixId);
+
       //发送查看请求
+      this.fixId = row.fixId;
       this.axios
         .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
           params: {
@@ -881,7 +994,124 @@ export default {
         })
         .then(res => {
           window.console.log(res);
-          
+          // 绑定数据
+          var newArr = [];
+          newArr.push(res.data.data.fix);
+          var first = newArr.map(function(item) {
+            return {
+              taskNum: item.task.taskNo,
+              taskName: item.task.taskName,
+              workDocuments: item.workForm.workFormName,
+              issuedPeople: item.task.users.userName,
+              issuedDate: item.task.createDate,
+              taskLeader: item.users.userName,
+              taskDescription: item.task.taskDescribe,
+              taskNote: item.task.taskNote
+            };
+          });
+          this.xiuForm = first[0]
+          window.console.log(first);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+      // 获取任务负责人（线路管理员）
+
+      this.axios
+        .get("http://192.168.6.184:8080/selectAllLineUser")
+        .then(res => {
+          var newLeader = res.data.data.users.map(function(item) {
+            return {
+              value: item.userId,
+              label: item.userName
+            };
+          });
+          this.options3 = newLeader.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+
+      // 获取所有的消缺管理员
+      this.axios
+        .get("http://192.168.6.184:8080/selectAllFixUser")
+        .then(res => {
+          window.console.log(res.data.data.users);
+          var newXiao = res.data.data.users.map(function(item) {
+            return {
+              name: item.userName,
+              id: item.userId
+            };
+          });
+          // window.console.log(newXiao);
+
+          this.xiuxiaoPeople = newXiao.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+
+      // 查询缺陷表
+      // this.axios
+      //   .get("http://192.168.6.184:8080/selectPoleDamage")
+      //   .then(res => {
+      //     window.console.log(res.data.data.damageRecord);
+      //     var newQue = res.data.data.damageRecord.map(function(item) {
+      //       return {
+      //         deId: item.damageRecordId,
+      //         lineNum: item.pole.circuitry.circuitryNo,
+      //         poleNum: item.pole.poleNo,
+      //         defectLevels: item.defectsLevel,
+      //         defectTypes: item.defects.defectsName,
+      //         defectDes: item.defectsDescribe,
+      //         quot: item.users.userName,
+      //         findTime: item.findDate
+      //       };
+      //     });
+      //     window.console.log(newQue[0]);
+      //     加入缺陷表中;
+      //     this.tableDataXiu = newQue.map(function(item) {
+      //       return item;
+      //     });
+      //   })
+      //   .catch(err => {
+      //     window.console.log(err);
+      //   });
+    },
+    shenClick(row) {
+      this.shenTask = true;
+      // window.console.log(row.fixId);
+      //发送查看请求
+      this.fixId = row.fixId;
+      this.axios
+        .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res.data.data.fix.users.userId);
+          this.issuedId = res.data.data.fix.task.users.userId;
+          this.mangerId = res.data.data.fix.users.userId;
+
+          if (10000004 == res.data.data.fix.task.users.userId) {
+            this.issuedShen = false;
+            this.shenStatus = false;
+          } else if (10000004 == res.data.data.fix.users.userId) {
+            this.leaderShen = false;
+          } else if (
+            10000004 == res.data.data.fix.users.userId &&
+            10000004 == res.data.data.fix.task.users.userId
+          ) {
+            this.issuedShen = false;
+            this.leaderShen = false;
+            this.shenStatus = false;
+          }
+
           // 绑定数据
           var newArr = [];
           newArr.push(res.data.data.fix);
@@ -895,19 +1125,20 @@ export default {
               issuedDate: item.task.createDate,
               taskLeader: item.users.userName,
               taskDescription: item.task.taskDescribe,
-              fixDate: item.task.finishDate
+              fixDate: item.task.finishDate,
+              wanDes: item.headUserOpinion
             };
           });
           this.shenTable1 = first.map(function(item) {
             return item;
           });
-          window.console.log(this.chakanForm);
+          // window.console.log(this.chakanForm);
           // 绑定消缺员数据
           var fixUser = res.data.data.fixUser.map(function(item) {
             return item.userName;
           });
           this.shenTable1[0].eliminateVacancies = fixUser.join(",");
-          window.console.log(this.chakanForm[0]);
+          // window.console.log(this.chakanForm[0]);
         })
         .catch(err => {
           window.console.log(err);
@@ -934,7 +1165,7 @@ export default {
               findTime: item.findDate
             };
           });
-          window.console.log(newQue);
+          // window.console.log(newQue);
           this.fixList = newQue.map(function(item) {
             return item;
           });
@@ -979,6 +1210,7 @@ export default {
     addXiao() {
       this.dialogFormVisible = true;
       // 获取任务负责人（线路管理员）
+
       this.axios
         .get("http://192.168.6.184:8080/selectAllLineUser")
         .then(res => {
@@ -1046,19 +1278,21 @@ export default {
     addTaskCofim() {
       // 确认添加新项目
       window.console.log(this.form);
+      window.console.log(this.value1);
+      window.console.log(this.form.taskLeader);
       this.axios
         .get("http://192.168.6.184:8080/addFixTask", {
           params: {
             taskNo: this.form.taskNum,
             taskName: this.form.taskName,
-            userId: 10000007,
+            userId: 10000003,
             createDate: this.form.createDate,
             taskNote: this.form.taskNote,
             taskDescribe: this.form.taskDescription,
-            workFormId: 1,
+            workFormId: this.value1,
             damageRecordId: this.fixSelection.join(","),
             fixUserId: this.multipleSelection.join(","),
-            manageUserId: 10000007
+            manageUserId: this.form.taskLeader
           }
         })
         .then(res => {
@@ -1075,13 +1309,13 @@ export default {
     this.axios
       .get("http://192.168.6.184:8080/selectFixTask", {
         params: {
-          userId: 10000007,
           currentPage: 1,
           pageSize: 5
         }
       })
       .then(res => {
-        window.console.log(res);
+        window.console.log(res.data.data.count);
+        this.countPage = res.data.data.count;
         var work = res.data.data.fix.map(function(item) {
           return item.workForm.workFormName;
         });
@@ -1121,6 +1355,15 @@ export default {
           }
         }
         window.console.log(this.tableData);
+      })
+      .catch(err => {
+        window.console.log(err);
+      });
+
+    this.axios
+      .get("http://192.168.6.184:8080/selectAllWorkForm")
+      .then(res => {
+        window.console.log(res);
       })
       .catch(err => {
         window.console.log(err);
@@ -1200,6 +1443,15 @@ li {
   // }
   .time {
     width: 150px;
+  }
+
+  .shenCofim {
+    margin-top: 15px;
+    margin-left: 300px;
+  }
+
+  .xiuTable {
+    margin-top: 20px;
   }
 }
 
