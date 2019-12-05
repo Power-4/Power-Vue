@@ -264,18 +264,13 @@
               type="text"
               size="small"
               @click="fenClick(scope.row)"
-              :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
+              :disabled="scope.row.isCancel == '是'?true:(scope.row.taskStatus == '审核中'?true:(scope.row.taskStatus == '驳回'?true:false))"
             >分配任务</el-button>
 
             <!-- 分配任务时的模态框 -->
             <el-dialog title="分配任务" :visible.sync="fenTask">
               <el-transfer v-model="fneValue" :data="fneArr"></el-transfer>
-              <el-button
-                type="primary"
-                class="fenCofim"
-                @click="fenCofirm()"
-                :disabled="fneValue.length == 0?true:false"
-              >确认分配</el-button>
+              <el-button type="primary" class="fenCofim" @click="fenCofirm()">确认分配</el-button>
             </el-dialog>
             <el-button
               v-if="scope.row.taskStatus == '审核中'"
@@ -289,7 +284,7 @@
               type="text"
               size="small"
               @click="xiuClick(scope.row)"
-              :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
+              :disabled="scope.row.isCancel == '是'?true:(scope.row.taskStatus == '审核中'?true:(scope.row.taskStatus == '驳回'?true:false))"
             >修改</el-button>
 
             <!-- 审查时的模态框 -->
@@ -482,11 +477,20 @@
             </el-dialog>
 
             <el-button
+              v-if="scope.row.isCancel == '是'?false:true"
               type="text"
               size="small"
               @click="open(scope.row)"
               :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
             >取消</el-button>
+            <el-button
+              v-else
+              type="text"
+              size="small"
+              @click="open2(scope.row)"
+              
+            >开启</el-button>
+
           </template>
         </el-table-column>
       </el-table>
@@ -673,7 +677,7 @@ export default {
       //发送确认请求
       if (10000004 == this.issuedId) {
         this.axios
-          .get("http://192.168.6.184:8080/creatAuditTask", {
+          .get("/creatAuditTask", {
             params: {
               fixId: this.fixId,
               createUserOpinion: this.shenform.yijian1,
@@ -688,7 +692,7 @@ export default {
           });
       } else if (10000004 == this.mangerId) {
         this.axios
-          .get("http://192.168.6.184:8080/manageAuditTask", {
+          .get("/manageAuditTask", {
             params: {
               fixId: this.fixId,
               headUserOpinion: this.shenform.yijian2
@@ -702,7 +706,7 @@ export default {
           });
       } else if (10000004 == this.mangerId && 10000003 == this.issuedId) {
         this.axios
-          .get("http://192.168.6.184:8080/cbossAuditTask", {
+          .get("/cbossAuditTask", {
             params: {
               fixId: this.fixId,
               createUserOpinion: this.shenform.yijian1,
@@ -763,7 +767,7 @@ export default {
         this.statusValue = -1;
       }
       this.axios
-        .get("http://192.168.6.184:8080/selectFixTaskByFind", {
+        .get("/selectFixTaskByFind", {
           params: {
             currentPage: 1,
             pageSize: 5,
@@ -826,7 +830,7 @@ export default {
       this.currentPage = currentPage;
       window.console.log(this.currentPage); //点击第几页
       this.axios
-        .get("http://192.168.6.184:8080/selectFixTask", {
+        .get("/selectFixTask", {
           params: {
             currentPage: this.currentPage,
             pageSize: 5
@@ -853,7 +857,8 @@ export default {
               issuedPeople: item.users.userName,
               issuedDate: item.createDate,
               taskStatus: item.systemPropertiesValue.sysProValueName,
-              completionTime: item.finishDate
+              completionTime: item.finishDate,
+              isCancel: item.isCancel
             };
           });
           // window.console.log(newArr);
@@ -865,6 +870,13 @@ export default {
           this.tableData = newArr.map(function(item) {
             return item;
           });
+           for (var j = 0; j < this.tableData.length; j++) {
+          if (this.tableData[j].isCancel == 1) {
+            this.tableData[j].isCancel = "否";
+          } else if (this.tableData[j].isCancel == 0) {
+            this.tableData[j].isCancel = "是";
+          }
+        }
           window.console.log(this.tableData);
         })
         .catch(err => {
@@ -875,7 +887,7 @@ export default {
       window.console.log(row.fixId);
       //发送查看请求
       this.axios
-        .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
+        .get("/selectFixTaskByFixId", {
           params: {
             fixId: row.fixId
           }
@@ -918,7 +930,7 @@ export default {
 
       // 查看当前任务缺陷
       this.axios
-        .get("http://192.168.6.184:8080/selectPoleDamageByFixId", {
+        .get("/selectPoleDamageByFixId", {
           params: {
             fixId: row.fixId
           }
@@ -952,10 +964,34 @@ export default {
       window.console.log(row.fixId);
       this.fixId = row.fixId;
       //获取所有消缺员
+      // this.axios
+      //   .get("http://192.168.6.184:8080/selectAllFixUser")
+      //   .then(res => {
+      //     window.console.log(res);
+      // var fixUserList = res.data.data.users.map(function(item) {
+      //   return {
+      //     key: item.userId,
+      //     label: item.userName,
+      //     disabled: false
+      //   };
+      // });
+      // this.fneArr = fixUserList.map(function(item) {
+      //   return item;
+      // });
+      // window.console.log(this.fneArr);
+      //   })
+      //   .catch(err => {
+      //     window.console.log(err);
+      //   });
+
       this.axios
-        .get("http://192.168.6.184:8080/selectAllFixUser")
+        .get("/selectWaitFixUserByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
         .then(res => {
-          window.console.log(res.data.data.users);
+          window.console.log(res);
           var fixUserList = res.data.data.users.map(function(item) {
             return {
               key: item.userId,
@@ -971,6 +1007,37 @@ export default {
         .catch(err => {
           window.console.log(err);
         });
+      // 查询对应的消缺员
+
+      this.axios
+        .get("/selectFixUserByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          this.fneValue = res.data.data.users.map(function(item) {
+            return item.userId;
+          });
+          window.console.log(this.fneValue);
+
+          var selectFix = res.data.data.users.map(function(item) {
+            return {
+              key: item.userId,
+              label: item.userName,
+              disabled: false
+            };
+          });
+
+          for (var k = 0; k < selectFix.length; k++) {
+            this.fneArr.push(selectFix[k]);
+          }
+          window.console.log(this.fneArr);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
 
     fenCofirm() {
@@ -979,7 +1046,7 @@ export default {
       var fixUserId = this.fneValue.join(",");
       window.console.log(fixUserId);
       this.axios
-        .get("http://192.168.6.184:8080/updateTaskUserRelation", {
+        .get("/updateTaskUserRelation", {
           params: {
             fixId: this.fixId,
             fixUserId: fixUserId
@@ -1000,7 +1067,7 @@ export default {
       //发送查看请求
       this.fixId = row.fixId;
       this.axios
-        .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
+        .get("/selectFixTaskByFixId", {
           params: {
             fixId: row.fixId
           }
@@ -1031,7 +1098,7 @@ export default {
       // 获取任务负责人（线路管理员）
 
       this.axios
-        .get("http://192.168.6.184:8080/selectAllLineUser")
+        .get("/selectAllLineUser")
         .then(res => {
           var newLeader = res.data.data.users.map(function(item) {
             return {
@@ -1049,7 +1116,7 @@ export default {
 
       // 获取所有的消缺管理员
       this.axios
-        .get("http://192.168.6.184:8080/selectAllFixUser")
+        .get("/selectAllFixUser")
         .then(res => {
           window.console.log(res.data.data.users);
           var newXiao = res.data.data.users.map(function(item) {
@@ -1096,18 +1163,19 @@ export default {
       //   });
     },
     shenClick(row) {
+      
       this.shenTask = true;
       // window.console.log(row.fixId);
       //发送查看请求
       this.fixId = row.fixId;
       this.axios
-        .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
+        .get("/selectFixTaskByFixId", {
           params: {
             fixId: row.fixId
           }
         })
         .then(res => {
-          window.console.log(res.data.data.fix.users.userId);
+          window.console.log(res);
           this.issuedId = res.data.data.fix.task.users.userId;
           this.mangerId = res.data.data.fix.users.userId;
 
@@ -1139,9 +1207,19 @@ export default {
               taskLeader: item.users.userName,
               taskDescription: item.task.taskDescribe,
               fixDate: item.task.finishDate,
-              wanDes: item.headUserOpinion
+              wanDes: item.accomplishDescribe
             };
           });
+          var leader = newArr.map(function(item) {
+            return item.headUserOpinion;
+          });
+          this.shenform.yijian2 = leader.join("");
+          window.console.log(this.shenform.yijian2);
+          if(this.shenform.yijian2 == "") {
+             this.issuedShen = true;
+             this.shenCofimBtn = true;
+          }
+          window.console.log(first);
           this.shenTable1 = first.map(function(item) {
             return item;
           });
@@ -1159,7 +1237,7 @@ export default {
 
       // 查看当前任务缺陷
       this.axios
-        .get("http://192.168.6.184:8080/selectPoleDamageByFixId", {
+        .get("/selectPoleDamageByFixId", {
           params: {
             fixId: row.fixId
           }
@@ -1197,13 +1275,14 @@ export default {
         .then(() => {
           // 发送取消请求
           this.axios
-            .get("http://192.168.6.184:8080/updateTaskIsCancel", {
+            .get("/updateTaskIsCancel", {
               params: {
                 fixId: row.fixId
               }
             })
             .then(res => {
               window.console.log(res);
+              // this.init();
             })
             .catch(err => {
               window.console.log(err);
@@ -1220,12 +1299,46 @@ export default {
           });
         });
     },
+    open2(row) {
+      window.console.log(row.fixId);
+      this.$confirm("此操作将开启该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          // 发送开启请求
+          this.axios
+            .get("/startTaskIsCancel", {
+              params: {
+                fixId: row.fixId
+              }
+            })
+            .then(res => {
+              window.console.log(res);
+              // this.init();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
+          this.$message({
+            type: "success",
+            message: "开启成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消"
+          });
+        });
+    },
     addXiao() {
       this.dialogFormVisible = true;
       // 获取任务负责人（线路管理员）
 
       this.axios
-        .get("http://192.168.6.184:8080/selectAllLineUser")
+        .get("/selectAllLineUser")
         .then(res => {
           var newLeader = res.data.data.users.map(function(item) {
             return {
@@ -1242,7 +1355,7 @@ export default {
         });
       // 获取所有的消缺管理员
       this.axios
-        .get("http://192.168.6.184:8080/selectAllFixUser")
+        .get("/selectAllFixUser")
         .then(res => {
           window.console.log(res.data.data.users);
           var newXiao = res.data.data.users.map(function(item) {
@@ -1263,7 +1376,7 @@ export default {
 
       // 查询缺陷表
       this.axios
-        .get("http://192.168.6.184:8080/selectPoleDamage")
+        .get("/selectPoleDamage")
         .then(res => {
           // window.console.log(res.data.data.damageRecord);
           var newQue = res.data.data.damageRecord.map(function(item) {
@@ -1294,7 +1407,7 @@ export default {
       window.console.log(this.value1);
       window.console.log(this.form.taskLeader);
       this.axios
-        .get("http://192.168.6.184:8080/addFixTask", {
+        .get("/addFixTask", {
           params: {
             taskNo: this.form.taskNum,
             taskName: this.form.taskName,
@@ -1312,22 +1425,24 @@ export default {
           window.console.log(res);
           this.form = {};
           this.dialogFormVisible = false;
+          // this.init();
         })
         .catch(err => {
           window.console.log(err);
         });
     }
+   
   },
   created: function() {
     this.axios
-      .get("http://192.168.6.184:8080/selectFixTask", {
+      .get("/selectFixTask", {
         params: {
-          currentPage: 1,
+          currentPage: this.currentPage,
           pageSize: 5
         }
       })
       .then(res => {
-        window.console.log(res.data.data.count);
+        window.console.log(res);
         this.countPage = res.data.data.count;
         var work = res.data.data.fix.map(function(item) {
           return item.workForm.workFormName;
@@ -1373,14 +1488,14 @@ export default {
         window.console.log(err);
       });
 
-    this.axios
-      .get("http://192.168.6.184:8080/selectAllWorkForm")
-      .then(res => {
-        window.console.log(res);
-      })
-      .catch(err => {
-        window.console.log(err);
-      });
+    // this.axios
+    //   .get("/selectAllWorkForm")
+    //   .then(res => {
+    //     window.console.log(res);
+    //   })
+    //   .catch(err => {
+    //     window.console.log(err);
+    //   });
   }
 };
 </script>

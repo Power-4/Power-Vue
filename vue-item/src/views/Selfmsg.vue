@@ -1,5 +1,9 @@
 <template>
   <div class="selfMsg">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>个人信息</el-breadcrumb-item>
+      <el-breadcrumb-item>个人资料修改</el-breadcrumb-item>
+    </el-breadcrumb>
     <!-- 用户框 -->
     <el-form
       class="abc"
@@ -124,7 +128,8 @@ export default {
       //
       var userId = sessionStorage.getItem("userId");
       if (userId) {
-        var words = `http://192.168.6.184:8080/user/showUser?userId=${userId}`;
+        // http://192.168.6.184:8080
+        var words = `/user/showUser?userId=${userId}`;
         this.axios.get(words).then(res => {
           window.console.log(res.data.data.user);
           this.user.age = res.data.data.user.age;
@@ -159,18 +164,22 @@ export default {
         window.console.log("未登录");
       }
     },
+    // ===============================修改个人资料==========================
     updateUserMsg() {
-      var words = `http://192.168.6.184:8080/user/modifyUser`;
+      // http://192.168.6.184:8080
+      var words = `/user/modifyUser`;
       this.axios
-        .post(words, {
-          userId: this.user.userId,
-          userName: this.user.userName,
-          sex: this.user.sex,
-          age: this.user.age,
-          joinDate: this.user.joinDate,
-          leavingDate: this.user.leavingDate,
-          phone: this.user.phone,
-          email: this.user.email
+        .get(words, {
+          params: {
+            userId: this.user.userId,
+            userName: this.user.userName,
+            sex: this.user.sex,
+            age: this.user.age,
+            joinDate: this.user.joinDate,
+            leavingDate: this.user.leavingDate,
+            phone: this.user.phone,
+            email: this.user.email
+          }
         })
         .then(res => {
           window.console.log(res);
@@ -197,7 +206,8 @@ export default {
       // 可以拿到 token
       window.console.log(window.sessionStorage.getItem("token"));
       this.axios({
-        url: "http://192.168.6.184:8080/user/modifyPassword",
+        // http://192.168.6.184:8080
+        url: "/user/modifyPassword",
         method: "POST",
         // 415
         // headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -327,14 +337,18 @@ export default {
         role: [
           { required: true, message: "请输入现在的密码", trigger: "blur" }
         ],
-        sex: [{ required: true, message: "请输入现在的密码", trigger: "blur" }],
+        sex: [
+          {
+            required: true,
+            pattern: /^(男|女)$/,
+            message: "请输入性别男或女",
+            trigger: "blur"
+          }
+        ],
         systemPropertiesValue: [
           { required: true, message: "请输入现在的密码", trigger: "blur" }
         ],
         userId: [
-          { required: true, message: "请输入现在的密码", trigger: "blur" }
-        ],
-        userName: [
           { required: true, message: "请输入现在的密码", trigger: "blur" }
         ],
         userPwd: [
@@ -348,6 +362,20 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.lu {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(218, 218, 218);
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
+  span:nth-of-type(2) {
+    font-size: 14px;
+    padding-top: 1px;
+  }
+}
 .form-left {
   width: 50%;
   float: left;

@@ -1,5 +1,10 @@
 <template>
   <div class="role">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-button @click="seeLog" type="text" size="small" class="log">用户日志</el-button>
+    </el-breadcrumb>
     <div class="topRole">
       <el-form>
         <el-form-item label="用户名称：">
@@ -16,12 +21,7 @@
       </el-form>
     </div>
 
-    <el-table
-      stripe
-      style="width: 100%"
-      border
-      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
-    >
+    <el-table stripe style="width: 100%" border :data="tableData">
       <!-- age: null -->
       <!-- email: "Orchid_phy@outlook.com" -->
       <!-- isCheck: "启用" -->
@@ -34,10 +34,11 @@
       <!-- userId: 10000001 -->
       <!-- userName: "Orchid" -->
       <!-- userPwd: null -->
-      <el-table-column prop="userId" label="用户ID" width="130"></el-table-column>
-      <el-table-column prop="userName" label="用户账号" width="150"></el-table-column>
+      <el-table-column prop="userId" label="用户ID" width="100"></el-table-column>
+      <el-table-column prop="userName" label="用户账号" width="110"></el-table-column>
       <el-table-column prop="roleName" label="用户角色" width="100"></el-table-column>
-      <el-table-column prop="phone" label="电话" width="150"></el-table-column>
+      <el-table-column prop="lastLoginTime" label="最后登录时间" width="180"></el-table-column>
+      <el-table-column prop="phone" label="电话" width="120"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
       <el-table-column prop="isCheck" label="状态" width="180"></el-table-column>
       <el-table-column prop="sex" label="性别"></el-table-column>
@@ -54,7 +55,6 @@
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
           <el-button @click="del(scope.row)" type="text" size="small">删除</el-button>
-          <el-button @click="seeLog(scope.$index, tableData)" type="text" size="small">日志</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -118,14 +118,49 @@
         <div class="box">
           <div>
             <el-button class="coloraaa" @click="sendUpdata">确认</el-button>
-            <el-button @click="addDataTab = false">取消</el-button>
+            <el-button @click="updataTab = false">取消</el-button>
           </div>
         </div>
       </el-form>
     </el-dialog>
 
-    <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
-      <!-- 插入类型 -->
+    <el-dialog title="查看用户日志" :visible.sync="seeLogTab" width="800px">
+      <span>选择时间</span>
+
+      <el-date-picker
+        v-model="logData"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        value-format="yyyy-MM-dd"
+        format="yyyy-MM-dd"
+      ></el-date-picker>
+      <el-button @click="sendLogData">查询</el-button>
+      <div class="blockbox"></div>
+      <el-table
+        stripe
+        style="width: 100%"
+        border
+        :data="logTableData"
+      >
+        <!-- // userLogId: 1;
+      // userLogOperationDate: "2019-11-29";
+        // userLogOperationInformation;-->
+        <el-table-column prop="userLogId" label="编号"></el-table-column>
+        <el-table-column prop="userLogOperationDate" label="时间"></el-table-column>
+        <el-table-column prop="userLogOperationInformation" label="日志信息"  width="400px"></el-table-column>
+      </el-table>
+      <div class="block">
+        <el-pagination
+          layout="prev, pager, next"
+          :total="logPages"
+          @size-change="logHandleSizeChange"
+          @current-change="logHandleCurrentChange"
+          :page-size="logPagesize"
+          class="pages"
+        ></el-pagination>
+      </div>
     </el-dialog>
 
     <el-dialog title="添加用户" :visible.sync="addUserDialog">
@@ -211,7 +246,8 @@ export default {
       // userPwd: null -->
     },
     sendUpdata() {
-      var words = `http://192.168.6.184:8080/userManage/modifyUserMessage?userName=${this.obj.userName}&userPwd=&roleName=${this.obj.roleName}&joinDate=&leavingDate=&sysProValueName=正常`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/modifyUserMessage?userName=${this.obj.userName}&userPwd=&roleName=${this.obj.roleName}&joinDate=&leavingDate=&sysProValueName=正常`;
       this.axios.get(words).then(res => {
         window.console.log(res);
         if (res.data.data.code == 200) {
@@ -232,22 +268,18 @@ export default {
     updataUser() {
       this.updataTab = false;
     },
-    // 查看日志按钮--------------------------------------------------
-    seeLog() {
-      this.seeLogTab = true;
-    },
     // 获取日志
     loadLog() {},
     // 添加用户按钮--------------------------------------------------
     // 获取角色类型select数据的函数
     getPowerSelect() {
-      var words = `http://192.168.6.184:8080/permission/getAllRoleName`;
+      // http://192.168.6.184:8080
+      var words = `/permission/getAllRoleName`;
       this.axios.get(words).then(res => {
         window.console.log(res);
         this.powerSelect = res.data.data.roleNames;
       });
     },
-
     // 点击按钮弹出添加角色函数
     openAddUserBTN() {
       this.addUserDialog = true;
@@ -258,7 +290,8 @@ export default {
     // 发送添加用户请求
     sendAddUser() {
       window.console.log("添加用户");
-      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinDate=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinDate=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
@@ -302,7 +335,8 @@ export default {
           });
           // 通过传入 scope.row 获取 选取的对象，获得id
           window.console.log(obj);
-          var words = `http://192.168.6.184:8080/userManage/deleteUserMessage?userId=${obj.userId}`;
+          // http://192.168.6.184:8080
+          var words = `/userManage/deleteUserMessage?userId=${obj.userId}`;
           this.axios.get(words).then(res => {
             window.console.log(res);
             this.loadData();
@@ -349,10 +383,15 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+      window.console.log(this.currpage);
+      this.loadData();
     },
     // 加载页面----------------------------------------------------------4
     loadData() {
-      var words = `http://192.168.6.184:8080/userManage/showAllUsers?pagesize=${this.pagesize}&currpage=${this.currpage}`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/showAllUsers?pageSize=${this.pagesize}&currentPage=${this.currpage}`;
+      // http://192.168.6.184:8080/userManage/showAllUsers?pageSize=2&currentPage=1
+      window.console.log(words);
       this.axios.get(words).then(res => {
         this.tableData = res.data.data.usersList;
         this.pages = res.data.data.count;
@@ -360,14 +399,16 @@ export default {
         for (var i = 0; i < this.tableData.length; i++) {
           this.tableData[i].isCheck = res.data.data.userStates[i];
           this.tableData[i].roleName = this.tableData[i].role.roleName;
+          this.tableData[i].lastLoginTime = res.data.data.lastLoginTimes[i];
         }
-        window.console.log(this.tableData);
+        window.console.log(res.data.data);
       });
     },
     // ===========================搜索部分===============================
     sendSearch() {
       this.currpage = 1;
-      var words = `http://192.168.6.184:8080/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log("搜索结果", res.data.data);
@@ -376,9 +417,60 @@ export default {
         for (var i = 0; i < this.tableData.length; i++) {
           this.tableData[i].isCheck = res.data.data.userStates[i];
           this.tableData[i].roleName = this.tableData[i].role.roleName;
+          this.tableData[i].lastLoginTime = res.data.data.lastLoginTimes[i];
         }
         window.console.log(this.tableData);
       });
+    },
+    // 添加用户----------------------------------------------------------
+    // 每页几条
+    // ========================查看日志============================
+    logHandleSizeChange(val) {
+      this.logPagesize = val;
+    },
+    // 当前页数
+    logHandleCurrentChange(val) {
+      this.logCurrpage = val;
+      // 换页加载
+      this.sendGetlogMsg();
+    },
+    seeLog() {
+      this.seeLogTab = true;
+      // 请求日志信息
+      this.sendGetlogMsg();
+    },
+    sendGetlogMsg() {
+      // http://192.168.6.184:8080
+      var words = `/userManage/showUserLog?pageSize=${this.logPagesize}&currentPage=${this.logCurrpage}`;
+      window.console.log(words);
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+        this.maliLogData(res);
+      });
+    },
+    // 发送请求
+    sendLogData() {
+      if (this.logData == "") {
+        window.console.log("日期为空");
+        return;
+      }
+      window.console.log(this.logData);
+      var startDate = this.logData[0];
+      var endtDate = this.logData[1];
+      window.console.log(startDate, endtDate);
+      // http://192.168.6.184:8080
+      var words = `/userManage/showUserLogBySelectDate?pageSize=${this.logPagesize}&startTime=${startDate}&endTime=${endtDate}`;
+      window.console.log(words);
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+        // 渲染信息
+        this.maliLogData(res);
+      });
+    },
+    // 处理用户信息
+    maliLogData(res) {
+      this.logTableData = res.data.data.userLogList;
+      this.logPages = res.data.data.count;
     }
   },
   created() {
@@ -386,6 +478,19 @@ export default {
   },
   data() {
     return {
+      // --------------------------------------------------------------
+      // 日志的分页信息
+      logCurrpage: 1,
+      logPagesize: 3,
+      logPages: 4,
+      logData: "",
+      // 日志信息
+      // 序号
+      // 用户名
+      // 操作信息
+      // 操作时间
+      logTableData: [],
+      logdiolog: false,
       // 修改用户数据模态框----------------------------------------------1
       updataTab: false,
       obj: {
@@ -479,8 +584,29 @@ export default {
   }
 };
 </script>
-
+<style lang="less" scoped>
+.log {
+  font-size: 16px;
+}
+.lu {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(218, 218, 218);
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
+  span:nth-of-type(2) {
+    font-size: 14px;
+    padding-top: 1px;
+  }
+}
+</style>
 <style>
+.blockbox {
+  height: 20px;
+}
 .form-box {
   widows: 800px;
   margin: 0 auto;

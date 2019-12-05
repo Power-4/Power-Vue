@@ -1,5 +1,9 @@
 <template>
   <div class="role">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>角色管理</el-breadcrumb-item>
+    </el-breadcrumb>
     <div class="topRole">
       <el-form>
         <el-form-item label="角色名称：">
@@ -15,11 +19,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table
-      stripe
-      style="width: 100%"
-      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
-    >
+    <el-table stripe style="width: 100%" :data="tableData">
       <!-- roleId:  -->
       <!-- roleName:  -->
       <!-- roleNo:  -->
@@ -39,7 +39,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
+          <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
           <el-button @click="deleteRow(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -60,10 +60,10 @@
     <el-dialog title="修改角色信息" :visible.sync="updataTab">
       <!-- 插入类型 -->
       <el-form>
-        <el-form-item label="手机号码">
+        <el-form-item label="角色名">
           <el-input v-model="roleData.roleName"></el-input>
         </el-form-item>
-        <el-form-item label="手机号码">
+        <el-form-item label="角色编号">
           <el-input v-model="roleData.roleNo"></el-input>
           <!-- roleName -->
           <!-- roleNo -->
@@ -102,7 +102,22 @@
     </el-dialog>
   </div>
 </template>
-
+<style lang="less">
+.lu {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(218, 218, 218);
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
+  span:nth-of-type(2) {
+    font-size: 14px;
+    padding-top: 1px;
+  }
+}
+</style>
 <style>
 .el-radio__input.is-checked .el-radio__inner {
   border-color: #5ee4e4;
@@ -243,7 +258,8 @@ export default {
             message: "删除成功"
           });
           // 输出id
-          var c = `http://192.168.6.184:8080/userManage/deleteUserMessage?roleId=${index.roleId}`;
+          // http://192.168.6.184:8080
+          var c = `/userManage/deleteUserMessage?roleId=${index.roleId}`;
           window.console.log(c);
           this.axios.get(c).then(res => {
             window.console.log(res);
@@ -261,26 +277,13 @@ export default {
     updata(index) {
       // 弹出由 :visible.sync 绑定的模态框
       this.updataTab = true;
-      //
-      // 获取准确 id
-      var a = this.currpage - 1;
-      var b = a * this.pagesize + index;
-
-      var thisid = 0;
-      for (var i = 0; i < this.tableData.length; i++) {
-        if (this.tableData[i].roleId == this.tableData[b].roleId) {
-          thisid = i;
-          break;
-        }
-      }
-      // 添加东西
-      this.roleData.roleName = this.tableData[thisid].roleName;
-      this.roleData.roleNo = this.tableData[thisid].roleNo;
-      this.roleData.systemPropertiesValue.sysProValueName = this.tableData[
-        thisid
-      ].systemPropertiesValue.sysProValueName;
-      this.roleData.roleId = this.tableData[thisid].roleId;
-      window.console.log(this.roleData);
+      // 此处 index 对象
+      window.console.log(index);
+      this.roleData.roleName = index.roleName;
+      this.roleData.roleNo = index.roleNo;
+      this.roleData.systemPropertiesValue.sysProValueName =
+        index.systemPropertiesValue.sysProValueName;
+      this.roleData.roleId = index.roleId;
     },
     // 分页函数
     // 每页几条
@@ -300,10 +303,9 @@ export default {
     isRoleNoOk() {
       if (this.role.roleNo == "") return;
       window.console.log("roleNo检测");
+      // http://192.168.6.184:8080
       this.axios
-        .get(
-          `http://192.168.6.184:8080/role/isExistsRoleNo?roleNo=${this.role.roleNo}`
-        )
+        .get(`/role/isExistsRoleNo?roleNo=${this.role.roleNo}`)
         .then(res => {
           window.console.log(res);
           if (res.data.code == "200") {
@@ -318,11 +320,12 @@ export default {
       if (this.roleNameOk == 1 && this.roleNoOk == 1) {
         window.console.log("开始添加角色");
         window.console.log(window.sessionStorage.getItem("userId"));
+        // http://192.168.6.184:8080
         this.axios
           .get(
-            `http://192.168.6.184:8080/role/addRole?roleName=${
-              this.role.roleName
-            }&roleNo=${this.role.roleNo}&sysProValueName=${
+            `/role/addRole?roleName=${this.role.roleName}&roleNo=${
+              this.role.roleNo
+            }&sysProValueName=${
               this.radio
             }&userId=${window.sessionStorage.getItem("userId")}`
           )
@@ -340,7 +343,8 @@ export default {
     },
     // 搜索内容
     getSearch() {
-      var words = `http://192.168.6.184:8080/role/fuzzyQueryShowRole?pagesize=${this.pagesize}&currpage=${this.currpage}&roleName=${this.search}&sysProValueName=${this.searchSelect}`;
+      // http://192.168.6.184:8080
+      var words = `/role/fuzzyQueryShowRole?pagesize=${this.pagesize}&currpage=${this.currpage}&roleName=${this.search}&sysProValueName=${this.searchSelect}`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log("加载角色", res);
@@ -366,7 +370,8 @@ export default {
     // 加载角色f
     LoadData() {
       // 获取平台数据
-      var words = `http://192.168.6.184:8080/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
+      // http://192.168.6.184:8080
+      var words = `/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
       this.axios
         .get(words)
         .then(res => {
@@ -402,7 +407,8 @@ export default {
       window.console.log(this.roleData.roleName);
       window.console.log(this.roleData.systemPropertiesValue.sysProValueName);
 
-      var b = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleNo=${this.roleData.roleNo}&roleName=${this.roleData.roleName}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`;
+      // http://192.168.6.184:8080
+      var b = `/role/modifyRoleNoAndRoleName?roleNo=${this.roleData.roleNo}&roleName=${this.roleData.roleName}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`;
       window.console.log(b);
       this.axios.get(b).then(res => {
         window.console.log("修改角色", res);
@@ -455,7 +461,7 @@ export default {
       },
       // 显示分页------------------------------------------------------4
       // 分页数据 一页显示最大数，当前页数
-      pagesize: 3,
+      pagesize: 4,
       currpage: 1,
       pages: 3,
       // 表格数据渲染----------------------------------------------------6

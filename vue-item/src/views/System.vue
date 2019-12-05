@@ -1,25 +1,5 @@
 <template>
   <div class="system">
-    <nav>
-      <router-link to="/system" @click.native="isCheck=1" :class="[isCheck==1 ? c1 : c2]">角色管理</router-link>
-
-
-      <router-link @click.native="isCheck=2" :class="[isCheck==2 ? c1 : c2]" to="/system/users">用户管理</router-link>
-
-
-      <router-link
-        @click.native="isCheck=3"
-        :class="[isCheck==3 ? c1 : c2]"
-        to="/system/power"
-      >角色权限管理</router-link>
-
-
-      <router-link
-        @click.native="isCheck=4"
-        :class="[isCheck==4 ? c1 : c2]"
-        to="/system/config"
-      >系统配置</router-link>
-    </nav>
     <section>
       <router-view></router-view>
     </section>

@@ -9,28 +9,28 @@
             <span>{{lineBasic.taskNo}}</span>  
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务名称：</label>
             <span>{{lineBasic.taskName}}</span>  
           </div>
           </el-col>
-        <el-col :span="5">
+        <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>巡检线路：</label>
             <span>{{lineBasic.circuitry.circuitryName}}</span> 
           </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>起始杆号：</label>
-            <span>{{lineBasic.circuitry.startPole.poleId}}</span> 
+            <span>{{lineBasic.taskPoleRelation.startPoleNo}}</span> 
           </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>终止杆号：</label>
-            <span>{{lineBasic.circuitry.endPole.poleId}}</span> 
+            <span>{{lineBasic.taskPoleRelation.endPoleNo}}</span> 
           </div>
         </el-col>
       </el-row>
@@ -41,19 +41,19 @@
             <span>{{lineBasic.users.userName}}</span>  
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
             <span>{{lineBasic.createDate}}</span>  
           </div>
           </el-col>
-        <el-col :span="5">
+        <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>任务状态：</label>
             <span>{{lineBasic.systemPropertiesValue.sysProValueName}}</span> 
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务完成时间：</label>
             <span>{{lineBasic.finishDate}}</span> 
@@ -62,6 +62,9 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span>{{lineBasic.taskNote}}</span></div></el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span :v-model="nowinspectors"></span></div></el-col>
       </el-row>
 
 
@@ -117,16 +120,11 @@ export default {
   data() {
     return {
       lineBasic: {
+        taskId:'',
         taskNo: '',
         taskName: '',
         circuitry: {
-          circuitryName: '',
-          startPole: {
-            circuitry: ''
-          },
-          endPole: {
-            circuitry: ''
-          }
+          circuitryName: ''
         },
         users: {
           userName: ''
@@ -134,7 +132,13 @@ export default {
         systemPropertiesValue: {
           sysProValueName: ''
         },
+        taskPoleRelation: {
+          startPoleNo: '',
+          endPoleNo: ''
+        }
       },
+      nowinspectors: '',
+      nowinspector: [],
       
       lines: [
         {
@@ -166,20 +170,43 @@ export default {
   },
   created() {
     this.getParams();
-    window.console.log(this.lineBasic.taskId)
 
-    this.axios.get('http://192.168.6.184:8080/showTaskandPoles?',{params:{taskId: this.lineBasic.taskId}})
+    // this.axios.get('/showTaskandPoles?',{params:{taskId: this.lineBasic.taskId}})
+    // .then((res) => {
+    //   this.lineBasic = res.data.data.taskAndPoles.task;
+    //   res.data.data.taskAndPoles.poles.forEach((item)=> {
+    //     var i = {};
+    //     i.id = item.poleId,
+    //     i.label = item.poleNo;
+    //     this.lines[0].children.push(i)
+    //   })
+      
+    //   this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
+    //   window.console.log(res.data);
+    // })
+    // .catch((err) => { 
+    //   window.console.log("错误",err)
+    // })
+
+    this.axios.get('/checkMissionS?',{params:{taskId: this.$route.query.taskId}})
     .then((res) => {
-      this.lineBasic = res.data.data.taskAndPoles.task;
-      res.data.data.taskAndPoles.poles.forEach((item)=> {
+      this.lineBasic = res.data.data.taskInfo;
+      res.data.data.poles.forEach((item)=> {
         var i = {};
         i.id = item.poleId,
         i.label = item.poleNo;
         this.lines[0].children.push(i)
       })
-      
-      this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
-      window.console.log(res.data);
+
+      res.data.data.inspectors.forEach((item)=> {
+        var i = {};
+        i.userName = item.userName;
+        this.nowinspector.push(i.userName);
+      })
+      this.nowinspectors = this.nowinspector.toString();
+      window.console.log(this.nowinspectors)
+      this.lines[0].label = res.data.data.taskInfo[0].circuitry.circuitryName;
+      window.console.log('任务对应杆号',res.data);
     })
     .catch((err) => { 
       window.console.log("错误",err)
@@ -204,20 +231,38 @@ export default {
         this.lineDetail.poleNo= '';
       }
 
-      this.axios.get('http://192.168.6.184:8080/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
-      .then((res) => {
-        this.lineDetail = res.data.data.taskAndPoles;
+
+      // this.axios.get('/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
+      // .then((res) => {
+      //   this.lineDetail = res.data.data.taskAndPoles;
   
-        if(res.data.data.taskAndPoles.hasDefects == 1) {
-          res.data.data.taskAndPoles.hasDefects = '有'
-        } else if (res.data.data.taskAndPoles.hasDefects == 0) {
-          res.data.data.taskAndPoles.hasDefects = '无'
-        }
+      //   if(res.data.data.taskAndPoles.hasDefects == 1) {
+      //     res.data.data.taskAndPoles.hasDefects = '有'
+      //   } else if (res.data.data.taskAndPoles.hasDefects == 0) {
+      //     res.data.data.taskAndPoles.hasDefects = '无'
+      //   }
+      //   window.console.log(res.data);
+      // })
+      // .catch((err) => { 
+      //   window.console.log("错误",err)
+      // })
+
+      this.axios.get('/showPoleInfosS?',{params:{poleId: lines.id}})
+      .then((res) => {
+        // this.lineDetail = res.data.data.taskAndPoles;
+  
+        // if(res.data.data.taskAndPoles.hasDefects == 1) {
+        //   res.data.data.taskAndPoles.hasDefects = '有'
+        // } else if (res.data.data.taskAndPoles.hasDefects == 0) {
+        //   res.data.data.taskAndPoles.hasDefects = '无'
+        // }
         window.console.log(res.data);
       })
       .catch((err) => { 
         window.console.log("错误",err)
       })
+
+
 
     }
   }
@@ -237,7 +282,7 @@ export default {
   .base-info {
     width: 100%;
     height: 150px;
-    padding: 22px 5px 0;
+    padding: 10px 5px 0;
     margin-bottom: 10px;
     box-sizing: border-box;
     border: 1px solid #000;

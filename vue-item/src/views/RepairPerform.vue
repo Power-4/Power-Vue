@@ -54,7 +54,7 @@
             >></el-date-picker>
           </div>
         </el-col>
-        <el-button type="primary" class="repair-query" @click="chaxun()">查询</el-button>
+        <el-button type="text" @click="chaxun()">查询</el-button>
       </el-row>
 
       <!-- 下方表格 -->
@@ -69,7 +69,7 @@
         <el-table-column prop="isCancel" label="是否取消" width="75"></el-table-column>
         <el-table-column prop label="操作" width="229">
           <template slot-scope="scope">
-            <el-button @click="chakanClick(scope.row)" type="text" size="small">查看</el-button>
+            <el-button @click="chakanClick(scope.row)" type="text"  size="small" class="wb_chakan">查看</el-button>
             <!-- 查看时的模态框 -->
             <el-dialog title="详情" :visible.sync="checkTask">
               <el-table :data="chakanForm" border size="small">
@@ -152,11 +152,11 @@
               <el-button @click="checkTask=false">返回</el-button>
             </el-dialog>
 
-            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')">执行录入</el-button>
+            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')" :disabled="scope.row.quan[0]" >执行录入</el-button>
 
-            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')">修改</el-button>
+            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')" :disabled="scope.row.quan[1]" >修改</el-button>
 
-            <el-button type="text" size="small" @click="open(scope.row)">执行</el-button>
+            <el-button type="text" size="small" @click="open(scope.row)" :disabled="scope.row.quan[2]">执行</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -243,7 +243,7 @@ export default {
       }
 
       this.axios
-        .get("http://192.168.6.184:8080/fix/getFixByConditions", {
+        .get("/fix/getFixByConditions", {
           params: {
             currentPage: currentPage||1,
             pageSize: this.pagesize,
@@ -268,7 +268,24 @@ export default {
             data.workDocuments = item.workForm.workFormName;
             data.issuedPeople = item.task.users.userName;
             data.issuedDate = item.task.createDate;
-            data.taskStatus = item.task.systemPropertiesValue.sysProValueName;
+            data.taskStatus = item.task.systemPropertiesValue.sysProValueName; // 任务状态
+            
+            data.quan=[true,true,true]; // 是否可用
+           if(data.taskStatus=="执行中"||data.taskStatus=="已完成") 
+           {
+             data.quan[0]=false
+           }
+           if(data.taskStatus=="待分配"||data.taskStatus=="已分配") 
+           {
+             data.quan[1]=false
+           }
+           if(data.taskStatus=="已分配") 
+           {
+             data.quan[2]=false
+           }
+
+            
+
             data.completionTime = item.task.finishDate;
             item.task.isCancel == 1
               ? (data.isCancel = "是")
@@ -289,7 +306,7 @@ export default {
       this.fixId = row.fixId;
 
       this.axios
-        .get("http://192.168.6.184:8080/fix/getfixpolebyfixid", {
+        .get("/fix/getfixpolebyfixid", {
           params: {
             fixId: row.fixId
           }
@@ -303,8 +320,9 @@ export default {
 
           this.chakanForm[0].taskNum = mydata.task.taskNo; // 任务编号
           this.chakanForm[0].taskName = mydata.task.taskName; //任务名称
-          this.chakanForm[0].taskStatus =
-            mydata.task.systemPropertiesValue.sysProValueName; // 任务状态
+          this.chakanForm[0].taskStatus = mydata.task.systemPropertiesValue.sysProValueName; // 任务状态
+        
+
           this.chakanForm[0].workDocuments = mydata.workForm.workFormName; // 工作单据
           this.chakanForm[0].issuedPeople = mydata.task.users.userName; // 下发人
           this.chakanForm[0].issuedDate = mydata.task.createDate; // 下发时间
@@ -347,7 +365,7 @@ export default {
     },
     xiugai() {
       this.axios
-        .get("http://192.168.6.184:8080/fix/submitfix", {
+        .get("/fix/submitfix", {
           params: {
             accomplishDescribe: this.wanmiaoshu,
             interruptDelayRecord: this.interruptDelayRecord,
@@ -374,7 +392,7 @@ export default {
         .then(() => {
            var userId=10000047;
           this.axios
-            .get(`http://192.168.6.184:8080/fix/executetask?fixId=${this.fixId}&userId=${userId}`)
+            .get(`/fix/executetask?fixId=${this.fixId}&userId=${userId}`)
             .then(res => {
              
               window.console.log(res);
@@ -396,7 +414,7 @@ export default {
     },
     danju() {
       this.axios
-        .get("http://192.168.6.184:8080/fix/getallworkform")
+        .get("/fix/getallworkform")
         .then(res => {
           res.data.data.workForms.forEach(item => {
             var newDanju = {};
@@ -405,7 +423,7 @@ export default {
             this.options.push(newDanju);
           });
         });
-    }
+    },
   },
   created: function() {
     this.danju();
@@ -452,6 +470,7 @@ export default {
 
   .repair-query {
     height: 32px;
+  
   }
 
   .repair-add {
@@ -480,6 +499,9 @@ export default {
   // }
 }
 
+.wb_chakan{
+  padding-right: 10px;
+}
 .el-tabs__item {
   font-size: 18px;
 }

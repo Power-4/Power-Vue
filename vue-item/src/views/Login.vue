@@ -106,6 +106,7 @@ export default {
 
       this.axios({
         url: "http://192.168.6.132:8080/user/login",
+        url: "/user/login",
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
@@ -117,6 +118,7 @@ export default {
           //
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
+          window.sessionStorage.setItem("userName", res.data.data.user.userName);
           var role = JSON.stringify(res.data.data.user.role);
           window.sessionStorage.setItem("role", role);
           this.$router.replace("/a");
