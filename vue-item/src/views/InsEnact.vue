@@ -41,7 +41,7 @@
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="createDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
+            <el-date-picker v-model="createDate" type="date" placeholder="选择日期" value-format="yyyy/MM/dd"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="3">
@@ -136,7 +136,6 @@
         <el-button @click="resetForm('addform',adddialogVisible=false)">取 消</el-button>
         <el-button type="primary" @click="resetForm('addform')">重 置</el-button>
         <el-button type="primary" @click="addSubmit('addform')">确 定</el-button>
-        <!-- ,adddialogVisible = false -->
       </span>
     </el-dialog>
 
@@ -218,11 +217,9 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <!-- <el-button @click="modifyclear(modifydialogVisible = false)">取 消</el-button> -->
         <el-button @click="resetForm('modifyform',modifydialogVisible = false)">取 消</el-button>
         <el-button type="primary" @click="resetForm('modifyform')">重 置</el-button>
         <el-button type="primary" @click="modifySubmit('modifyform')">确 定</el-button>
-        <!-- ,modifydialogVisible = false -->
       </span>
     </el-dialog>
 
@@ -231,6 +228,7 @@
         <template slot-scope="scope">
           <el-popover>
             <p>ID: {{ scope.row.taskId}}</p>
+            <p>circuitryId: {{ scope.row.circuitry.circuitryId}}</p>
             <div slot="reference">
               {{ scope.row.taskNo }}
             </div>
@@ -277,7 +275,7 @@ export default {
       taskNo: "",
       circuitryNo: "",
       userName: "",
-      createDate: "",
+      createDate: null,
       taskState: "",
       stateOptions: [],
       circuitryNames: [],
@@ -333,7 +331,9 @@ export default {
       value: [],
       nowTaskId: null,
       isQuery: false,
-      nowInspector: []
+      nowInspector: [],
+      nowcircuitryId: ''
+
     };
   },
   created() {
@@ -502,6 +502,8 @@ export default {
 
     // 制定任务根据线路id请求杆号
     selectChanged(value) {
+      this.modifyform.startPoleNo = '';
+      this.modifyform.endPoleNo = '';
       window.console.log(value)
       this.axios.get('/selectPoleNoByCircuitryIdS?',{params:{circuitryId: value}})
       .then((res) => {
@@ -606,6 +608,7 @@ export default {
       this.modifyform.startPoleNo = this.tableData[index].circuitry.startPole.poleNo;
       this.modifyform.endPoleNo = this.tableData[index].circuitry.endPole.poleNo;
       this.modifyform.describe = this.tableData[index].taskNote;
+      this.nowcircuitryId = this.tableData[index].circuitry.circuitryId;
       
       // 获取当前任务巡检线路杆列表
       this.axios.get('/selectPoleNoByCircuitryIdS?',{
@@ -646,13 +649,12 @@ export default {
     modifySubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // alert('确定提交数据吗');
           this.axios.get('/changeTaskS?',{
             params: {
               taskId: this.nowTaskId,
               taskNo: this.modifyform.taskNo,
               taskName: this.modifyform.taskName,
-              circuitryId: this.modifyform.circuitryName,
+              circuitryId: this.nowcircuitryId,
               inspectorId: this.modifyform.inspectPerson.toString(),
               startPoleNo: this.modifyform.startPoleNo,
               endPoleNo: this.modifyform.endPoleNo,
@@ -696,7 +698,7 @@ export default {
         window.console.log(this.isQuery);
         this.axios.get('/selectTasksByConditionS?',{
           params: {
-            currentPage: this.currentPage,
+            currentPage: val,
             pageSize: this.pageSize,
             userName: this.userName,
             startTime: this.createDate,
