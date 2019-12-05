@@ -54,7 +54,7 @@
             >></el-date-picker>
           </div>
         </el-col>
-        <el-button type="primary" class="repair-query" @click="chaxun">查询</el-button>
+        <el-button type="primary" class="repair-query" @click="chaxun()">查询</el-button>
       </el-row>
 
       <!-- 下方表格 -->
@@ -71,7 +71,7 @@
           <template slot-scope="scope">
             <el-button @click="chakanClick(scope.row)" type="text" size="small">查看</el-button>
             <!-- 查看时的模态框 -->
-            <el-dialog title="查看任务" :visible.sync="checkTask">
+            <el-dialog title="详情" :visible.sync="checkTask">
               <el-table :data="chakanForm" border size="small">
                 <el-table-column prop="taskNum" label="任务编号" width="178"></el-table-column>
                 <el-table-column prop="taskName" label="任务名称" width="178"></el-table-column>
@@ -90,7 +90,17 @@
                 <el-table-column prop="xiaoqueren" label="消缺员" width="178"></el-table-column>
                 <el-table-column prop="xiaoqueTime" label="消缺时间" width="178"></el-table-column>
                 <el-table-column prop="fuzheyijian" label="负责人审查意见" width="178"></el-table-column>
-                <el-table-column prop="wanmiaoshu" label="完成情况描述" width="178"></el-table-column>
+                <el-table-column prop="wanmiaoshu" label="完成情况描述" width="178">
+                  <template slot-scope="scope">
+                    <el-input
+                      type="textarea"
+                      autosize
+                      placeholder="请输入内容"
+                      :readonly="!xiuTask"
+                      v-model="wanmiaoshu"
+                    >{{scope.wanmiaoshu}}</el-input>
+                  </template>
+                </el-table-column>
               </el-table>
 
               <el-table :data="chakanForm" border style="width: 99%" size="small">
@@ -116,123 +126,37 @@
 
               <!--  -->
               <el-table :data="chakanForm" border style="width: 100%" size="small">
-                <el-table-column prop="interruptDelayRecord" label="工作间断延期报告" width="358"></el-table-column>
-                <el-table-column prop="workSummaryReport" label="工作总结报告" width="358"></el-table-column>
+                <el-table-column prop="interruptDelayRecord" label="工作间断延期报告" width="358">
+                  <template slot-scope="scope">
+                    <el-input
+                      type="textarea"
+                      autosize
+                      :readonly="!xiuTask"
+                      placeholder="请输入内容"
+                      v-model="interruptDelayRecord"
+                    >{{scope.wanmiaoshu}}</el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="workSummaryReport" label="工作总结报告" width="358">
+                  <template slot-scope="scope">
+                    <el-input
+                      type="textarea"
+                      autosize
+                      :readonly="!xiuTask"
+                      v-model="workSummaryReport"
+                    >{{scope.wanmiaoshu}}</el-input>
+                  </template>
+                </el-table-column>
               </el-table>
+              <el-button v-if="xiuTask" @click="xiugai()">确定</el-button>
+              <el-button @click="checkTask=false">返回</el-button>
             </el-dialog>
 
-            <el-button type="text" size="small" @click="fenClick(scope.row)">执行录入</el-button>
+            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')">执行录入</el-button>
 
-            <!-- 分配任务时的模态框 -->
-            <el-dialog title="分配任务" :visible.sync="fenTask">
-              <el-transfer v-model="fneValue" :data="fneArr"></el-transfer>
-              <el-button type="primary" class="fenCofim">确认分配</el-button>
-            </el-dialog>
-            
-            <el-button type="text" size="small" @click="xiuClick(scope.row)">修改</el-button>
-            <!-- 修改时的模态框 -->
-            <el-dialog title="修改任务" :visible.sync="xiuTask">
-              <div style="width:100%; height:700px;">
-                <el-form
-                  class="zhidingMotai xiugaiMoTai"
-                  size="mini"
-                  :inline="true"
-                  label-position="left"
-                  ref="form"
-                  :model="xiuForm"
-                  label-width="86px"
-                  style="height:40%"
-                >
-                  <!-- 任务编码修改 -->
-                  <el-form-item label="任务编码:">
-                    <el-input v-model="xiuForm.taskNum"></el-input>
-                  </el-form-item>
+            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')">修改</el-button>
 
-                  <!-- 任务名称修改 -->
-                  <el-form-item label="任务名称:">
-                    <el-input v-model="xiuForm.taskName"></el-input>
-                  </el-form-item>
-
-                  <!-- 工作单据修改 -->
-                  <el-form-item label="工作单据:">
-                    <el-select v-model="form.workDocuments" placeholder="请选择工作单据">
-                      <el-option label="任务单" value="renwudan"></el-option>
-                      <el-option label="第一张单据" value="one"></el-option>
-                      <el-option label="第二种单据" value="two"></el-option>
-                    </el-select>
-                  </el-form-item>
-
-                  <!-- 任务负责人修改 -->
-                  <el-form-item label="任务负责人:">
-                    <el-select v-model="xiuForm.taskLeader" placeholder="请选择任务负责人">
-                      <el-option label="线路管理测试用户1" value="taskLeaderOne"></el-option>
-                      <el-option label="线路管理测试用户3" value="taskLeaderTwo"></el-option>
-                      <el-option label="线路管理测试用户2" value="taskLeaderThree"></el-option>
-                    </el-select>
-                  </el-form-item>
-
-                  <!-- 下发人修改 -->
-                  <el-form-item label="下发人:">
-                    <el-input v-model="xiuForm.issuedPeople"></el-input>
-                  </el-form-item>
-
-                  <!-- 下发时间修改 -->
-                  <el-form-item label="下发时间:">
-                    <el-col :span="14">
-                      <el-date-picker
-                        type="date"
-                        placeholder="选择日期"
-                        v-model="xiuForm.issuedDate"
-                        style="width: 100%;"
-                      ></el-date-picker>
-                    </el-col>
-                  </el-form-item>
-
-                  <!-- 任务描述修改 -->
-                  <el-form-item label="任务描述:">
-                    <el-input type="textarea" v-model="xiuForm.taskDescription"></el-input>
-                  </el-form-item>
-
-                  <!-- 任务备注修改 -->
-                  <el-form-item label="任务备注:">
-                    <el-input type="textarea" v-model="xiuForm.taskNote"></el-input>
-                  </el-form-item>
-
-                  <!-- 任务消缺员修改 -->
-                  <el-form-item label="消缺员:">
-                    <el-input type="textarea" v-model="xiuForm.eliminateVacancies"></el-input>
-                  </el-form-item>
-
-                  <!--  -->
-                </el-form>
-                <!-- 添加缺陷按钮 -->
-                <el-button type="primary" size="small">添加缺陷</el-button>
-                <!-- 缺陷列表 -->
-                <el-table
-                  ref="multipleTable"
-                  :data="tableData2"
-                  tooltip-effect="dark"
-                  style="width: 100%"
-                  size="mini"
-                >
-                  <el-table-column type="selection" width="40"></el-table-column>
-                  <el-table-column prop="lineNum" label="线路编号" width="84"></el-table-column>
-                  <el-table-column prop="poleNum" label="塔杆编号" width="84"></el-table-column>
-                  <el-table-column prop="defectLevels" label="缺陷等级" width="50"></el-table-column>
-                  <el-table-column prop="defectTypes" label="缺陷类型" width="100"></el-table-column>
-                  <el-table-column prop="defectDes" label="缺陷描述" width="100"></el-table-column>
-                  <el-table-column prop="quot" label="发现人" width="85"></el-table-column>
-                  <el-table-column prop="findTime" label="发现时间" width="100"></el-table-column>
-                  <el-table-column prop="defectCaozuo" label="操作" width="75">
-                    <el-button type="text" size="mini" @click="open()">取消</el-button>
-                  </el-table-column>
-                </el-table>
-                <!-- 确认制定按钮 -->
-                <el-button type="primary" class="addXiaoQueren">确认修改消缺任务</el-button>
-              </div>
-            </el-dialog>
-
-            <el-button type="text" size="small" @click="open()">执行</el-button>
+            <el-button type="text" size="small" @click="open(scope.row)">执行</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -295,39 +219,23 @@ export default {
       pagesize: 5, //    每页的数据
       countPage: null, // 页面总数
       tableData: [],
-      tableData2: [
-        {
-          lineNum: 123456,
-          poleNum: 45678,
-          defectLevels: "一般",
-          defectTypes: "叉梁断裂",
-          defectDes: "断裂了",
-          quot: "羊海龙",
-          findTime: "2019/11/28"
-        },
-        {
-          lineNum: 123456,
-          poleNum: 45678,
-          defectLevels: "一般",
-          defectTypes: "叉梁断裂",
-          defectDes: "断裂了",
-          quot: "羊海龙",
-          findTime: "2019/11/28"
-        }
-      ],
+      tableData2: [],
+      fixId: null,
+      wanmiaoshu: "", //任务完成描述
+      interruptDelayRecord: "", //工作间断延期报告
+      workSummaryReport: "", // 工作总结报告
       checkTask: false,
-      xiuTask: false,
-      fenTask: false
+      xiuTask: false
     };
   },
   methods: {
     handleCurrentChange: function(currentPage) {
       this.currentPage = currentPage;
-      this.chaxun( currentPage );
+      this.chaxun(currentPage);
     },
     chaxun(currentPage) {
-      var startTime = "1700/01/01";
-      var endTime = "2700/01/01";
+      var startTime = "1970/01/01";
+      var endTime = "2050/01/01";
 
       if (this.value2) {
         startTime = this.value2[0];
@@ -337,7 +245,7 @@ export default {
       this.axios
         .get("http://192.168.6.184:8080/fix/getFixByConditions", {
           params: {
-            currentPage:currentPage||1,
+            currentPage: currentPage||1,
             pageSize: this.pagesize,
             taskNo: this.input1,
             workFormId: this.value,
@@ -375,9 +283,10 @@ export default {
           window.console.log(err);
         });
     },
-    chakanClick(row) {
-      // this.chakanForm = [];
-      // this.chakanForm.push(row);
+    chakanClick(row, xiuTask) {
+      xiuTask ? (this.xiuTask = true) : (this.xiuTask = false);
+
+      this.fixId = row.fixId;
 
       this.axios
         .get("http://192.168.6.184:8080/fix/getfixpolebyfixid", {
@@ -387,8 +296,8 @@ export default {
         })
         .then(res => {
           window.console.log(res.data);
-          this.chakanForm=[{}];
-          this.tableData2=[];
+          this.chakanForm = [{}];
+          this.tableData2 = [];
 
           var mydata = res.data.data.fix;
 
@@ -411,27 +320,24 @@ export default {
 
           this.chakanForm[0].xiaoqueTime = mydata.task.finishDate; // 消缺时间
           this.chakanForm[0].fuzheyijian = mydata.headUserOpinion; // 负责人意见
-          this.chakanForm[0].wanmiaoshu = mydata.accomplishDescribe; // 完成情况描述
+          this.wanmiaoshu = mydata.accomplishDescribe; // 完成情况描述
           this.chakanForm[0].xiayijian = mydata.createUserOpinion; // 下发人审查意见
 
+          this.interruptDelayRecord = mydata.interruptDelayRecord; //中断记录
+          this.workSummaryReport = mydata.workSummaryReport; //延期记录
 
-          this.chakanForm[0].interruptDelayRecord=mydata.interruptDelayRecord;  //中断记录
-          this.chakanForm[0].workSummaryReport = mydata.workSummaryReport; //延期记录
-
-          
-          res.data.data.poles.forEach((item,index)=>{
-            var data ={};
+          res.data.data.poles.forEach((item, index) => {
+            var data = {};
             data.lineNum = res.data.data.circuitries[index].circuitryNo; //  线路编号
-            data.poleNum =item.damageRecord.pole.poleNo    //杆塔编号
-            data.defectLevels =item.damageRecord.defectsLevel    //缺陷等级
-            data.defectTypes =item.damageRecord.defects.defectsName    //缺陷类型
-            data.defectDes= item.damageRecord.defectsDescribe //缺陷描述
-            data.quot=item.damageRecord.users.userName //发现人
-            data.findTime=item.damageRecord.findDate //发现时间
+            data.poleNum = item.damageRecord.pole.poleNo; //杆塔编号
+            data.defectLevels = item.damageRecord.defectsLevel; //缺陷等级
+            data.defectTypes = item.damageRecord.defects.defectsName; //缺陷类型
+            data.defectDes = item.damageRecord.defectsDescribe; //缺陷描述
+            data.quot = item.damageRecord.users.userName; //发现人
+            data.findTime = item.damageRecord.findDate; //发现时间
 
             this.tableData2.push(data);
-          })
-          
+          });
 
           this.checkTask = true;
         })
@@ -439,42 +345,52 @@ export default {
           window.console.log(err);
         });
     },
-    fenClick() {
-      this.fenTask = true;
+    xiugai() {
       this.axios
-        .post("http://192.168.6.184:8080/fix/getFixByConditions", {
-          currentPage: this.currentPage,
-          pageSize: this.pagesize
+        .get("http://192.168.6.184:8080/fix/submitfix", {
+          params: {
+            accomplishDescribe: this.wanmiaoshu,
+            interruptDelayRecord: this.interruptDelayRecord,
+            workSummaryReport: this.workSummaryReport,
+            fixId: this.fixId
+          }
         })
         .then(res => {
-          window.console.log(res.data);
+          window.console.log("这是修改后的", res);
+          this.checkTask = false;
         })
         .catch(err => {
-          window.console.log(err);
+          window.console.log("修改失败了", err);
         });
     },
-    xiuClick(row) {
-      this.xiuTask = true;
-      window.console.log(row);
-      Object.assign(this.xiuForm, row);
-      window.console.log(this.xiuForm);
-    },
-    open() {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+    open(scope) {
+      this.fixId=scope.fixId;
+
+      this.$confirm("确定执行", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!"
-          });
+           var userId=10000047;
+          this.axios
+            .get(`http://192.168.6.184:8080/fix/executetask?fixId=${this.fixId}&userId=${userId}`)
+            .then(res => {
+             
+              window.console.log(res);
+              
+              
+
+              this.$message({
+                type: "success",
+                message: "执行成功!"
+              });
+            });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除"
+            message: "已取消执行"
           });
         });
     },

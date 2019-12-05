@@ -153,7 +153,7 @@ export default {
 
       window.console.log(this.total);
 
-      var url = "http://192.168.6.184:8080";
+      var url = "";
       this.wdname == "xun" ? (url += "/showCensusRecordsS") : (url += "/selectFixRecordByFind");
 
       this.axios
