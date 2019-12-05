@@ -13,9 +13,8 @@
         stripe
         style="width: 100%"
         @selection-change="handleSelectionChange"
-        ref="multipleTable"
-      >
-        <el-table-column width="55" type="selection"></el-table-column>
+        ref="multipleTable">
+        <el-table-column width="55" type="selection" :class="{ischeck:check}"></el-table-column>
         <el-table-column prop="sysProTypeCode" label="配置类型编码" width="150" align="center">
           <template slot-scope="scope">
             <el-input v-model="scope.row.sysProTypeCode" style="width:150"></el-input>
@@ -39,14 +38,14 @@
       </el-table>
     </div>
 
-    <div class="icon" @click="icon()">
-      <i class="el-icon-caret-right" :class="{on:one}" @click="one=!one"></i>
+    <div class="icon" @click="icon(one=!one)">
+      <i class="el-icon-caret-right" :class="{on:one}" ></i>
     </div>
 
     <div class="child-icon" v-show="isShow">
       <div class="config-parameter">
         <el-row>
-          <el-button type="primary">新增</el-button>
+          <el-button type="primary" @click="adds()">新增</el-button>
           <el-button type="primary">保存</el-button>
           <el-button type="primary">取消</el-button>
         </el-row>
@@ -56,7 +55,7 @@
           :data="tableConnect"
           stripe
           style="width: 100%"
-          @selection-change="handleSelectionChange"
+          @selection-change="SelectionChange"
           ref="multipleTable"
         >
           <el-table-column type="selection" width="55"></el-table-column>
@@ -86,7 +85,8 @@ export default {
       Data: [], //父集
       Connect: [], //子集
       one: false,
-      isShow: false
+      isShow: false,
+      check:  false
     };
   },
   methods: {
@@ -116,8 +116,20 @@ export default {
           window.console.log(err);
         });
     },
+    //子页面选择框
+    SelectionChange(val) {
+      this.multipleSelection = val;
+      window.console.log(val);
+    },
+    //父页面选择框
     handleSelectionChange(val) {
-      this.icon((this.one = !this.one));
+      this.check=!this.check;
+      // if(this.isShow == true) {
+      //   window.console.log(this.check)
+      // } else{
+      //   this.icon();
+      // }
+      
       this.multipleSelection = val;
       window.console.log(val);
       this.Data = [];
@@ -131,26 +143,33 @@ export default {
       });
 
       // window.console.log("子集", this.Connect);
-      // window.console.log("父集", this.Data[0]);
+      // window.console.log("父集id", this.Data[0]);
       // window.console.log("父集", this.tableData);
 
       this.tableData.forEach(item => {
         // window.console.log("子集信息", item.sysProValues);
 
-        if (!item.sysProValues == undefined) {
+        if (item.sysProValues != undefined) {
+            
           item.sysProValues.forEach(i => {
             // window.console.log("子集的id",i.sysProId);
             if (i.sysProId == this.Data[0]) {
               this.tableConnect = item.sysProValues;
+              window.console.log( this.tableConnect);
             }
           });
         }
       });
     },
-    //添加数组
+    //父集添加数组
     add() {
       var item = {};
       this.tableData.push(item);
+    },
+     //子集集添加数组
+    adds() {
+      var item = {};
+      this.tableConnect.push(item);
     },
     //保存信息 - 修改信息
     seave() {
@@ -182,6 +201,7 @@ export default {
     },
     icon() {
       this.isShow = !this.isShow;
+      window.console.log(this.isShow)
     }
   },
   created() {

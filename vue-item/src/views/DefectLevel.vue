@@ -74,7 +74,7 @@
       </el-row>
     </div>
     <div class="save">
-      <el-col :span="6">
+      <el-col :span="6" class="searchs">
         <div class="grid-content bg-purple">
           <el-button type="text" class="btn-query" @click="save()">保存</el-button>
         </div>
@@ -182,10 +182,17 @@ export default {
           window.console.log(res.data);
           this.tableData = res.data.data.defectsVO;
           this.count = res.data.data.count;
-          
+          this.$message({
+            type: "success",
+            message: "查询成功!"
+          });
         })
         .catch(err => {
           window.console.log(err);
+          this.$message({
+            type: "info",
+            message: "查询失败"
+          });
         });    
     },
     //保存
@@ -204,9 +211,17 @@ export default {
             this.tableData = res.data.data.defectsVO;
             this.count = res.data.data.count;
             this.Init();
+            this.$message({
+            type: "success",
+            message: "保存成功!"
+          });
           })
           .catch(err => {
             window.console.log(err);
+            this.$message({
+            type: "info",
+            message: "保存失败"
+          });
           });
         }
       });
@@ -356,5 +371,9 @@ export default {
 .search {
   float: right;
   margin-right: 70px;
+}
+.searchs {
+  
+  margin-left: 20px;
 }
 </style>

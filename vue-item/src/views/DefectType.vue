@@ -147,9 +147,17 @@ export default {
           .then(res => {
             window.console.log(res.data);
             this.Init(); //调用初始化函数
+            this.$message({
+            type: "success",
+            message: "修改成功!"
+          });
           })
           .catch(err => {
             window.console.log(err);
+            this.$message({
+            type: "info",
+            message: "修改失败！"
+          });
           });
     },
     //删除按钮
@@ -221,10 +229,6 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!"
-          });
         window.console.log("当前所删除的id",this.defectsId);
         this.axios.get("http://192.168.6.184:8080/defectsOrchid/deleteDefectsById", {
           params:{
@@ -234,9 +238,17 @@ export default {
           .then(res => {
             window.console.log(res.data);
             this.Init(); //调用初始化函数
+              this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
           })
           .catch(err => {
             window.console.log(err);
+            this.$message({
+            type: "info",
+            message: "删除失败"
+          });
           });
         })
         .catch(() => {
@@ -248,11 +260,20 @@ export default {
     }
   },
   created() {
-    this.axios
-      .post("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
-        currentPage: this.currpage,
-        pageSize: this.pagesize
-      })
+    // ("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
+    //     currentPage: this.currpage,
+    //     pageSize: this.pagesize
+    //   })
+    
+    // window.console.log(window.sessionStorage['userId'])
+    // window.console.log(window.sessionStorage['token'])
+    this.axios({
+      methods:"POST",
+      url:"http://192.168.6.184:8080/defectsOrchid/getDefectsByPage",
+      headers:{
+        'Token':window.sessionStorage['token']
+      }
+    })
       .then(res => {
         window.console.log(res.data);
         this.tableData = res.data.data.defects;

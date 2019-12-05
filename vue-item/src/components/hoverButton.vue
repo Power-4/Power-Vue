@@ -53,8 +53,12 @@
           <span slot="title">缺陷管理</span>
         </template>
         <el-menu-item-group>
-          <el-menu-item index="/defect">缺陷类型名称</el-menu-item>
-          <el-menu-item index="/defectLevel">缺陷等级确认</el-menu-item>
+          <el-menu-item index="/defect?name=type"
+          
+          
+          
+          >缺陷类型名称</el-menu-item>
+          <el-menu-item index="/defectLevel?name=level">缺陷等级确认</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
 
@@ -104,7 +108,6 @@
 .myIc::before{
   color: rgb(255, 255, 255);
 }
-
 </style>
 
 <script>
