@@ -117,6 +117,7 @@ export default {
           //
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
+          window.sessionStorage.setItem("userName", res.data.data.user.userName);
           var role = JSON.stringify(res.data.data.user.role);
           window.sessionStorage.setItem("role", role);
           this.$router.replace("/a");

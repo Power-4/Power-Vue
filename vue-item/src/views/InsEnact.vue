@@ -347,13 +347,13 @@ export default {
     })
     .then((res) => {
       this.tableData = res.data.data.tasks;
-      for(var i = 0; i< res.data.data.tasks.length; i++) {
-        if(res.data.data.tasks[i].isCancel == 1) {
-          res.data.data.tasks[i].isCancel = '是'
-        } else if (res.data.data.tasks[i].isCancel == 0) {
-          res.data.data.tasks[i].isCancel = '否'
-        }
-      }
+      // for(var i = 0; i< res.data.data.tasks.length; i++) {
+      //   if(res.data.data.tasks[i].isCancel == 1) {
+      //     res.data.data.tasks[i].isCancel = '是'
+      //   } else if (res.data.data.tasks[i].isCancel == 0) {
+      //     res.data.data.tasks[i].isCancel = '否'
+      //   }
+      // }
       this.count = res.data.data.count;
       window.console.log("初始化",res.data);
     })
