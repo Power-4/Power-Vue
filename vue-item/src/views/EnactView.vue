@@ -6,31 +6,31 @@
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
-            <span>{{lineBasic.taskNo}}</span>  
+            <span>{{taskNo}}</span>  
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务名称：</label>
-            <span>{{lineBasic.taskName}}</span>  
+            <span>{{taskName}}</span>  
           </div>
           </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>巡检线路：</label>
-            <span>{{lineBasic.circuitry.circuitryName}}</span> 
+            <!-- <span>{{lineBasic.circuitry.circuitryName}}</span>  -->
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>起始杆号：</label>
-            <span>{{lineBasic.taskPoleRelation.startPoleNo}}</span> 
+            <!-- <span>{{lineBasic.taskPoleRelation.startPoleNo}}</span>  -->
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>终止杆号：</label>
-            <span>{{lineBasic.taskPoleRelation.endPoleNo}}</span> 
+            <!-- <span>{{lineBasic.taskPoleRelation.endPoleNo}}</span>  -->
           </div>
         </el-col>
       </el-row>
@@ -38,33 +38,33 @@
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发人：</label>
-            <span>{{lineBasic.users.userName}}</span>  
+            <!-- <span>{{lineBasic.users.userName}}</span>   -->
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <span>{{lineBasic.createDate}}</span>  
+            <!-- <span>{{lineBasic.createDate}}</span>   -->
           </div>
           </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>任务状态：</label>
-            <span>{{lineBasic.systemPropertiesValue.sysProValueName}}</span> 
+            <!-- <span>{{lineBasic.systemPropertiesValue.sysProValueName}}</span>  -->
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务完成时间：</label>
-            <span>{{lineBasic.finishDate}}</span> 
+            <!-- <span>{{lineBasic.finishDate}}</span>  -->
           </div>
         </el-col>
       </el-row>
       <el-row :gutter="20">
-        <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span>{{lineBasic.taskNote}}</span></div></el-col>
+        <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span></span></div></el-col>
       </el-row>
       <el-row :gutter="20">
-        <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span :v-model="nowinspectors"></span></div></el-col>
+        <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span></span></div></el-col>
       </el-row>
 
 
@@ -119,6 +119,9 @@
 export default {
   data() {
     return {
+      taskNo: '',
+      taskName: '',
+      circuitry: '',
       lineBasic: {
         taskId:'',
         taskNo: '',
@@ -190,22 +193,22 @@ export default {
 
     this.axios.get('/checkMissionS?',{params:{taskId: this.$route.query.taskId}})
     .then((res) => {
-      this.lineBasic = res.data.data.taskInfo;
-      res.data.data.poles.forEach((item)=> {
-        var i = {};
-        i.id = item.poleId,
-        i.label = item.poleNo;
-        this.lines[0].children.push(i)
-      })
+      // this.lineBasic = res.data.data.taskInfo;
+      // res.data.data.poles.forEach((item)=> {
+      //   var i = {};
+      //   i.id = item.poleId,
+      //   i.label = item.poleNo;
+      //   this.lines[0].children.push(i)
+      // })
 
-      res.data.data.inspectors.forEach((item)=> {
-        var i = {};
-        i.userName = item.userName;
-        this.nowinspector.push(i.userName);
-      })
-      this.nowinspectors = this.nowinspector.toString();
-      window.console.log(this.nowinspectors)
-      this.lines[0].label = res.data.data.taskInfo[0].circuitry.circuitryName;
+      // res.data.data.inspectors.forEach((item)=> {
+      //   var i = {};
+      //   i.userName = item.userName;
+      //   this.nowinspector.push(i.userName);
+      // })
+      // this.nowinspectors = this.nowinspector.toString();
+      // window.console.log(this.nowinspectors)
+      // this.lines[0].label = res.data.data.taskInfo[0].circuitry.circuitryName;
       window.console.log('任务对应杆号',res.data);
     })
     .catch((err) => { 

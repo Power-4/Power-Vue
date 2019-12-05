@@ -115,7 +115,6 @@ export default {
       })
         .then(res => {
           window.console.log(res);
-          //
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
           window.sessionStorage.setItem("userName", res.data.data.user.userName);
