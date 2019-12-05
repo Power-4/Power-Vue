@@ -1,10 +1,10 @@
 // 对 axios 进行二次封装
 import axios from 'axios'
-import router from '../router/'
+import router from '../router'
 
 // 添加一个新的 axios 的实例
 const http = axios.create({
-  baseURL: '/api', // 统一设置请求地址前缀
+  baseURL: 'http://192.168.6.184:8080', // 统一设置请求地址前缀
   timeout: 6000 // 请求超时时间
 })
 
@@ -30,14 +30,15 @@ http.interceptors.response.use(function (response) {
 
   return response;
 }, function (error) {
+  
   window.console.log('服务器响应错误：', error)
+  
   const _response = error.response
 
   switch (_response.status) {
     case 401:
       return router.replace({
         path: '/login',
-        query: { redirect: router.currentRoute.fullPath }
       })
 
   }

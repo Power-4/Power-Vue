@@ -118,11 +118,11 @@ export default {
       this.chaxun();
     },
     /* 点击查询 */
-    chaxun() {
+    chaxun(currentPage) {
 
       this.loading=true;
       this.tableData=[];
-      this.total.currentPage = this.submit.currentPage; /* 页面初始值 第几页 */
+      this.total.currentPage = currentPage||1; /* 页面初始值 第几页 */
       this.total.pageSize = this.pageSize; /* 页面显示条数 */
 
       /* 时间赋值 */
@@ -153,7 +153,7 @@ export default {
 
       window.console.log(this.total);
 
-      var url = "http://192.168.6.184:8080";
+      var url = "";
       this.wdname == "xun" ? (url += "/showCensusRecordsS") : (url += "/selectFixRecordByFind");
 
       this.axios
@@ -222,7 +222,7 @@ export default {
          
            tableData.poleNo = item.poleNo;  //杆塔编号
            tableData.defectsLevel =item.defectsLevel; //缺陷级别
-           tableData.defectsName = '没有'; //缺陷类型
+           tableData.defectsName =item.defectsName; //缺陷类型
            tableData.findDate = item.findDate; //发现时间
        
            item.hasDefects == 1?tableData.error = "有" : tableData.error= "无"; // 错误
@@ -251,7 +251,7 @@ export default {
     /* 监测分页 */
     handleCurrentChange(val) {
       this.submit.currentPage = val;
-      this.chaxun();
+      this.chaxun(val);
     },
 
     downloadExcel() {
@@ -306,6 +306,7 @@ export default {
   /*创建开始时*/
   created() {
 
+    
     this.wdname=this.$route.query.name;
 
     
@@ -323,7 +324,7 @@ export default {
   max-height: 700px;
   overflow: hidden;
   float: right;
-  border: @bottom;
+ 
 }
 /* 导航栏 */
 .nav {
@@ -389,7 +390,7 @@ export default {
 
 /* 编号查询 */
 .in-bianhao {
-  width: 190px;
+  width: 200px;
   float: left;
   font-size: 14px;
 }
@@ -437,7 +438,7 @@ export default {
     &:active {
       background-color: #51bdbd;
       background: #56d3d3;
-      background: #2a6363;
+    
     
     }
   }
