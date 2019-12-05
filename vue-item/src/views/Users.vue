@@ -43,14 +43,8 @@
       <el-table-column prop="isCheck" label="状态" width="180"></el-table-column>
       <el-table-column prop="sex" label="性别"></el-table-column>
       <el-table-column prop="age" label="年龄"></el-table-column>
-      <el-table-column prop="joinData" label="入职日期"></el-table-column>
+      <el-table-column prop="joinDate" label="入职日期"></el-table-column>
       <el-table-column prop="leavingDate" label="离职日期"></el-table-column>
-      <el-table-column label="状态(冻结/未冻结)">
-        <template slot-scope="scope">
-          <el-checkbox v-model="scope.row.isCheck" @change="achecbox(scope.row)"></el-checkbox>
-          <!-- // 添加一个多选框,控制选中与否 -->
-        </template>
-      </el-table-column>
       <el-table-column fixed="right" label="操作" width="150">
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
@@ -253,7 +247,7 @@ export default {
             type: "success",
             message: "修改成功"
           });
-          this.loadData();
+          this.isSearchft();
         } else {
           this.$message({
             type: "info",
@@ -298,7 +292,7 @@ export default {
           type: "success",
           message: "添加用户成功"
         });
-        this.loadData();
+        this.isSearchft();
       });
     },
     // 用户查重
@@ -355,7 +349,7 @@ export default {
           var words = `/userManage/deleteUserMessage?userId=${obj.userId}`;
           this.axios.get(words).then(res => {
             window.console.log(res);
-            this.loadData();
+            this.isSearchft();
           });
         })
         .catch(() => {
@@ -400,10 +394,19 @@ export default {
     handleCurrentChange(val) {
       this.currpage = val;
       window.console.log(this.currpage);
-      this.loadData();
+      this.isSearchft();
+    },
+    // 判断登录与否
+    isSearchft() {
+      if (this.isSearch == true) {
+        this.sendSearch();
+      } else if (this.isSearch == false) {
+        this.loadData();
+      }
     },
     // 加载页面----------------------------------------------------------4
     loadData() {
+      this.isSearch = false;
       // http://192.168.6.184:8080
       var words = `/userManage/showAllUsers?pageSize=${this.pagesize}&currentPage=${this.currpage}`;
       // http://192.168.6.184:8080/userManage/showAllUsers?pageSize=2&currentPage=1
@@ -417,15 +420,15 @@ export default {
           this.tableData[i].roleName = this.tableData[i].role.roleName;
           this.tableData[i].lastLoginTime = res.data.data.lastLoginTimes[i];
         }
-        window.console.log(res.data.data);
+        window.console.log("获取的数据", this.tableData);
       });
     },
     // ===========================搜索部分===============================
     sendSearch() {
-      this.currpage = 1;
+      this.isSearch = true;
       // http://192.168.6.184:8080
-      var words = `/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}`;
-      window.console.log(words);
+      var words = `/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}&currentPage=${this.currpage}`;
+      window.console.log("搜索用户传的数据", words);
       this.axios.get(words).then(res => {
         window.console.log("搜索结果", res.data.data);
         this.tableData = res.data.data.usersList;
@@ -444,11 +447,19 @@ export default {
     logHandleSizeChange(val) {
       this.logPagesize = val;
     },
+    // 如何使用
+    isLogSearchft() {
+      if (this.isLogSearch == true) {
+        this.sendLogData();
+      } else if (this.isLogSearch == false) {
+        this.sendGetlogMsg();
+      }
+    },
     // 当前页数
     logHandleCurrentChange(val) {
       this.logCurrpage = val;
       // 换页加载
-      this.sendGetlogMsg();
+      this.isLogSearchft();
     },
     seeLog() {
       this.seeLogTab = true;
@@ -457,6 +468,7 @@ export default {
     },
     sendGetlogMsg() {
       // http://192.168.6.184:8080
+      this.isLogSearch = false;
       var words = `/userManage/showUserLog?pageSize=${this.logPagesize}&currentPage=${this.logCurrpage}`;
       window.console.log(words);
       this.axios.get(words).then(res => {
@@ -470,12 +482,13 @@ export default {
         window.console.log("日期为空");
         return;
       }
+      this.isLogSearch = true;
       window.console.log(this.logData);
       var startDate = this.logData[0];
       var endtDate = this.logData[1];
       window.console.log(startDate, endtDate);
       // http://192.168.6.184:8080
-      var words = `/userManage/showUserLogBySelectDate?pageSize=${this.logPagesize}&startTime=${startDate}&endTime=${endtDate}`;
+      var words = `/userManage/showUserLogBySelectDate?pageSize=${this.logPagesize}&currentPage=${this.logCurrpage}&startTime=${startDate}&endTime=${endtDate}`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
@@ -490,7 +503,6 @@ export default {
       for (var i = 0; i < res.data.data.userLogList.length; i++) {
         this.logTableData[i].userName =
           res.data.data.userLogList[i].user.userName;
-        this.logTableData[i].i = i + 1;
       }
     }
   },
@@ -507,6 +519,16 @@ export default {
         this.userSubForm.joinDate = "";
         window.console.log(this.userSubForm);
       }
+    },
+    isSearch() {
+      if (this.isSearch == true) {
+        this.currpage = 1;
+      }
+    },
+    isLogSearch() {
+      if (this.isLogSearch == true) {
+        this.logCurrpage = 1;
+      }
     }
   },
   data() {
@@ -516,7 +538,7 @@ export default {
       // --------------------------------------------------------------
       // 日志的分页信息
       logCurrpage: 1,
-      logPagesize: 3,
+      logPagesize: 6,
       logPages: 4,
       logData: "",
       // 日志信息

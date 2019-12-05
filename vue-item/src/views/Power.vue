@@ -73,38 +73,55 @@ export default {
     // =======================提交修改权限==============================
     // 提交修改后的权限
     sendPower() {
-      // this.yesData
-      var yesDataName = [];
-      var abb = this.rolePower;
-      window.console.log(abb);
-      for (var i = 0; i < this.yesData.length; i++) {
-        for (var j = 0; j < abb.length; j++) {
-          if (this.yesData[i] == abb[j].resourcesId) {
-            yesDataName.push(abb[j].resourcesName);
+      this.$confirm("是否保存修改？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+          // this.yesData
+          var yesDataName = [];
+          var abb = this.rolePower;
+          window.console.log(abb);
+          for (var i = 0; i < this.yesData.length; i++) {
+            for (var j = 0; j < abb.length; j++) {
+              if (this.yesData[i] == abb[j].resourcesId) {
+                yesDataName.push(abb[j].resourcesName);
+              }
+            }
           }
-        }
-      }
-      window.console.log("权限获取", this.yesData);
-      window.console.log("this.rolePower.length", this.rolePower.length);
-      window.console.log("this.yesData.length", this.yesData.length);
-      window.console.log("获得权限信息", yesDataName);
-      window.console.log(this.role);
-      // http://192.168.6.184:8080
-      var words = `/permission/addRole_resources_relation`;
-      window.console.log(words);
-      this.axios
-        .get(words, {
-          params: {
-            resourcesNames: yesDataName,
-            roleName: this.role
-          },
-          // 传输组需要的配置
-          paramsSerializer: params => {
-            return qs.stringify(params, { indices: false });
-          }
+          window.console.log("权限获取", this.yesData);
+          window.console.log("this.rolePower.length", this.rolePower.length);
+          window.console.log("this.yesData.length", this.yesData.length);
+          window.console.log("获得权限信息", yesDataName);
+          window.console.log(this.role);
+          // http://192.168.6.184:8080
+          var words = `/permission/addRole_resources_relation`;
+          window.console.log(words);
+          this.axios
+            .get(words, {
+              params: {
+                resourcesNames: yesDataName,
+                roleName: this.role
+              },
+              // 传输组需要的配置
+              paramsSerializer: params => {
+                return qs.stringify(params, { indices: false });
+              }
+            })
+            .then(res => {
+              window.console.log(res);
+            });
         })
-        .then(res => {
-          window.console.log(res);
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
         });
     }
   },

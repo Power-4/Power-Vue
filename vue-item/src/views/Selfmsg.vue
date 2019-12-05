@@ -205,7 +205,8 @@ export default {
 
       // window.console.log(params);
       // 可以拿到 token
-      window.console.log(window.sessionStorage.getItem("token"));
+      var userId = window.sessionStorage.getItem("userId");
+      window.console.log(userId);
       this.axios({
         // http://192.168.6.184:8080
         url: "/user/modifyPassword",
@@ -216,10 +217,9 @@ export default {
         // headers: { "content-type": "application/json" },
         // 415
         data: {
-          params: {
-            oldPwd: this.pass.oldPass,
-            newPwd: this.pass.pass
-          }
+          userId: userId,
+          oldPwd: this.pass.oldPass,
+          newPwd: this.pass.pass
         }
       })
         .then(res => {
@@ -229,6 +229,7 @@ export default {
             message: "修改信息发送成功",
             type: "success"
           });
+          window.console.log(res);
         })
         .catch(err => {
           window.console.log(err);
@@ -239,12 +240,36 @@ export default {
       this.$refs[formName].validate(valid => {
         if (valid) {
           if (formName == "pwdForm") {
-            window.console.log("发送修改密码");
-            this.sendPwd();
+            if (this.pass.pass == this.pass.newPass) {
+              window.console.log("发送修改密码");
+              this.sendPwd();
+            } else {
+              this.$message({
+                type: "info",
+                message: "两次输入的新密码不一致"
+              });
+            }
           }
           if (formName == "msgForm") {
-            window.console.log("发送修改信息");
-            this.updateUserMsg();
+            this.$confirm("是否修改自己的个人信息, 是否继续?", "提示", {
+              confirmButtonText: "确定",
+              cancelButtonText: "取消",
+              type: "warning"
+            })
+              .then(() => {
+                this.$message({
+                  type: "success",
+                  message: "修改成功!"
+                });
+                window.console.log("发送修改信息");
+                this.updateUserMsg();
+              })
+              .catch(() => {
+                this.$message({
+                  type: "info",
+                  message: "已取消修改"
+                });
+              });
           }
         } else {
           window.console.log("error submit!!");
