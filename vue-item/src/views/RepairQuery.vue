@@ -15,12 +15,12 @@
         <el-col :span="6">
           <div class="grid-content bg-purple-light">
             任务状态:
-            <el-select size="mini" v-model="sysProValueId" placeholder="请选择" class="queryKuang">
+            <el-select size="mini" v-model="id" placeholder="请选择" class="queryKuang">
               <el-option
                 v-for="item in options"
-                :key="item.sysProValueId"
+                :key="item.id"
                 :label="item.sysProValueName"
-                :value="item.sysProValueId"
+                :value="item.id"
               ></el-option>
             </el-select>
           </div>
@@ -78,7 +78,7 @@
         </el-col>
 
         <!-- 查询按钮 -->
-        <el-button type="primary" class="queryBtn" @click="find()">查询</el-button>
+        <el-button type="primary" class="queryBtn" @click="find(ischeck=false)">查询</el-button>
       </el-row>
 
       <!-- 缺陷表格 -->
@@ -129,7 +129,7 @@ export default {
       defectsId: "",
       value1: "",
       options2: [],
-      sysProValueId: "",
+      id : "",
       options3: [],
       value3: "",
       input: "",
@@ -137,6 +137,7 @@ export default {
       workFormId: "",
       date: "",
       count: null,
+      ischeck:false,
       currentPage: 1, //初始页
       pagesize: 5 //    每页的数据
     };
@@ -144,7 +145,33 @@ export default {
   methods: {
     handleCurrentChange: function(val) {
       window.console.log(val); //点击第几页
-      this.axios
+      if(this.ischeck == true) {
+        window.console.log("chaxun",this.ischeck)
+        this.axios
+        .get("fix/selectallfix", {
+          params: {
+          userId:window.sessionStorage['userId'],
+          taskNo: this.taskNo,
+          taskState:this.id,
+          defectsId: this.defectsId,
+          defectsLevel:this.value3,
+          workFormId:this.workFormId,
+          startTime: this.value1==''?'1970/01/01':this.value1,
+          pageSize: this.pagesize,
+          currentPage: val,
+        }
+        })
+        .then(res => {
+          // window.console.log(res.data.data.fixs);
+          this.tableData = res.data.data.fixs;
+          this.count = res.data.data.page.count;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+      }else{
+        window.console.log("chushi",this.ischeck)
+        this.axios
         .get("fix/selectallfix", {
           params: {
             userId:window.sessionStorage['userId'],
@@ -160,18 +187,28 @@ export default {
         .catch(err => {
           window.console.log(err);
         });
+      }
+      
     },
     find() {
+      this.ischeck=true
+      // window.console.log(this.value3)
       this.axios
       .get("fix/selectallfix", {
         params: {
           userId:window.sessionStorage['userId'],
+          taskNo: this.taskNo,
+          taskState:this.id,
+          defectsId: this.defectsId,
+          defectsLevel:this.value3,
+          workFormId:this.workFormId,
+          startTime: this.value1==''?'1970/01/01':this.value1,
           pageSize: this.pagesize,
           currentPage: this.currentPage,
         }
       })
       .then(res => {
-        window.console.log(res.data.data.fixs);
+        window.console.log(res.data.data);
         this.tableData = res.data.data.fixs;
         this.count = res.data.data.page.count;
       })

@@ -270,20 +270,20 @@ const router = new VueRouter({
   routes
 });
 
-// // 路由拦截
-// router.beforeEach((to, from, next) => {
-//   var token = sessionStorage.getItem("token");
-//   if (to.meta.auth) {
-//     if (token) {
-//       next()
-//     } else {
-//       next({
-//         path: "/login",
-//       })
-//     }
-//   } else {
-//     next()
-//   }
-// });
+// 路由拦截
+router.beforeEach((to, from, next) => {
+  var token = sessionStorage.getItem("token");
+  if (to.meta.auth) {
+    if (token) {
+      next()
+    } else {
+      next({
+        path: "/login",
+      })
+    }
+  } else {
+    next()
+  }
+});
 
 export default router

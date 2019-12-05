@@ -4,8 +4,7 @@ import router from '../router'
 
 // 添加一个新的 axios 的实例
 const http = axios.create({
-  // baseURL: 'http://182.92.194.51:8080/PowerPatrolSystem', // 统一设置请求地址前缀
-  baseURL: 'http://192.168.6.132:8080',
+  baseURL: 'http://182.92.194.51:8080/PowerPatrolSystem', // 统一设置请求云数据库地址前缀
   timeout: 6000 // 请求超时时间
 })
 
