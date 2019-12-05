@@ -110,7 +110,8 @@ export default {
       taskState: "",
       options: [],
       edit: true,
-      isQuery: false
+      isQuery: false,
+      nowPage: ''
     };
   },
   created() {
@@ -152,10 +153,10 @@ export default {
   
   methods: {
     // 初始化
-    init() {
+    pageInit(val) {
       this.axios.get('/getAllTaskByUserId?', {
         params: {
-          currentPage: this.currentPage, 
+          currentPage: val, 
           pageSize: this.pageSize
         }
       })
@@ -220,7 +221,7 @@ export default {
       .then(() => {
         this.axios.get('/changeTaskSateToRunning?',{params:{taskId: row.taskId}})
         .then((res) => {
-          this.init();
+          this.pageInit(this.nowPage);
           window.console.log(res.data);
         })
         .catch((err) => {
@@ -239,6 +240,9 @@ export default {
     },
     // 分页点击事件
     handleCurrentChange(val) {
+      // 获取当前点击页
+      this.nowPage = val;
+
       window.console.log(this.isQuery)
       if(this.isQuery) {
         this.axios.get('/getAllTaskByCondition?',{params:{

@@ -332,7 +332,8 @@ export default {
       nowTaskId: null,
       isQuery: false,
       nowInspector: [],
-      nowcircuitryId: ''
+      nowcircuitryId: '',
+      nowPage: ''
 
     };
   },
@@ -402,11 +403,11 @@ export default {
   },
   methods: {
 
-    // 初始化
-    init() {
+    // 分页之后页面初始化
+    pageInit(val) {
       this.axios.get('/showAllTasksByPageS?',{ 
         params: {
-          currentPage: this.currentPage,
+          currentPage: val,
           pageSize: this.pageSize
         }
       })
@@ -425,7 +426,6 @@ export default {
       .catch((err) => {
         window.console.log("错误",err)
       })
-
     },
 
 
@@ -547,7 +547,7 @@ export default {
                 message: "添加失败!"
               });
             }
-            this.init();
+            this.pageInit(this.nowPage);
             window.console.log('添加成功',res.data);
           })
           .catch((err) => {
@@ -591,7 +591,7 @@ export default {
         }
       })
       .then((res) => {
-        this.init();
+        this.pageInit(this.nowPage);
         window.console.log(res.data);
       })
       .catch((err) => {
@@ -675,7 +675,7 @@ export default {
                 message: "修改失败!"
               });
             }
-            this.init();
+            this.pageInit(this.nowPage);
             window.console.log(res.data);
           })
           .catch((err) => {
@@ -694,6 +694,9 @@ export default {
 
     // 分页点击事件
     handleCurrentChange(val) {
+      // 获取当前点击页
+      this.nowPage = val;
+
       if(this.isQuery) {
         window.console.log(this.isQuery);
         this.axios.get('/selectTasksByConditionS?',{
@@ -763,7 +766,7 @@ export default {
         this.axios.get('/cancelTaskS?',{params:{taskId: row.taskId }})
         .then((res) => {
 
-          this.init();
+          this.pageInit(this.nowPage);
           if(res.data.data.ifSuccess == 'success') {
             this.$message({
               type: "success",
