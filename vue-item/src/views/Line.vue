@@ -62,7 +62,8 @@
                     v-model="revaTable.value"
                     type="date"
                     placeholder="选择日期"
-                    format="yyyy 年 MM 月 dd 日"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy-MM-dd"
                   ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电压等级" :label-width="formLabelWidth">
@@ -82,6 +83,9 @@
                     <el-option label="启用" value="启用"></el-option>
                     <el-option label="停用" value="停用"></el-option>
                   </el-select>
+                </el-form-item>
+                <el-form-item label="备注" :label-width="formLabelWidth">
+                  <el-input v-model="revaTable.remark" placeholder="请输入塔基数"></el-input>
                 </el-form-item>
               </el-form>
               <div slot="footer" class="dialog-footer">
@@ -131,16 +135,19 @@
           <el-input v-model="revaTable.towerBase" placeholder="请输入塔基数"></el-input>
         </el-form-item>
         <el-form-item label="启动状态" :label-width="formLabelWidth">
-          <el-select v-model="revaTable.circuitryState" placeholder="请选启动状态" style="width:202px">
+          <el-select v-model="revaTable.state" placeholder="请选启动状态" style="width:202px">
             <el-option label="启用" value="启用"></el-option>
             <el-option label="停用" value="停用"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="运行状态" :label-width="formLabelWidth">
-          <el-select v-model="revaTable.state" placeholder="请选运行状态" style="width:202px">
+          <el-select v-model="revaTable.circuitryState" placeholder="请选运行状态" style="width:202px">
             <el-option label="正常" value="正常"></el-option>
             <el-option label="检修中" value="检修中"></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="备注" :label-width="formLabelWidth">
+            <el-input v-model="revaTable.remark" placeholder="请输入塔基数"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -216,7 +223,8 @@ export default {
         end: "",
         towerBase: "",
         circuitryState: "",
-        state: ""
+        state: "",
+        remark: ""
       },
       form: {
         name: "",
@@ -237,7 +245,7 @@ export default {
     //查询
     chaxun() {
       this.axios
-        .get("http://192.168.6.177:8080/circuitryOrchid/getCirPageByNo", {
+        .get("/circuitryOrchid/getCirPageByNo", {
           params: {
             currentPage: 1,
             pageSize: this.pageSize,
@@ -257,15 +265,23 @@ export default {
           window.console.log(err);
         });
     },
-    //添加杆塔
+    //添加线路
     addOk() {
-      window.console.log(this.submit.poleNo, this.submit.circuitryName, this.submit.activate);
+      window.console.log("拿到的值",this.revaTable);
       
-      this.axios.get("http://192.168.6.177:8080/poleOrchid/addPole", {
+      this.axios.get("/circuitryOrchid/addCircuitry", {
         params:{
-          poleNo: this.submit.poleNo,
-          circuitryName: this.submit.circuitryName,
-          activate: this.submit.activate
+          circuitryNo: this.revaTable.lineId,
+          circuitryName: this.revaTable.lineName,
+          lineLength: this.revaTable.lineLength,
+          backLineLength: this.revaTable.loopLength,
+          deLiveryDate: this.revaTable.value,
+          voltageLevelId: this.revaTable.voltage,
+          startPoleNo: this.revaTable.start,
+          endPoleNo: this.revaTable.end,
+          poleNumber: this.revaTable.towerBase,
+          sysProValueName: this.revaTable.state,
+          circuitryNote: this.revaTable.remark
         }
         })
         .then(res => {
@@ -295,7 +311,7 @@ export default {
     },
     fenClick() {
       this.axios
-        .post("http://192.168.6.177:8080/circuitryOrchid/getCirByPage", {
+        .post("/circuitryOrchid/getCirByPage", {
           currentPage: this.submit.currentPage,
           pageSize: this.pageSize
         })
@@ -313,27 +329,27 @@ export default {
     Edit(index, row) {
       window.console.log(index, row);
       this.poleId = this.tableData[index].poleId;
-      this.submit.poleNo = this.tableData[index].poleNo;
-      this.submit.activate = this.tableData[index].systemPropertiesValue.sysProValueName;
     },
     //修改模态框确定按钮
     xiugai() {
       this.axios
-        .get("http://192.168.6.177:8080/poleOrchid/updatePoleById",{
+        .get("/circuitryOrchid/updateCircuitryById",{
           params: {
-            poleId: this.poleId,
-            poleNo: this.submit.poleNo,
-            circuitryNo: this.submit.circuitryNo,
-            activate: this.submit.activate
+            circuitryNo: this.revaTable.lineId,
+            circuitryName: this.revaTable.revaTable.lineName,
+            lineLength: this.revaTable.lineLength,
+            backLineLength: this.revaTable.loopLength,
+            deLiveryDate: this.revaTable.value,
+            voltageLevelId: this.revaTable.voltage,
+            startPoleNo: this.revaTable.start,
+            endPoleNo: this.revaTable.end,
+            oleNumber: this.revaTable.towerBase,
+            ysProValueName: this.revaTable.state,
+            runningStatus: this.revaTable.circuitryState,
+            ircuitryNote: this.revaTable.remark
           }
         })
         .then(res => {
-          window.console.log("当前所修改的id",this.poleId);
-          // window.console.log(this.submit.poleNo);
-          // window.console.log(this.submit.activate);
-          // window.console.log(res.data);
-          // window.console.log(this.tableData);
-          
           this.countPage = res.data.data.count;
           this.tableData = res.data.data.poles;
           this.$message({
@@ -369,7 +385,7 @@ export default {
           window.console.log("当前所删除的id", this.circuitryId);
           this.axios
             .get(
-              "http://192.168.6.177:8080/circuitryOrchid/deleteCircuitryById",
+              "/circuitryOrchid/deleteCircuitryById",
               {
                 params: {
                   circuitryId: this.circuitryId
@@ -412,7 +428,7 @@ export default {
           // window.console.log(this.revaTable.circuitryState);
           this.axios
             .get(
-              "http://192.168.6.177:8080/circuitryOrchid/updateCircuitryState",
+              "/circuitryOrchid/updateCircuitryState",
               {
                 params: {
                   circuitryId: this.circuitryId,
