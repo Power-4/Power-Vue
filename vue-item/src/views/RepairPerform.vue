@@ -69,7 +69,7 @@
         <el-table-column prop="isCancel" label="是否取消" width="75"></el-table-column>
         <el-table-column prop label="操作" width="229">
           <template slot-scope="scope">
-            <el-button @click="chakanClick(scope.row)" type="text"  size="small" class="wb_chakan">查看</el-button>
+            <el-button @click="chakanClick(scope.row)" type="text" size="small" class="wb_chakan">查看</el-button>
             <!-- 查看时的模态框 -->
             <el-dialog title="详情" :visible.sync="checkTask">
               <el-table :data="chakanForm" border size="small">
@@ -152,11 +152,26 @@
               <el-button @click="checkTask=false">返回</el-button>
             </el-dialog>
 
-            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')" :disabled="scope.row.quan[0]" >执行录入</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="chakanClick(scope.row,'xiuTask')"
+              :disabled="scope.row.quan[0]"
+            >执行录入</el-button>
 
-            <el-button type="text" size="small" @click="chakanClick(scope.row,'xiuTask')" :disabled="scope.row.quan[1]" >修改</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="chakanClick(scope.row,'xiuTask')"
+              :disabled="scope.row.quan[1]"
+            >修改</el-button>
 
-            <el-button type="text" size="small" @click="open(scope.row)" :disabled="scope.row.quan[2]">执行</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="open(scope.row)"
+              :disabled="scope.row.quan[2]"
+            >执行</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -179,23 +194,7 @@ export default {
   data() {
     return {
       fneValue: [],
-      fneArr: [
-        {
-          key: 1,
-          label: "消缺员1",
-          disabled: false
-        },
-        {
-          key: 2,
-          label: "消缺员2",
-          disabled: false
-        },
-        {
-          key: 3,
-          label: "消缺员3",
-          disabled: false
-        }
-      ],
+      fneArr: [],
       chakanForm: [{}],
       xiuForm: {},
       form: {
@@ -245,7 +244,7 @@ export default {
       this.axios
         .get("/fix/getFixByConditions", {
           params: {
-            currentPage: currentPage||1,
+            currentPage: currentPage || 1,
             pageSize: this.pagesize,
             taskNo: this.input1,
             workFormId: this.value,
@@ -269,22 +268,17 @@ export default {
             data.issuedPeople = item.task.users.userName;
             data.issuedDate = item.task.createDate;
             data.taskStatus = item.task.systemPropertiesValue.sysProValueName; // 任务状态
-            
-            data.quan=[true,true,true]; // 是否可用
-           if(data.taskStatus=="执行中"||data.taskStatus=="已完成") 
-           {
-             data.quan[0]=false
-           }
-           if(data.taskStatus=="待分配"||data.taskStatus=="已分配") 
-           {
-             data.quan[1]=false
-           }
-           if(data.taskStatus=="已分配") 
-           {
-             data.quan[2]=false
-           }
 
-            
+            data.quan = [true, true, true]; // 是否可用
+            if (data.taskStatus == "执行中" || data.taskStatus == "已完成") {
+              data.quan[0] = false;
+            }
+            if (data.taskStatus == "待分配" || data.taskStatus == "已分配") {
+              data.quan[1] = false;
+            }
+            if (data.taskStatus == "已分配") {
+              data.quan[2] = false;
+            }
 
             data.completionTime = item.task.finishDate;
             item.task.isCancel == 1
@@ -320,8 +314,8 @@ export default {
 
           this.chakanForm[0].taskNum = mydata.task.taskNo; // 任务编号
           this.chakanForm[0].taskName = mydata.task.taskName; //任务名称
-          this.chakanForm[0].taskStatus = mydata.task.systemPropertiesValue.sysProValueName; // 任务状态
-        
+          this.chakanForm[0].taskStatus =
+            mydata.task.systemPropertiesValue.sysProValueName; // 任务状态
 
           this.chakanForm[0].workDocuments = mydata.workForm.workFormName; // 工作单据
           this.chakanForm[0].issuedPeople = mydata.task.users.userName; // 下发人
@@ -363,26 +357,8 @@ export default {
           window.console.log(err);
         });
     },
-    xiugai() {
-      this.axios
-        .get("/fix/submitfix", {
-          params: {
-            accomplishDescribe: this.wanmiaoshu,
-            interruptDelayRecord: this.interruptDelayRecord,
-            workSummaryReport: this.workSummaryReport,
-            fixId: this.fixId
-          }
-        })
-        .then(res => {
-          window.console.log("这是修改后的", res);
-          this.checkTask = false;
-        })
-        .catch(err => {
-          window.console.log("修改失败了", err);
-        });
-    },
     open(scope) {
-      this.fixId=scope.fixId;
+      this.fixId = scope.fixId;
 
       this.$confirm("确定执行", "提示", {
         confirmButtonText: "确定",
@@ -390,19 +366,27 @@ export default {
         type: "warning"
       })
         .then(() => {
-           var userId=10000047;
+          var userId = sessionStorage.getItem("userId");
           this.axios
             .get(`/fix/executetask?fixId=${this.fixId}&userId=${userId}`)
             .then(res => {
-             
               window.console.log(res);
-              
-              
 
-              this.$message({
+              if ( res.data.code == 201) {
+                this.$confirm("您没有排到此任务", "提示", {
+                   confirmButtonText: "确定",
+                   type: "error"
+                });
+                              
+              }
+              else{
+                this.$message({
                 type: "success",
                 message: "执行成功!"
-              });
+                });
+               this.chaxun(this.currentPage)
+              }
+
             });
         })
         .catch(() => {
@@ -413,17 +397,15 @@ export default {
         });
     },
     danju() {
-      this.axios
-        .get("/fix/getallworkform")
-        .then(res => {
-          res.data.data.workForms.forEach(item => {
-            var newDanju = {};
-            newDanju.value = item.workFormId;
-            newDanju.label = item.workFormName;
-            this.options.push(newDanju);
-          });
+      this.axios.get("/fix/getallworkform").then(res => {
+        res.data.data.workForms.forEach(item => {
+          var newDanju = {};
+          newDanju.value = item.workFormId;
+          newDanju.label = item.workFormName;
+          this.options.push(newDanju);
         });
-    },
+      });
+    }
   },
   created: function() {
     this.danju();
@@ -470,7 +452,6 @@ export default {
 
   .repair-query {
     height: 32px;
-  
   }
 
   .repair-add {
@@ -499,7 +480,7 @@ export default {
   // }
 }
 
-.wb_chakan{
+.wb_chakan {
   padding-right: 10px;
 }
 .el-tabs__item {

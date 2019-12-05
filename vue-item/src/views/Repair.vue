@@ -1,23 +1,16 @@
 <template>
   <div class="app-repair">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" active-text-color="#409EFF">
-      <el-menu-item index="1">
-        <router-link to="/repairdistribution">消缺任务制定与分配</router-link>
-      </el-menu-item>
-
-      <el-menu-item index="2">
-        <router-link to="/repairperform">消缺任务执行与回执</router-link>
-      </el-menu-item>
-
-      <el-menu-item index="3">
-        <router-link to="/repairquery">消缺查询</router-link>
-      </el-menu-item>
+    <el-menu
+      :default-active="activeIndex"
+      class="el-menu-demo"
+      mode="horizontal"
+      active-text-color="#409EFF"
+    >
+      <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+        <el-breadcrumb-item>消缺管理</el-breadcrumb-item>
+        <el-breadcrumb-item>{{title}}</el-breadcrumb-item>
+      </el-breadcrumb>
     </el-menu>
-    <!-- <el-breadcrumb separator="|" class="repair-nav">
-      <el-breadcrumb-item></el-breadcrumb-item>
-      <el-breadcrumb-item></el-breadcrumb-item>
-      <el-breadcrumb-item></el-breadcrumb-item>
-    </el-breadcrumb>-->
 
     <!-- 子组件 -->
     <div class="repair-content">
@@ -31,7 +24,26 @@ export default {
   name: "reapir",
   data() {
     return {
-      activeIndex: '1'
+      activeIndex: "1",
+      title: "消缺任务制定与分配"
+    };
+  },
+  watch: {
+    "$route": {
+      handler(){
+
+        window.console.log( this.$route.fullPath)
+
+        if ( this.$route.fullPath == "/repair") {
+          this.title = "消缺任务制定与分配";
+        } 
+        else if (this.$route.fullPath == "/repairperform") {
+          this.title = "消缺任务执行与回执";
+        } 
+        else if (this.$route.fullPath == "/repairquery") {
+          this.title = "消缺查询";
+        }
+      }
     }
   }
 };
@@ -40,6 +52,19 @@ export default {
 <style lang="less" scoped>
 a {
   text-decoration: none;
+}
+.lu {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
+  span:nth-of-type(2) {
+    font-size: 14px;
+    padding-top: 1px;
+  }
 }
 
 .app-repair {
