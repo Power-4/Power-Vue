@@ -4,17 +4,13 @@
       <el-form>
         <el-form-item label="角色名称：">
           <el-input class="inputs" v-model="search" placeholder="请输入角色名称"></el-input>
-          <el-select class="select-css" v-model="selValue" @change="getPower" placeholder="请选择">
-            <el-option
-              v-for="item in selOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
+          <el-select class="select-css" v-model="searchSelect" placeholder="请选择">
+            <el-option v-for="item in selectList" :key="item" :label="item" :value="item"></el-option>
           </el-select>
           <el-button class="btn-sea" type="button" @click="getSearch">搜索</el-button>
+          <el-button type="button" @click="LoadData">全部</el-button>
           <el-button class="addusers" type="button" @click="addRole">
-            <i class="el-icon-circle-plus-outline"></i>添加角色
+            <i class="el-icon-circle-plus-outline"></i>新增
           </el-button>
         </el-form-item>
       </el-form>
@@ -44,7 +40,7 @@
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
-          <el-button @click="deleteRow(scope.$index)" type="text" size="small">删除</el-button>
+          <el-button @click="deleteRow(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -94,8 +90,8 @@
         <el-form-item label="角色编号">
           <el-input v-model="role.roleNo" @blur="isRoleNoOk" minlength="4" maxlength="10"></el-input>
         </el-form-item>
-        <el-radio v-model="radio" label="1">启用</el-radio>
-        <el-radio v-model="radio" label="2">未启用</el-radio>
+        <el-radio v-model="radio" label="启用">启用</el-radio>
+        <el-radio v-model="radio" label="停用">未启用</el-radio>
         <div class="box">
           <div>
             <el-button type="button" class="ok" @click="getRole">确认</el-button>
@@ -174,17 +170,6 @@
 <script>
 export default {
   methods: {
-    // 根据角色id roleId加载权限
-    getPower(index) {
-      // 获取的数据为字符串
-      window.console.log(index);
-      if (index == "true") {
-        this.chose = "2";
-      } else {
-        this.chose = "3";
-      }
-      window.console.log(this.chose);
-    },
     // 启用/禁用选项框的修改
     achecbox(index) {
       this.addRoleTab = true;
@@ -245,8 +230,6 @@ export default {
           window.console.log("取消后的isCheck", index.isCheck);
         });
     },
-    // index 编号传入 scope.$index
-    // rows 需要修改的数组
     deleteRow(index) {
       // 弹出确认窗口
       this.$confirm("此操作将永久删除该角色, 是否继续?", "提示", {
@@ -259,12 +242,8 @@ export default {
             type: "success",
             message: "删除成功"
           });
-          // 执行删除操作
-          // 获取准确 id
-          var a = this.currpage - 1;
-          var b = a * this.pagesize + index;
           // 输出id
-          var c = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleId=${this.tableData[b].roleId}`;
+          var c = `http://192.168.6.184:8080/userManage/deleteUserMessage?roleId=${index.roleId}`;
           window.console.log(c);
           this.axios.get(c).then(res => {
             window.console.log(res);
@@ -338,23 +317,14 @@ export default {
       // 是否符合标准
       if (this.roleNameOk == 1 && this.roleNoOk == 1) {
         window.console.log("开始添加角色");
-        // 等到
-        var a = "";
-        if (this.radio == "1") {
-          a = "启用";
-        } else if (this.radio == "2") {
-          a = "未启用";
-        }
         window.console.log(window.sessionStorage.getItem("userId"));
         this.axios
           .get(
             `http://192.168.6.184:8080/role/addRole?roleName=${
               this.role.roleName
-            }&roleNo=${
-              this.role.roleNo
-            }&sysProValueName=${a}&userId=${window.sessionStorage.getItem(
-              "userId"
-            )}`
+            }&roleNo=${this.role.roleNo}&sysProValueName=${
+              this.radio
+            }&userId=${window.sessionStorage.getItem("userId")}`
           )
           .then(res => {
             window.console.log(res);
@@ -363,39 +333,35 @@ export default {
               message: "添加角色成功",
               type: "success"
             });
+            this.LoadData();
             this.addRoleTab = false;
           });
       }
     },
     // 搜索内容
     getSearch() {
-      if (this.chose == "1") {
-        if (this.search == "") {
-          // 没有内容
-          window.console.log("没有内容");
-        } else {
-          // 没选择但是有内容
-          window.console.log("没选择但是有内容");
+      var words = `http://192.168.6.184:8080/role/fuzzyQueryShowRole?pagesize=${this.pagesize}&currpage=${this.currpage}&roleName=${this.search}&sysProValueName=${this.searchSelect}`;
+      window.console.log(words);
+      this.axios.get(words).then(res => {
+        window.console.log("加载角色", res);
+        this.pages = res.data.data.count;
+        this.pagesize = res.data.data.count;
+        this.tableData = res.data.data.roleList;
+        for (var i = 0; i < this.tableData.length; i++) {
+          if (
+            this.tableData[i].systemPropertiesValue.sysProValueName == "启用"
+          ) {
+            this.tableData[i].isCheck = true;
+            window.console.log(this.tableData[i].isCheck);
+          }
+          if (
+            this.tableData[i].systemPropertiesValue.sysProValueName == "未启用"
+          ) {
+            this.tableData[i].isCheck = false;
+          }
+          this.tableData[i].users = res.data.data.roleList[i].users.userName;
         }
-      }
-      if (this.chose == "2") {
-        if (this.search == "") {
-          // 没有内容选 true
-          window.console.log("没有内容选 true");
-        } else {
-          // 选 true 但是有内容
-          window.console.log("选 true 但是有内容");
-        }
-      }
-      if (this.chose == "3") {
-        if (this.search == "") {
-          // 没有内容选 false
-          window.console.log("没有内容选 false");
-        } else {
-          // 选 false 但是有内容
-          window.console.log("选 false 但是有内容");
-        }
-      }
+      });
     },
     // 加载角色f
     LoadData() {
@@ -406,6 +372,7 @@ export default {
         .then(res => {
           window.console.log("加载角色", res);
           this.pages = res.data.data.count;
+          this.pagesize = 4;
           this.tableData = res.data.data.roleList;
           for (var i = 0; i < this.tableData.length; i++) {
             if (
@@ -439,17 +406,11 @@ export default {
       window.console.log(b);
       this.axios.get(b).then(res => {
         window.console.log("修改角色", res);
-        if (res.data.msg == "修改成功") {
-          this.$message({
-            type: "success",
-            message: "修改成功"
-          });
-        } else if (res.data.msg == "处理失败") {
-          this.$message({
-            type: "info",
-            message: "修改失败"
-          });
-        }
+        this.$message({
+          type: "success",
+          message: "修改成功"
+        });
+        this.LoadData();
       });
       // 关闭窗口 一切结束后写道axios回调函数里面
       this.updataTab = false;
@@ -460,6 +421,11 @@ export default {
   },
   data() {
     return {
+      // ============================搜索===========================
+      // 搜索内容
+      search: "",
+      selectList: ["启用", "停用"],
+      searchSelect: "启用",
       // 添加角色----------------------------------------------------1
       // 1 为通多，2 为不通过
       roleOk: 2,
@@ -467,7 +433,7 @@ export default {
       roleNameOk: 1,
       // 用户编号是否得体
       roleNoOk: 1,
-      radio: "1",
+      radio: "启用",
       role: {
         roleName: "",
         roleNo: "",
@@ -487,29 +453,11 @@ export default {
           sysProValueName: ""
         }
       },
-      // 搜索内容---------------------------------------------------3
-      // 搜索内容
-      search: "",
-      chose: "1",
       // 显示分页------------------------------------------------------4
       // 分页数据 一页显示最大数，当前页数
       pagesize: 3,
       currpage: 1,
       pages: 3,
-      // select下拉框---------------------------------------------------5
-      // select选择框取下的值
-      selValue: "",
-      // 启用/未启用 复选框选择
-      selOptions: [
-        {
-          value: "启用",
-          label: "启用"
-        },
-        {
-          value: "未启用",
-          label: "未启用"
-        }
-      ],
       // 表格数据渲染----------------------------------------------------6
       // 渲染表格的数据
       tableData: [

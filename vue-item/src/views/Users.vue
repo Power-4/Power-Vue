@@ -4,17 +4,13 @@
       <el-form>
         <el-form-item label="用户名称：">
           <el-input class="inputs" v-model="search" placeholder="请输入用户名称"></el-input>
-          <el-select class="select-css" v-model="selValue" placeholder="冻结/未冻结">
-            <el-option
-              v-for="item in selOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
+          <el-select class="select-css" v-model="searchSelect">
+            <el-option v-for="item in selects" :key="item" :label="item" :value="item"></el-option>
           </el-select>
-          <el-button class="btn-sea">搜索</el-button>
+          <el-button class="btn-sea" @click="sendSearch">搜索</el-button>
+          <el-button @click="loadData">全部</el-button>
           <el-button class="addusers" @click="openAddUserBTN">
-            <i class="el-icon-circle-plus-outline"></i>添加用户
+            <i class="el-icon-circle-plus-outline"></i>新增
           </el-button>
         </el-form-item>
       </el-form>
@@ -44,7 +40,7 @@
       <el-table-column prop="phone" label="电话" width="150"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
       <el-table-column prop="isCheck" label="状态" width="180"></el-table-column>
-      <el-table-column prop="role" label="性别"></el-table-column>
+      <el-table-column prop="sex" label="性别"></el-table-column>
       <el-table-column prop="age" label="年龄"></el-table-column>
       <el-table-column prop="joinData" label="入职日期"></el-table-column>
       <el-table-column prop="leavingDate" label="离职日期"></el-table-column>
@@ -83,8 +79,16 @@
         <el-form-item label="用户账号">
           <el-input class="inpu" v-model="obj.userName"></el-input>
         </el-form-item>
-        <el-form-item label="用户角色">
-          <el-input class="inpu" v-model="obj.roleName"></el-input>
+        <el-form-item label="用户角色" prop="roleName">
+          <el-select v-model="obj.roleName" placeholder="请选择角色">
+            <el-option
+              v-for="item in powerSelect"
+              :label="item"
+              :key="item"
+              :value="item"
+              style="width: 100%;"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="加入日期">
           <el-form-item>
@@ -113,7 +117,7 @@
         </el-form-item>
         <div class="box">
           <div>
-            <el-button class="coloraaa">确认</el-button>
+            <el-button class="coloraaa" @click="sendUpdata">确认</el-button>
             <el-button @click="addDataTab = false">取消</el-button>
           </div>
         </div>
@@ -125,17 +129,23 @@
     </el-dialog>
 
     <el-dialog title="添加用户" :visible.sync="addUserDialog">
-      <el-form :model="userSubForm" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="用户编号">
+      <el-form
+        :model="userSubForm"
+        ref="ruleForm"
+        :rules="addUserRules"
+        label-width="100px"
+        class="demo-ruleForm"
+      >
+        <el-form-item label="用户编号" prop="userNo">
           <el-input v-model="userSubForm.userNo"></el-input>
         </el-form-item>
-        <el-form-item label="用户名称">
+        <el-form-item label="用户名称" prop="userName">
           <el-input v-model="userSubForm.userName"></el-input>
         </el-form-item>
-        <el-form-item label="用户密码">
+        <el-form-item label="用户密码" prop="userPwd">
           <el-input v-model="userSubForm.userPwd"></el-input>
         </el-form-item>
-        <el-form-item label="用户角色" prop="region">
+        <el-form-item label="用户角色" prop="roleName">
           <el-select v-model="userSubForm.roleName" placeholder="请选择角色">
             <el-option
               v-for="item in powerSelect"
@@ -146,17 +156,15 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="活动时间" required>
-          <el-form-item>
-            <el-date-picker
-              type="date"
-              placeholder="选择日期"
-              v-model="userSubForm.joinDate"
-              style="width: 100%;"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-            ></el-date-picker>
-          </el-form-item>
+        <el-form-item label="加入时间" prop="joinDate">
+          <el-date-picker
+            type="date"
+            placeholder="选择日期"
+            v-model="userSubForm.joinDate"
+            style="width: 100%;"
+            value-format="yyyy-MM-dd"
+            format="yyyy-MM-dd"
+          ></el-date-picker>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
@@ -174,6 +182,8 @@ export default {
     // 修改用户按钮--------------------------------------------------
     updata(index) {
       this.updataTab = true;
+      // 加载角色
+      this.getPowerSelect();
       this.obj.age = index.age;
       this.obj.email = index.email;
       this.obj.isCheck = index.isCheck;
@@ -199,6 +209,24 @@ export default {
       // userId: 10000001 -->
       // userName: "Orchid" -->
       // userPwd: null -->
+    },
+    sendUpdata() {
+      var words = `http://192.168.6.184:8080/userManage/modifyUserMessage?userName=${this.obj.userName}&userPwd=&roleName=${this.obj.roleName}&joinDate=&leavingDate=&sysProValueName=正常`;
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+        if (res.data.data.code == 200) {
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+        } else {
+          this.$message({
+            type: "info",
+            message: "修改失败"
+          });
+        }
+      });
+      this.updataTab = false;
     },
     // 修改用户信息关闭
     updataUser() {
@@ -230,7 +258,7 @@ export default {
     // 发送添加用户请求
     sendAddUser() {
       window.console.log("添加用户");
-      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinData=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
+      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinDate=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
@@ -328,6 +356,23 @@ export default {
       this.axios.get(words).then(res => {
         this.tableData = res.data.data.usersList;
         this.pages = res.data.data.count;
+        this.pagesize = 5;
+        for (var i = 0; i < this.tableData.length; i++) {
+          this.tableData[i].isCheck = res.data.data.userStates[i];
+          this.tableData[i].roleName = this.tableData[i].role.roleName;
+        }
+        window.console.log(this.tableData);
+      });
+    },
+    // ===========================搜索部分===============================
+    sendSearch() {
+      this.currpage = 1;
+      var words = `http://192.168.6.184:8080/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}`;
+      window.console.log(words);
+      this.axios.get(words).then(res => {
+        window.console.log("搜索结果", res.data.data);
+        this.tableData = res.data.data.usersList;
+        this.pages = res.data.data.count;
         for (var i = 0; i < this.tableData.length; i++) {
           this.tableData[i].isCheck = res.data.data.userStates[i];
           this.tableData[i].roleName = this.tableData[i].role.roleName;
@@ -357,7 +402,7 @@ export default {
         joinDate: "",
         leavingDate: "",
         phone: "",
-        role: "",
+        roleName: "",
         sex: "",
         systemPropertiesValue: "",
         userId: "",
@@ -368,13 +413,37 @@ export default {
       // 新增角色---------------------------------------------------
       // 提交表单
       userSubForm: {
+        userNo: "",
         roleName: "",
         userName: "",
         joinDate: "",
         userPwd: "",
         leavingDate: ""
       },
-      //
+      // 正则
+      addUserRules: {
+        userNo: [
+          { required: true, message: "请输入用户编号", trigger: "blur" }
+        ],
+        userName: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+          { min: 2, max: 6, message: "长度在 2 到 6 个字符", trigger: "blur" }
+        ],
+        roleName: [
+          { required: true, message: "角色类型不能为空", trigger: "blur" }
+        ],
+        joinDate: [
+          { required: true, message: "加入日期不能为空", trigger: "blur" }
+        ],
+        userPwd: [
+          {
+            required: true,
+            pattern: /^[a-zA-Z0-9]{6,22}$/,
+            message: "请输入新密码，6-22由数字或字母组成的字符",
+            trigger: "blur"
+          }
+        ]
+      },
       // 角色类型select数据
       powerSelect: ["地主", "师爷", "家丁", "长工", "短工", "佃户"],
       // 模态框开启
@@ -383,10 +452,8 @@ export default {
       neeUser: {},
       // 查看日志模态框控制----------------------------------------------3
       seeLogTab: false,
-      // 搜索框内容-----------------------------------------------------4
-      search: "",
       // 分页数据 一页显示最大数，当前页数-------------------------------5
-      pagesize: 3,
+      pagesize: 5,
       currpage: 1,
       pages: 0,
       // select选择框取下的值-------------------------------------------6
@@ -403,7 +470,11 @@ export default {
       ],
       // 表格渲染数据 --------------------------------------------------7
       // 渲染表格的数据
-      tableData: []
+      tableData: [],
+      // ============================ 搜索 ===============================
+      selects: ["正常", "冻结"],
+      searchSelect: "正常",
+      search: ""
     };
   }
 };
