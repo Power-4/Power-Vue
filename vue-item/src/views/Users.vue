@@ -589,7 +589,7 @@ export default {
         ],
         userName: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 6, max: 40, message: "长度在 6 到 40 个字符", trigger: "blur" }
+          { min: 2, max: 18, message: "长度在 2 到 18 个字符", trigger: "blur" }
         ],
         roleName: [
           { required: true, message: "角色类型不能为空", trigger: "blur" }
