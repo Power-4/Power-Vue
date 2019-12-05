@@ -439,6 +439,7 @@ export default {
           this.tableData[i].lastLoginTime = res.data.data.lastLoginTimes[i];
         }
         window.console.log(this.tableData);
+        window.console.log(res);
       });
     },
     // 添加用户----------------------------------------------------------
