@@ -176,7 +176,7 @@ export default {
     chaxun() {
       this.axios
         .get(
-          "http://192.168.6.177:8080/poleOrchid/getPolePageByCirIdAndActivate",
+          "/poleOrchid/getPolePageByCirIdAndActivate",
           {
             params: {
               currentPage: 1,
@@ -207,7 +207,7 @@ export default {
       );
 
       this.axios
-        .get("http://192.168.6.177:8080/poleOrchid/addPole", {
+        .get("/poleOrchid/addPole", {
           params: {
             poleNo: this.submit.poleNo,
             circuitryNo: this.submit.circuitryNo,
@@ -240,7 +240,7 @@ export default {
     //修改模态框确定按钮
     xiugai() {
       this.axios
-        .get("http://192.168.6.177:8080/poleOrchid/updatePoleById", {
+        .get("/poleOrchid/updatePoleById", {
           params: {
             poleId: this.poleId,
             poleNo: this.submit.poleNo,
@@ -289,7 +289,7 @@ export default {
           });
           window.console.log("当前所删除的id", this.poleId);
           this.axios
-            .get("http://192.168.6.177:8080/poleOrchid/deletePoleByPoleId", {
+            .get("/poleOrchid/deletePoleByPoleId", {
               params: {
                 poleId: this.poleId
               }
@@ -317,7 +317,7 @@ export default {
     //分页
     fenClick() {
       this.axios
-        .post("http://192.168.6.177:8080/poleOrchid/getPoleByPage", {
+        .post("/poleOrchid/getPoleByPage", {
           currentPage: this.submit.currentPage,
           pageSize: this.pageSize
         })
