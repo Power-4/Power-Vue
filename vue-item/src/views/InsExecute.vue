@@ -197,6 +197,7 @@ export default {
     //回执录入
     add(index, row) {
       this.$store.state.isAdd = true;
+      window.console.log('11111',this.$store.state.isAdd)
       var taskId = row.taskId;
       this.$router.push({
         path: "/inspect/executeenter",

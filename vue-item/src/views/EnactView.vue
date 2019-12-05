@@ -225,20 +225,21 @@ export default {
       }
 
 
-      this.axios.get('/showPoleInfosS?',{params:{poleId: lines.id}})
+      this.axios.get('/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
       .then((res) => {
-        if(res.data.data.poleInfosS[0]==null) {
+        
+        if(res.data.data.taskAndPoles==null) {
           this.lineDetail = {}
           this.lineDetail.poleNo = lines.label;
         } else {
-          this.lineDetail = res.data.data.poleInfosS[0];
+          this.lineDetail = res.data.data.taskAndPoles;
           if(res.data.data.taskAndPoles.hasDefects == 1) {
             res.data.data.taskAndPoles.hasDefects = '有'
           } else if (res.data.data.taskAndPoles.hasDefects == 0) {
             res.data.data.taskAndPoles.hasDefects = '无'
           }
         }
-        window.console.log(res.data);
+        window.console.log('杆塔数据',res.data);
       })
       .catch((err) => { 
         window.console.log("错误",err)

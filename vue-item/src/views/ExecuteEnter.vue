@@ -58,7 +58,7 @@ export default {
     return {
       taskId: '',
       temps: [],
-      isadd: true,
+      isadd: '',
       lines: [
         {
           id: 0,
@@ -88,24 +88,46 @@ export default {
   created() {
     this.getParams();
     this.isadd = this.isAdd;
-    
-    // 渲染页面数据
-    this.axios.get('/showTaskandPoles?',{params:{taskId: this.taskId}})
-    .then((res) => {
-      res.data.data.taskAndPoles.poles.forEach((item)=> {
-        var i = {};
-        i.id = item.poleId,
-        i.label = item.poleNo;
-        this.lines[0].children.push(i)
+
+    if(this.isadd) {
+
+      this.axios.get('/selectPolesByTaskIdNotInsert?',{params:{taskId: this.taskId}})
+      .then((res) => {
+        res.data.data.taskPoleVO.poles.forEach((item)=> {
+          var i = {};
+          i.id = item.poleId,
+          i.label = item.poleNo;
+          this.lines[0].children.push(i)
+        })
+        this.form.taskNo = res.data.data.taskPoleVO.task.taskNo;
+        this.lines[0].label = res.data.data.taskPoleVO.task.circuitry.circuitryName;
+        this.form.circuitryNo = res.data.data.taskPoleVO.task.circuitry.circuitryNo;
+        window.console.log('录入页杆塔号',res.data);
       })
-      this.form.taskNo = res.data.data.taskAndPoles.task.taskNo;
-      this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
-      this.form.circuitryNo = res.data.data.taskAndPoles.task.circuitry.circuitryNo;
-      window.console.log(res.data);
-    })
-    .catch((err) => { 
-      window.console.log("错误",err)
-    })
+      .catch((err) => { 
+        window.console.log("错误",err)
+      })
+    } else {
+          // 渲染页面数据
+      this.axios.get('/showTaskandPoles?',{params:{taskId: this.taskId}})
+      .then((res) => {
+        res.data.data.taskAndPoles.poles.forEach((item)=> {
+          var i = {};
+          i.id = item.poleId,
+          i.label = item.poleNo;
+          this.lines[0].children.push(i)
+        })
+        this.form.taskNo = res.data.data.taskAndPoles.task.taskNo;
+        this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
+        this.form.circuitryNo = res.data.data.taskAndPoles.task.circuitry.circuitryNo;
+        window.console.log(res.data);
+      })
+      .catch((err) => { 
+        window.console.log("错误",err)
+      })
+    }
+    
+
 
     // 请求缺陷类型
     this.axios.get('/getDefectsName?')
@@ -130,6 +152,26 @@ export default {
     this.form.findDate = this.addDate()
   },
   methods: {
+    // 初始化
+    init() {
+      this.axios.get('/showTaskandPoles?',{params:{taskId: this.taskId}})
+      .then((res) => {
+        res.data.data.taskAndPoles.poles.forEach((item)=> {
+          var i = {};
+          i.id = item.poleId,
+          i.label = item.poleNo;
+          this.lines[0].children.push(i)
+        })
+        this.form.taskNo = res.data.data.taskAndPoles.task.taskNo;
+        this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
+        this.form.circuitryNo = res.data.data.taskAndPoles.task.circuitry.circuitryNo;
+        window.console.log(res.data);
+      })
+      .catch((err) => { 
+        window.console.log("错误",err)
+      })
+    },
+
     // 获取基本信息
     getParams() {
       this.taskId = this.$route.query.taskId;
@@ -144,7 +186,7 @@ export default {
       var today = nowDate.getDate();
       today = today < 10? '0' + today:today;
 
-      let systemDate = year + '-' + month + '-' + today;
+      let systemDate = year + '/' + month + '/' + today;
       return systemDate;
     },
     // 返回上一页
@@ -180,13 +222,19 @@ export default {
           this.form.defectsDescribe = '';
         }
       }
+      window.console.log(this.isadd)
 
       if(!this.isadd) {
         this.axios.get('/selectRecord?',{params:{poleId: lines.id}})
         .then((res) => {
+          if(res.data.data.circuitryPoleRecordVO==null) {
+            this.form.defectsName = '';
+            this.form.defectsDescribe = '';
+          } else {
             this.form.defectsName = res.data.data.circuitryPoleRecordVO.damageRecord.defects.defectsName;
             this.form.defectsDescribe = res.data.data.circuitryPoleRecordVO.damageRecord.defectsDescribe;
-          window.console.log(res.data);
+          }
+          window.console.log('杆塔的信息',res.data);
         })
         .catch((err) => {
           window.console.log("错误",err)
@@ -236,31 +284,38 @@ export default {
       })
     },
     modifySave() {
-      let msg = {
-        poleNo: this.form.poleNo,
-        defectsName: this.form.defectName,
-        defectsDescribe: this.form.defectsDescribe
-      }
+      // let msg = {
+      //   poleNo: this.form.poleNo,
+      //   defectsName: this.form.defectName,
+      //   defectsDescribe: this.form.defectsDescribe
+      // }
 
       // 判断数组是否存在（之前保存过）
-      var  flag = false;
-      if(this.temps.length==0) {
-        this.temps.push(msg);
-      } else {
-        for(var i in this.temps) {
-          if(this.temps[i].poleNo == this.form.poleNo) {
-            this.temps.splice(i, 1, msg);
-            flag=true;
-          }
-        }
+      // var  flag = false;
+      // if(this.temps.length==0) {
+      //   this.temps.push(msg);
+      // } else {
+      //   for(var i in this.temps) {
+      //     if(this.temps[i].poleNo == this.form.poleNo) {
+      //       this.temps.splice(i, 1, msg);
+      //       flag=true;
+      //     }
+      //   }
 
-        if(flag==false) {
-          this.temps.push(msg);
-        }
-      }
+      //   if(flag==false) {
+      //     this.temps.push(msg);
+      //   }
+      // }
+
+
+      window.console.log(this.form.taskNo)
+      window.console.log(this.form.nowPoleId)
+      window.console.log(this.form.defectsName)
+      window.console.log(this.form.findDate)
+      window.console.log(this.form.defectsDescribe)
 
       // 回执修改请求
-      this.axios.get('http://192.168.6.184:8080/updateRecord?',{params:{
+      this.axios.get('/updateRecord?',{params:{
         taskNo: this.form.taskNo,
         poleId: this.form.nowPoleId,
         defectsId: this.form.defectsName,
