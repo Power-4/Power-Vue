@@ -163,6 +163,9 @@
             <!-- 缺陷列表 -->
             选择缺陷：
             <el-table
+              lazy
+              v-infinite-scroll="load"
+              height="250"
               @selection-change="fixchangeFun"
               ref="multipleTable"
               :data="tableData2"
@@ -190,12 +193,8 @@
       </el-row>
 
       <!-- 下方表格 -->
-      <el-table
-        :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)"
-        border
-        style="width: 100%"
-        size="small"
-      >
+      <el-table :data="tableData" border style="width: 100%" size="small">
+        <el-table-column prop="fixId" label="id" width="40" v-if="false"></el-table-column>
         <el-table-column prop="taskNum" label="任务编号" width="75"></el-table-column>
         <el-table-column prop="taskName" label="任务名称" width="100"></el-table-column>
         <el-table-column prop="workDocuments" label="工作单据" width="100"></el-table-column>
@@ -219,13 +218,13 @@
               <el-table :data="chakanForm" border style="width: 99%" size="small">
                 <el-table-column prop="issuedPeople" label="下发人" width="178"></el-table-column>
                 <el-table-column prop="issuedDate" label="下发时间" width="178"></el-table-column>
-                <el-table-column prop label="任务负责人" width="178"></el-table-column>
-                <el-table-column prop label="任务描述" width="178"></el-table-column>
+                <el-table-column prop="taskLeader" label="任务负责人" width="178"></el-table-column>
+                <el-table-column prop=" taskDescription" label="任务描述" width="178"></el-table-column>
               </el-table>
 
               <el-table :data="chakanForm" border style="width: 99%" size="small">
-                <el-table-column prop label="消缺员" width="178"></el-table-column>
-                <el-table-column prop label="消缺时间" width="178"></el-table-column>
+                <el-table-column prop="fixuser" label="消缺员" width="178"></el-table-column>
+                <el-table-column prop="fixDate" label="消缺时间" width="178"></el-table-column>
                 <el-table-column prop label="负责人审查意见" width="178"></el-table-column>
                 <el-table-column prop label="完成情况描述" width="178"></el-table-column>
               </el-table>
@@ -236,7 +235,7 @@
 
               <p>缺陷列表:</p>
               <el-table
-                :data="tableData2"
+                :data="tableData3"
                 border
                 style="width: 99%"
                 size="small"
@@ -258,14 +257,95 @@
               </el-table>
             </el-dialog>
 
-            <el-button type="text" size="small" @click="fenClick(scope.row)">分配任务</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="fenClick(scope.row)"
+              :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
+            >分配任务</el-button>
 
             <!-- 分配任务时的模态框 -->
             <el-dialog title="分配任务" :visible.sync="fenTask">
               <el-transfer v-model="fneValue" :data="fneArr"></el-transfer>
-              <el-button type="primary" class="fenCofim">确认分配</el-button>
+              <el-button
+                type="primary"
+                class="fenCofim"
+                @click="fenCofirm()"
+                :disabled="fneValue.length == 0?true:false"
+              >确认分配</el-button>
             </el-dialog>
-            <el-button type="text" size="small" @click="xiuClick(scope.row)">修改</el-button>
+            <el-button
+              v-if="scope.row.taskStatus == '审核中'"
+              type="text"
+              size="small"
+              @click="shenClick(scope.row)"
+              :disabled="scope.row.taskStatus == '已完成'?true:(scope.row.taskStatus == '驳回'?true:false)"
+            >审核</el-button>
+            <el-button
+              v-else
+              type="text"
+              size="small"
+              @click="xiuClick(scope.row)"
+              :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
+            >修改</el-button>
+
+            <!-- 审查时的模态框 -->
+            <el-dialog title="任务审查" :visible.sync="shenTask">
+              <!-- 第一列表格 -->
+              <el-table :data="shenTable1" border style="width: 100%" size="mini">
+                <el-table-column prop="taskNum" label="任务编码" width="180"></el-table-column>
+                <el-table-column prop="taskName" label="任务名称" width="180"></el-table-column>
+                <el-table-column prop="taskStatus" label="任务状态"></el-table-column>
+                <el-table-column prop="workDocuments" label="工作单据"></el-table-column>
+              </el-table>
+
+              <!-- 第二列表格 -->
+              <el-table :data="shenTable1" border style="width: 100%" size="mini">
+                <el-table-column prop="issuedPeople" label="下发人" width="180"></el-table-column>
+                <el-table-column prop="issuedDate" label="下发时间" width="180"></el-table-column>
+                <el-table-column prop="taskLeader" label="负责人"></el-table-column>
+                <el-table-column prop="taskDescription" label="任务描述"></el-table-column>
+              </el-table>
+
+              <!-- 第三列表格 -->
+              <el-table :data="shenTable1" border style="width: 100%" size="mini">
+                <el-table-column prop="eliminateVacancies" label="消缺员" width="180"></el-table-column>
+                <el-table-column prop="endTime" label="任务完成时间" width="180"></el-table-column>
+                <el-table-column prop="wanDes" label="完成情况描述"></el-table-column>
+              </el-table>
+
+              <!-- 审查意见 -->
+              <el-form ref="form" :model="shenform" label-width="80px" size="mini">
+                <el-form-item label="下发人意见">
+                  <el-input type="textarea" v-model="shenform.issued"></el-input>
+                </el-form-item>
+
+                <el-form-item label="负责人意见">
+                  <el-input type="textarea" v-model="shenform.leader"></el-input>
+                </el-form-item>
+              </el-form>
+              <!--  -->
+              <el-select v-model="value" placeholder="请选择" size="mini">
+                <el-option
+                  v-for="item in isPass"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+
+              <!-- 缺陷信息列表 -->
+              <el-table :data="fixList" border style="width: 100%" size="mini">
+                <el-table-column prop="lineNum" label="线路编号" width="70"></el-table-column>
+                <el-table-column prop="poleNum" label="塔杆编号" width="70"></el-table-column>
+                <el-table-column prop="defectLevels" label="缺陷等级" width="50"></el-table-column>
+                <el-table-column prop="defectTypes" label="缺陷类型" width="100"></el-table-column>
+                <el-table-column prop="defectDes" label="缺陷描述" width="100"></el-table-column>
+                <el-table-column prop="quot" label="发现人" width="85"></el-table-column>
+                <el-table-column prop="findTime" label="发现时间" width="100"></el-table-column>
+              </el-table>
+            </el-dialog>
+
             <!-- 修改时的模态框 -->
             <el-dialog title="修改任务" :visible.sync="xiuTask">
               <div style="width:100%; height:700px;">
@@ -292,18 +372,24 @@
                   <!-- 工作单据修改 -->
                   <el-form-item label="工作单据:">
                     <el-select v-model="form.workDocuments" placeholder="请选择工作单据">
-                      <el-option label="任务单" value="renwudan"></el-option>
-                      <el-option label="第一张单据" value="one"></el-option>
-                      <el-option label="第二种单据" value="two"></el-option>
+                      <el-option
+                        v-for="item in options4"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      ></el-option>
                     </el-select>
                   </el-form-item>
 
                   <!-- 任务负责人修改 -->
                   <el-form-item label="任务负责人:">
                     <el-select v-model="xiuForm.taskLeader" placeholder="请选择任务负责人">
-                      <el-option label="线路管理测试用户1" value="taskLeaderOne"></el-option>
-                      <el-option label="线路管理测试用户3" value="taskLeaderTwo"></el-option>
-                      <el-option label="线路管理测试用户2" value="taskLeaderThree"></el-option>
+                      <el-option
+                        v-for="item in options3"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      ></el-option>
                     </el-select>
                   </el-form-item>
 
@@ -346,7 +432,7 @@
                 <!-- 缺陷列表 -->
                 <el-table
                   ref="multipleTable"
-                  :data="tableData2"
+                  :data="tableData4"
                   tooltip-effect="dark"
                   style="width: 100%"
                   size="mini"
@@ -369,7 +455,12 @@
               </div>
             </el-dialog>
 
-            <el-button type="text" size="small" @click="open()">取消</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="open(scope.row)"
+              :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
+            >取消</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -394,25 +485,10 @@ export default {
       xiaoList: ["消缺员1"],
       selectXuan: false,
       fneValue: [],
-      fneArr: [
-        {
-          key: 1,
-          label: "消缺员1",
-          disabled: false
-        },
-        {
-          key: 2,
-          label: "消缺员2",
-          disabled: false
-        },
-        {
-          key: 3,
-          label: "消缺员3",
-          disabled: false
-        }
-      ],
+      fneArr: [],
       chakanForm: [],
       xiuForm: {},
+      shenform: {},
       xiaoPeople: [],
       form: {
         taskName: "",
@@ -468,24 +544,60 @@ export default {
           label: "驳回"
         }
       ],
+      isPass: [
+        {
+          value: 1,
+          label: "通过"
+        },
+        {
+          value: 0,
+          label: "不通过"
+        }
+      ],
+      options3: [],
+      options4: [
+        {
+          value: 1,
+          label: "抬头发票"
+        },
+        {
+          value: 2,
+          label: "银行票据"
+        },
+        {
+          value: 3,
+          label: "邮递单据"
+        }
+      ],
       multipleSelection: [],
       fixSelection: [],
       value: "",
       statusValue: "",
       createTime: "",
       endTime: "",
+      fixId: "",
       currentPage: 1, //初始页
       pagesize: 5, //    每页的数据
+      loadCurrentPage: 1, //懒加载初始页
       tableData: [],
       tableData2: [],
+      tableData3: [],
+      tableData4: [],
+      fixList: [], //审查时缺陷列表
+      shenTable1: [], //审查时表格
       dialogFormVisible: false,
       checkTask: false,
       xiuTask: false,
       fenTask: false,
+      shenTask: false,
+      isCofim: true,
       checkList: []
     };
   },
   methods: {
+    load() {
+      window.console.log("到底了");
+    },
     fixchangeFun(val) {
       this.fixSelection = val.map(function(item) {
         return item.deId;
@@ -519,7 +631,6 @@ export default {
       str += "RXQ" + date;
       this.form.taskNum = str.substr(0, 13);
       return str.substr(0, 13);
-      
     },
     selectByFind: function() {
       if (this.statusValue == "待分配") {
@@ -600,7 +711,11 @@ export default {
           var work = res.data.data.fix.map(function(item) {
             return item.workForm.workFormName;
           });
+          var fix = res.data.data.fix.map(function(item) {
+            return item.fixId;
+          });
           // window.console.log(work);
+          // window.console.log(fix)
           var taskArr = res.data.data.fix.map(function(item) {
             return item.task;
           });
@@ -618,28 +733,133 @@ export default {
           // window.console.log(newArr);
           for (var i = 0; i < newArr.length; i++) {
             newArr[i].workDocuments = work[i];
-            this.tableData.push(newArr[i]);
+            newArr[i].fixId = fix[i];
           }
-          // window.console.log(newArr);
+          this.tableData = [];
+          this.tableData = newArr.map(function(item) {
+            return item;
+          });
+          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
         });
     },
     chakanClick(row) {
-      this.checkTask = true;
-      this.chakanForm = [];
-      this.chakanForm.push(row);
-    },
-    fenClick() {
-      this.fenTask = true;
+      window.console.log(row.fixId);
+      //发送查看请求
       this.axios
-        .post("http://192.168.6.175:8080/fix/getallfix", {
-          currentPage: 1,
-          pageSize: 2
+        .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
+          params: {
+            fixId: row.fixId
+          }
         })
         .then(res => {
-          window.console.log(res.data);
+          window.console.log(res);
+          this.checkTask = true;
+          // 绑定数据
+          var newArr = [];
+          newArr.push(res.data.data.fix);
+          var first = newArr.map(function(item) {
+            return {
+              taskNum: item.task.taskNo,
+              taskName: item.task.taskName,
+              taskStatus: item.task.systemPropertiesValue.sysProValueName,
+              workDocuments: item.workForm.workFormName,
+              issuedPeople: item.task.users.userName,
+              issuedDate: item.task.createDate,
+              taskLeader: item.users.userName,
+              taskDescription: item.task.taskDescribe,
+              fixDate: item.task.finishDate
+            };
+          });
+          this.chakanForm = first.map(function(item) {
+            return item;
+          });
+          window.console.log(this.chakanForm);
+          // 绑定消缺员数据
+          var fixUser = res.data.data.fixUser.map(function(item) {
+            return item.userName;
+          });
+          this.chakanForm[0].fixuser = fixUser.join(",");
+          window.console.log(this.chakanForm[0]);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+
+      // 查看当前任务缺陷
+      this.axios
+        .get("http://192.168.6.184:8080/selectPoleDamageByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          var newQue = res.data.data.damageRecord.map(function(item) {
+            return {
+              deId: item.damageRecordId,
+              lineNum: item.pole.circuitry.circuitryNo,
+              poleNum: item.pole.poleNo,
+              defectLevels: item.defectsLevel,
+              defectTypes: item.defects.defectsName,
+              defectDes: item.defectsDescribe,
+              quot: item.users.userName,
+              findTime: item.findDate
+            };
+          });
+          window.console.log(newQue);
+          this.tableData3 = newQue.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+
+    fenClick(row) {
+      this.fenTask = true;
+      window.console.log(row.fixId);
+      this.fixId = row.fixId;
+      //获取所有消缺员
+      this.axios
+        .get("http://192.168.6.184:8080/selectAllFixUser")
+        .then(res => {
+          window.console.log(res.data.data.users);
+          var fixUserList = res.data.data.users.map(function(item) {
+            return {
+              key: item.userId,
+              label: item.userName,
+              disabled: false
+            };
+          });
+          this.fneArr = fixUserList.map(function(item) {
+            return item;
+          });
+          window.console.log(this.fneArr);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+
+    fenCofirm() {
+      // 确认分配任务
+      window.console.log(this.fneValue);
+      var fixUserId = this.fneValue.join(",");
+      window.console.log(fixUserId);
+      this.axios
+        .get("http://192.168.6.184:8080/updateTaskUserRelation", {
+          params: {
+            fixId: this.fixId,
+            fixUserId: fixUserId
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          // this.fenTask = false;
         })
         .catch(err => {
           window.console.log(err);
@@ -648,25 +868,111 @@ export default {
     xiuClick(row) {
       this.xiuTask = true;
       window.console.log(row);
-      Object.assign(this.xiuForm, row);
-      window.console.log(this.xiuForm);
     },
-    open() {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+    shenClick(row) {
+      this.shenTask = true;
+      window.console.log(row.fixId);
+      //发送查看请求
+      this.axios
+        .get("http://192.168.6.184:8080/selectFixTaskByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          
+          // 绑定数据
+          var newArr = [];
+          newArr.push(res.data.data.fix);
+          var first = newArr.map(function(item) {
+            return {
+              taskNum: item.task.taskNo,
+              taskName: item.task.taskName,
+              taskStatus: item.task.systemPropertiesValue.sysProValueName,
+              workDocuments: item.workForm.workFormName,
+              issuedPeople: item.task.users.userName,
+              issuedDate: item.task.createDate,
+              taskLeader: item.users.userName,
+              taskDescription: item.task.taskDescribe,
+              fixDate: item.task.finishDate
+            };
+          });
+          this.shenTable1 = first.map(function(item) {
+            return item;
+          });
+          window.console.log(this.chakanForm);
+          // 绑定消缺员数据
+          var fixUser = res.data.data.fixUser.map(function(item) {
+            return item.userName;
+          });
+          this.shenTable1[0].eliminateVacancies = fixUser.join(",");
+          window.console.log(this.chakanForm[0]);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+
+      // 查看当前任务缺陷
+      this.axios
+        .get("http://192.168.6.184:8080/selectPoleDamageByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          var newQue = res.data.data.damageRecord.map(function(item) {
+            return {
+              deId: item.damageRecordId,
+              lineNum: item.pole.circuitry.circuitryNo,
+              poleNum: item.pole.poleNo,
+              defectLevels: item.defectsLevel,
+              defectTypes: item.defects.defectsName,
+              defectDes: item.defectsDescribe,
+              quot: item.users.userName,
+              findTime: item.findDate
+            };
+          });
+          window.console.log(newQue);
+          this.fixList = newQue.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+    open(row) {
+      window.console.log(row.fixId);
+      this.$confirm("此操作将取消该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
+          // 发送取消请求
+          this.axios
+            .get("http://192.168.6.184:8080/updateTaskIsCancel", {
+              params: {
+                fixId: row.fixId
+              }
+            })
+            .then(res => {
+              window.console.log(res);
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
           this.$message({
             type: "success",
-            message: "删除成功!"
+            message: "取消成功!"
           });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除"
+            message: "已取消"
           });
         });
     },
@@ -700,7 +1006,7 @@ export default {
               id: item.userId
             };
           });
-          window.console.log(newXiao);
+          // window.console.log(newXiao);
 
           this.xiaoPeople = newXiao.map(function(item) {
             return item;
@@ -714,7 +1020,7 @@ export default {
       this.axios
         .get("http://192.168.6.184:8080/selectPoleDamage")
         .then(res => {
-          window.console.log(res.data.data.damageRecord);
+          // window.console.log(res.data.data.damageRecord);
           var newQue = res.data.data.damageRecord.map(function(item) {
             return {
               deId: item.damageRecordId,
@@ -727,8 +1033,8 @@ export default {
               findTime: item.findDate
             };
           });
-          window.console.log(newQue);
-          // 加入缺陷表中
+          window.console.log(newQue[0]);
+          // 加入缺陷表中;
           this.tableData2 = newQue.map(function(item) {
             return item;
           });
@@ -739,7 +1045,7 @@ export default {
     },
     addTaskCofim() {
       // 确认添加新项目
-      window.console.log(this.form)
+      window.console.log(this.form);
       this.axios
         .get("http://192.168.6.184:8080/addFixTask", {
           params: {
@@ -750,15 +1056,15 @@ export default {
             taskNote: this.form.taskNote,
             taskDescribe: this.form.taskDescription,
             workFormId: 1,
-            damageRecordId:this.fixSelection.join(",") ,
+            damageRecordId: this.fixSelection.join(","),
             fixUserId: this.multipleSelection.join(","),
             manageUserId: 10000007
           }
         })
         .then(res => {
           window.console.log(res);
-          this.form = {}
-          this.dialogFormVisible = false
+          this.form = {};
+          this.dialogFormVisible = false;
         })
         .catch(err => {
           window.console.log(err);
@@ -775,11 +1081,15 @@ export default {
         }
       })
       .then(res => {
-        // window.console.log(res.data.data.fix);
+        window.console.log(res);
         var work = res.data.data.fix.map(function(item) {
           return item.workForm.workFormName;
         });
+        var fix = res.data.data.fix.map(function(item) {
+          return item.fixId;
+        });
         // window.console.log(work);
+        // window.console.log(fix)
         var taskArr = res.data.data.fix.map(function(item) {
           return item.task;
         });
@@ -791,15 +1101,26 @@ export default {
             issuedPeople: item.users.userName,
             issuedDate: item.createDate,
             taskStatus: item.systemPropertiesValue.sysProValueName,
-            completionTime: item.finishDate
+            completionTime: item.finishDate,
+            isCancel: item.isCancel
           };
         });
         // window.console.log(newArr);
         for (var i = 0; i < newArr.length; i++) {
           newArr[i].workDocuments = work[i];
-          this.tableData.push(newArr[i]);
+          newArr[i].fixId = fix[i];
         }
-        // window.console.log(newArr);
+        this.tableData = newArr.map(function(item) {
+          return item;
+        });
+        for (var j = 0; j < this.tableData.length; j++) {
+          if (this.tableData[j].isCancel == 1) {
+            this.tableData[j].isCancel = "否";
+          } else if (this.tableData[j].isCancel == 0) {
+            this.tableData[j].isCancel = "是";
+          }
+        }
+        window.console.log(this.tableData);
       })
       .catch(err => {
         window.console.log(err);
