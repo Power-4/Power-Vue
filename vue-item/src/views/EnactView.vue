@@ -6,31 +6,31 @@
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务编号：</label>
-            <span>{{taskNo}}</span>  
+            <span>{{lineBasic.taskNo}}</span>  
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务名称：</label>
-            <span>{{taskName}}</span>  
+            <span>{{lineBasic.taskName}}</span>  
           </div>
           </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>巡检线路：</label>
-            <!-- <span>{{lineBasic.circuitry.circuitryName}}</span>  -->
+            <span>{{lineBasic.circuitry.circuitryName}}</span> 
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>起始杆号：</label>
-            <!-- <span>{{lineBasic.taskPoleRelation.startPoleNo}}</span>  -->
+            <span>{{lineBasic.taskPoleRelation.startPoleNo}}</span> 
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>终止杆号：</label>
-            <!-- <span>{{lineBasic.taskPoleRelation.endPoleNo}}</span>  -->
+            <span>{{lineBasic.taskPoleRelation.endPoleNo}}</span> 
           </div>
         </el-col>
       </el-row>
@@ -38,33 +38,33 @@
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发人：</label>
-            <!-- <span>{{lineBasic.users.userName}}</span>   -->
+            <span>{{lineBasic.users.userName}}</span>  
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <!-- <span>{{lineBasic.createDate}}</span>   -->
+            <span>{{lineBasic.createDate}}</span>  
           </div>
           </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
             <label>任务状态：</label>
-            <!-- <span>{{lineBasic.systemPropertiesValue.sysProValueName}}</span>  -->
+            <span>{{lineBasic.systemPropertiesValue.sysProValueName}}</span> 
           </div>
         </el-col>
         <el-col :span="5">
           <div class="grid-content bg-purple">
             <label>任务完成时间：</label>
-            <!-- <span>{{lineBasic.finishDate}}</span>  -->
+            <span>{{lineBasic.finishDate}}</span> 
           </div>
         </el-col>
       </el-row>
       <el-row :gutter="20">
-        <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span></span></div></el-col>
+        <el-col :span="24"><div class="grid-content bg-purple"><label>备注信息：</label><span>{{lineBasic.taskNotee}}</span></div></el-col>
       </el-row>
       <el-row :gutter="20">
-        <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span></span></div></el-col>
+        <el-col :span="24"><div class="grid-content bg-purple"><label>巡检员：</label><span>{{nowinspectors}}</span></div></el-col>
       </el-row>
 
 
@@ -119,9 +119,6 @@
 export default {
   data() {
     return {
-      taskNo: '',
-      taskName: '',
-      circuitry: '',
       lineBasic: {
         taskId:'',
         taskNo: '',
@@ -138,7 +135,8 @@ export default {
         taskPoleRelation: {
           startPoleNo: '',
           endPoleNo: ''
-        }
+        },
+        taskNote: ''
       },
       nowinspectors: '',
       nowinspector: [],
@@ -162,7 +160,7 @@ export default {
         defectsName: '',
         defectsLevel: '',
         checkDate: '',
-        findUserName: '',
+        defectUserName: '',
         findDate: '',
         createUserName: '',
         createDate: '',
@@ -174,46 +172,46 @@ export default {
   created() {
     this.getParams();
 
-    // this.axios.get('/showTaskandPoles?',{params:{taskId: this.lineBasic.taskId}})
+    this.axios.get('/showTaskandPoles?',{params:{taskId: this.lineBasic.taskId}})
+    .then((res) => {
+      this.lineBasic = res.data.data.taskAndPoles.task;
+      res.data.data.taskAndPoles.poles.forEach((item)=> {
+        var i = {};
+        i.id = item.poleId,
+        i.label = item.poleNo;
+        this.lines[0].children.push(i)
+      })
+      
+      this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
+      window.console.log(res.data);
+    })
+    .catch((err) => { 
+      window.console.log("错误",err)
+    })
+
+    // this.axios.get('/checkMissionS?',{params:{taskId: this.$route.query.taskId}})
     // .then((res) => {
-    //   this.lineBasic = res.data.data.taskAndPoles.task;
-    //   res.data.data.taskAndPoles.poles.forEach((item)=> {
+    //   this.lineBasic = res.data.data.taskInfo[0];
+    //   res.data.data.poles.forEach((item)=> {
     //     var i = {};
     //     i.id = item.poleId,
     //     i.label = item.poleNo;
     //     this.lines[0].children.push(i)
     //   })
-      
-    //   this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
-    //   window.console.log(res.data);
+
+    //   res.data.data.inspectors.forEach((item)=> {
+    //     var i = {};
+    //     i.userName = item.userName;
+    //     this.nowinspector.push(i.userName);
+    //   })
+    //   this.nowinspectors = this.nowinspector.toString();
+    //   this.lines[0].label = res.data.data.taskInfo[0].circuitry.circuitryName;
+
+    //   window.console.log('任务对应杆号',res.data);
     // })
     // .catch((err) => { 
     //   window.console.log("错误",err)
     // })
-
-    this.axios.get('/checkMissionS?',{params:{taskId: this.$route.query.taskId}})
-    .then((res) => {
-      // this.lineBasic = res.data.data.taskInfo;
-      // res.data.data.poles.forEach((item)=> {
-      //   var i = {};
-      //   i.id = item.poleId,
-      //   i.label = item.poleNo;
-      //   this.lines[0].children.push(i)
-      // })
-
-      // res.data.data.inspectors.forEach((item)=> {
-      //   var i = {};
-      //   i.userName = item.userName;
-      //   this.nowinspector.push(i.userName);
-      // })
-      // this.nowinspectors = this.nowinspector.toString();
-      // window.console.log(this.nowinspectors)
-      // this.lines[0].label = res.data.data.taskInfo[0].circuitry.circuitryName;
-      window.console.log('任务对应杆号',res.data);
-    })
-    .catch((err) => { 
-      window.console.log("错误",err)
-    })
   },
   watch: {
     '$route': 'getParams'
@@ -226,6 +224,7 @@ export default {
       this.$router.go(-1)
     },
     handleNodeClick(lines) {
+      window.console.log(lines.id)
 
       // 判断点击的杆塔编号
       if(lines.id !== 0) {
@@ -235,35 +234,36 @@ export default {
       }
 
 
-      // this.axios.get('/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
-      // .then((res) => {
-      //   this.lineDetail = res.data.data.taskAndPoles;
-  
-      //   if(res.data.data.taskAndPoles.hasDefects == 1) {
-      //     res.data.data.taskAndPoles.hasDefects = '有'
-      //   } else if (res.data.data.taskAndPoles.hasDefects == 0) {
-      //     res.data.data.taskAndPoles.hasDefects = '无'
-      //   }
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => { 
-      //   window.console.log("错误",err)
-      // })
-
-      this.axios.get('/showPoleInfosS?',{params:{poleId: lines.id}})
+      this.axios.get('/showPoleMsgByPoleId?',{params:{poleId: lines.id}})
       .then((res) => {
-        // this.lineDetail = res.data.data.taskAndPoles;
+        this.lineDetail = res.data.data.taskAndPoles;
+        window.console.log(this.lineDetail)
   
-        // if(res.data.data.taskAndPoles.hasDefects == 1) {
-        //   res.data.data.taskAndPoles.hasDefects = '有'
-        // } else if (res.data.data.taskAndPoles.hasDefects == 0) {
-        //   res.data.data.taskAndPoles.hasDefects = '无'
-        // }
+        if(res.data.data.taskAndPoles.hasDefects == 1) {
+          res.data.data.taskAndPoles.hasDefects = '有'
+        } else if (res.data.data.taskAndPoles.hasDefects == 0) {
+          res.data.data.taskAndPoles.hasDefects = '无'
+        }
         window.console.log(res.data);
       })
       .catch((err) => { 
         window.console.log("错误",err)
       })
+
+      // this.axios.get('/showPoleInfosS?',{params:{poleId: lines.id}})
+      // .then((res) => {
+      //   this.lineDetail = res.data.data.poleInfosS[0];
+      //   window.console.log(this.lineDetail)
+      //   // if(res.data.data.taskAndPoles.hasDefects == 1) {
+      //   //   res.data.data.taskAndPoles.hasDefects = '有'
+      //   // } else if (res.data.data.taskAndPoles.hasDefects == 0) {
+      //   //   res.data.data.taskAndPoles.hasDefects = '无'
+      //   // }
+      //   window.console.log(res.data);
+      // })
+      // .catch((err) => { 
+      //   window.console.log("错误",err)
+      // })
 
 
 
