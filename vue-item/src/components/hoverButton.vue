@@ -370,8 +370,8 @@ export default {
   created() {
     this.list = resourceList;
     
-     this.axios.get("/permission/getResources",{params:{
-       token:sessionstorage.getItem("token")
+    this.axios.get("/permission/getResources",{params:{
+       token:sessionStorage.getItem("token")
      }})
      .then((res)=>{
        window.console.log(res)
