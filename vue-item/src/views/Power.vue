@@ -1,5 +1,9 @@
 <template>
   <div class="power">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>角色权限管理</el-breadcrumb-item>
+    </el-breadcrumb>
     <div class="slec">
       <span>选择角色：</span>
       <el-select placeholder="--请选择要修改的权限--" v-model="role" @change="getRolePower">
@@ -63,7 +67,7 @@ export default {
         window.console.log("得到的可以使用的权力", this.yesData);
       });
     },
-    // ============================================================
+    // ================================================================
     // =======================提交修改权限==============================
     // 提交修改后的权限
     sendPower() {
@@ -145,7 +149,22 @@ export default {
   }
 };
 </script>
-
+<style lang="less">
+.lu {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(218, 218, 218);
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
+  span:nth-of-type(2) {
+    font-size: 14px;
+    padding-top: 1px;
+  }
+}
+</style>
 <style>
 .Chbox {
   width: 800px;

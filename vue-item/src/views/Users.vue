@@ -1,5 +1,9 @@
 <template>
   <div class="role">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+    </el-breadcrumb>
     <div class="topRole">
       <el-form>
         <el-form-item label="用户名称：">
@@ -538,7 +542,22 @@ export default {
   }
 };
 </script>
-
+<style lang="less" scoped>
+.lu {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(218, 218, 218);
+  span:nth-of-type(1) {
+    margin-left: 20px;
+  }
+  span:nth-of-type(2) {
+    font-size: 14px;
+    padding-top: 1px;
+  }
+}
+</style>
 <style>
 .form-box {
   widows: 800px;

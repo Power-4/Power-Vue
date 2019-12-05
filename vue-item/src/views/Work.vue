@@ -1,5 +1,9 @@
 <template>
   <div class="work">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>个人信息</el-breadcrumb-item>
+      <el-breadcrumb-item>代办列表</el-breadcrumb-item>
+    </el-breadcrumb>
     <div class></div>
     <el-table style="width: 100%" stripe border :data="tableData">
       <!-- 
@@ -165,7 +169,7 @@ export default {
       this.axios
         .get(words)
         .then(res => {
-          window.console.log("加载数据",res);
+          window.console.log("加载数据", res);
           this.pages = res.data.data.count;
           this.tableData = res.data.data.tasks;
         })
