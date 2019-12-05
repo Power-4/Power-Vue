@@ -15,11 +15,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table
-      stripe
-      style="width: 100%"
-      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
-    >
+    <el-table stripe style="width: 100%" :data="tableData">
       <!-- roleId:  -->
       <!-- roleName:  -->
       <!-- roleNo:  -->
@@ -39,7 +35,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button class="cli" @click="updata(scope.$index)" type="text" size="small">修改</el-button>
+          <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
           <el-button @click="deleteRow(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -60,10 +56,10 @@
     <el-dialog title="修改角色信息" :visible.sync="updataTab">
       <!-- 插入类型 -->
       <el-form>
-        <el-form-item label="手机号码">
+        <el-form-item label="角色名">
           <el-input v-model="roleData.roleName"></el-input>
         </el-form-item>
-        <el-form-item label="手机号码">
+        <el-form-item label="角色编号">
           <el-input v-model="roleData.roleNo"></el-input>
           <!-- roleName -->
           <!-- roleNo -->
@@ -261,26 +257,13 @@ export default {
     updata(index) {
       // 弹出由 :visible.sync 绑定的模态框
       this.updataTab = true;
-      //
-      // 获取准确 id
-      var a = this.currpage - 1;
-      var b = a * this.pagesize + index;
-
-      var thisid = 0;
-      for (var i = 0; i < this.tableData.length; i++) {
-        if (this.tableData[i].roleId == this.tableData[b].roleId) {
-          thisid = i;
-          break;
-        }
-      }
-      // 添加东西
-      this.roleData.roleName = this.tableData[thisid].roleName;
-      this.roleData.roleNo = this.tableData[thisid].roleNo;
-      this.roleData.systemPropertiesValue.sysProValueName = this.tableData[
-        thisid
-      ].systemPropertiesValue.sysProValueName;
-      this.roleData.roleId = this.tableData[thisid].roleId;
-      window.console.log(this.roleData);
+      // 此处 index 对象
+      window.console.log(index);
+      this.roleData.roleName = index.roleName;
+      this.roleData.roleNo = index.roleNo;
+      this.roleData.systemPropertiesValue.sysProValueName =
+        index.systemPropertiesValue.sysProValueName;
+      this.roleData.roleId = index.roleId;
     },
     // 分页函数
     // 每页几条
@@ -455,7 +438,7 @@ export default {
       },
       // 显示分页------------------------------------------------------4
       // 分页数据 一页显示最大数，当前页数
-      pagesize: 3,
+      pagesize: 4,
       currpage: 1,
       pages: 3,
       // 表格数据渲染----------------------------------------------------6

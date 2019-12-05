@@ -23,7 +23,7 @@
 
     <div class="abc">
       <div class="elbtnel">
-        <el-button class="elb" @click="canselUpdata">取消修改</el-button>
+        <el-button class="elb" @click="getRolePower">取消修改</el-button>
         <el-button class="elb" @click="sendPower">保存修改</el-button>
       </div>
     </div>
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import qs from "qs";
 export default {
   methods: {
     // ====================获取角色和全选============================
@@ -62,17 +63,41 @@ export default {
         window.console.log("得到的可以使用的权力", this.yesData);
       });
     },
+    // ============================================================
+    // =======================提交修改权限==============================
     // 提交修改后的权限
     sendPower() {
-      var words = `http://192.168.6.184:8080/`;
-      this.axios.get(words).then(res => {
-        window.console.log(res);
-      });
-    },
-    // ============================================================
-    // 取消修改
-    canselUpdata() {
-      this.getPowerSelect();
+      // this.yesData
+      var yesDataName = [];
+      var abb = this.rolePower;
+      window.console.log(abb);
+      for (var i = 0; i < this.yesData.length; i++) {
+        for (var j = 0; j < abb.length; j++) {
+          if (this.yesData[i] == abb[j].resourcesId) {
+            yesDataName.push(abb[j].resourcesName);
+          }
+        }
+      }
+      window.console.log("权限获取", this.yesData);
+      window.console.log("this.rolePower.length", this.rolePower.length);
+      window.console.log("this.yesData.length", this.yesData.length);
+      window.console.log("获得权限信息", yesDataName);
+      var words = `http://192.168.6.184:8080//permission/addRole_resources_relation`;
+      window.console.log(words);
+      this.axios
+        .get(words, {
+          params: {
+            resourcesNames: yesDataName,
+            userName: this.role
+          },
+          // 传输组需要的配置
+          paramsSerializer: params => {
+            return qs.stringify(params, { indices: false });
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+        });
     }
   },
   data() {
@@ -160,29 +185,3 @@ export default {
   margin-top: 30px;
 }
 </style>
-
-// <el-checkbox class="aaaa">电力巡检系统</el-checkbox>
-// <el-checkbox class="aaaa">我的工作平台</el-checkbox>
-// <el-checkbox class="aaaa">待办列表</el-checkbox>
-// <el-checkbox class="aaaa">个人资料修改</el-checkbox>
-// <el-checkbox class="aaaa">系统管理</el-checkbox>
-// <el-checkbox class="aaaa">角色管理</el-checkbox>
-// <el-checkbox class="aaaa">用户管理</el-checkbox>
-// <el-checkbox class="aaaa">角色权限配置</el-checkbox>
-// <el-checkbox class="aaaa">系统配置</el-checkbox>
-// <el-checkbox class="aaaa">杆塔管理</el-checkbox>
-// <el-checkbox class="aaaa">线路管理</el-checkbox>
-// <el-checkbox class="aaaa">缺陷管理</el-checkbox>
-// <el-checkbox class="aaaa">缺陷类型设置</el-checkbox>
-// <el-checkbox class="aaaa">缺陷等级确认</el-checkbox>
-// <el-checkbox class="aaaa">巡检任务管理</el-checkbox>
-// <el-checkbox class="aaaa">巡检任务制定与分配</el-checkbox>
-// <el-checkbox class="aaaa">巡检任务执行与回执</el-checkbox>
-// <el-checkbox class="aaaa">缺陷查询</el-checkbox>
-// <el-checkbox class="aaaa">消缺任务管理</el-checkbox>
-// <el-checkbox class="aaaa">消缺任务制定与分配</el-checkbox>
-// <el-checkbox class="aaaa">消缺任务执行与回执</el-checkbox>
-// <el-checkbox class="aaaa">消缺查询</el-checkbox>
-// <el-checkbox class="aaaa">信息统计</el-checkbox>
-// <el-checkbox class="aaaa">巡检记录统计</el-checkbox>
-// <el-checkbox class="aaaa">消缺记录统计</el-checkbox>

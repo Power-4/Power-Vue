@@ -327,14 +327,18 @@ export default {
         role: [
           { required: true, message: "请输入现在的密码", trigger: "blur" }
         ],
-        sex: [{ required: true, message: "请输入现在的密码", trigger: "blur" }],
+        sex: [
+          {
+            required: true,
+            pattern: /^(男|女)$/,
+            message: "请输入性别男或女",
+            trigger: "blur"
+          }
+        ],
         systemPropertiesValue: [
           { required: true, message: "请输入现在的密码", trigger: "blur" }
         ],
         userId: [
-          { required: true, message: "请输入现在的密码", trigger: "blur" }
-        ],
-        userName: [
           { required: true, message: "请输入现在的密码", trigger: "blur" }
         ],
         userPwd: [

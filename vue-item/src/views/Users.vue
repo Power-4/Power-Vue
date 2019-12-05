@@ -16,12 +16,7 @@
       </el-form>
     </div>
 
-    <el-table
-      stripe
-      style="width: 100%"
-      border
-      :data="tableData.slice((currpage - 1) * pagesize, currpage * pagesize)"
-    >
+    <el-table stripe style="width: 100%" border :data="tableData">
       <!-- age: null -->
       <!-- email: "Orchid_phy@outlook.com" -->
       <!-- isCheck: "启用" -->
@@ -34,10 +29,11 @@
       <!-- userId: 10000001 -->
       <!-- userName: "Orchid" -->
       <!-- userPwd: null -->
-      <el-table-column prop="userId" label="用户ID" width="130"></el-table-column>
-      <el-table-column prop="userName" label="用户账号" width="150"></el-table-column>
+      <el-table-column prop="userId" label="用户ID" width="100"></el-table-column>
+      <el-table-column prop="userName" label="用户账号" width="110"></el-table-column>
       <el-table-column prop="roleName" label="用户角色" width="100"></el-table-column>
-      <el-table-column prop="phone" label="电话" width="150"></el-table-column>
+      <el-table-column prop="lastLoginTime" label="最后登录时间" width="180"></el-table-column>
+      <el-table-column prop="phone" label="电话" width="120"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
       <el-table-column prop="isCheck" label="状态" width="180"></el-table-column>
       <el-table-column prop="sex" label="性别"></el-table-column>
@@ -118,14 +114,35 @@
         <div class="box">
           <div>
             <el-button class="coloraaa" @click="sendUpdata">确认</el-button>
-            <el-button @click="addDataTab = false">取消</el-button>
+            <el-button @click="updataTab = false">取消</el-button>
           </div>
         </div>
       </el-form>
     </el-dialog>
 
     <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
-      <!-- 插入类型 -->
+      <el-table
+        stripe
+        style="width: 100%"
+        border
+        :data="logTableData.slice((logCurrpage - 1) * logPagesize, logCurrpage * logPagesize)"
+      >
+        <el-table-column prop="number" label="序号"></el-table-column>
+        <el-table-column prop="userName" label="用户名"></el-table-column>
+        <el-table-column prop="logMsg" label="日志信息"></el-table-column>
+        <el-table-column prop="actionMsg" label="操作信息"></el-table-column>
+        <el-table-column prop="actionDate" label="操作日志"></el-table-column>
+      </el-table>
+      <div class="block">
+        <el-pagination
+          layout="prev, pager, next"
+          :total="logPages"
+          @size-change="logHandleSizeChange"
+          @current-change="logHandleCurrentChange"
+          :page-size="logPagesize"
+          class="pages"
+        ></el-pagination>
+      </div>
     </el-dialog>
 
     <el-dialog title="添加用户" :visible.sync="addUserDialog">
@@ -349,10 +366,14 @@ export default {
     // 当前页数
     handleCurrentChange(val) {
       this.currpage = val;
+      window.console.log(this.currpage);
+      this.loadData();
     },
     // 加载页面----------------------------------------------------------4
     loadData() {
-      var words = `http://192.168.6.184:8080/userManage/showAllUsers?pagesize=${this.pagesize}&currpage=${this.currpage}`;
+      var words = `http://192.168.6.184:8080/userManage/showAllUsers?pageSize=${this.pagesize}&currentPage=${this.currpage}`;
+      // http://192.168.6.184:8080/userManage/showAllUsers?pageSize=2&currentPage=1
+      window.console.log(words);
       this.axios.get(words).then(res => {
         this.tableData = res.data.data.usersList;
         this.pages = res.data.data.count;
@@ -360,8 +381,9 @@ export default {
         for (var i = 0; i < this.tableData.length; i++) {
           this.tableData[i].isCheck = res.data.data.userStates[i];
           this.tableData[i].roleName = this.tableData[i].role.roleName;
+          this.tableData[i].lastLoginTime = res.data.data.lastLoginTimes[i];
         }
-        window.console.log(this.tableData);
+        window.console.log(res.data.data);
       });
     },
     // ===========================搜索部分===============================
@@ -376,9 +398,19 @@ export default {
         for (var i = 0; i < this.tableData.length; i++) {
           this.tableData[i].isCheck = res.data.data.userStates[i];
           this.tableData[i].roleName = this.tableData[i].role.roleName;
+          this.tableData[i].lastLoginTime = res.data.data.lastLoginTimes[i];
         }
         window.console.log(this.tableData);
       });
+    },
+    // 添加用户----------------------------------------------------------
+    // 每页几条
+    logHandleSizeChange(val) {
+      this.logPagesize = val;
+    },
+    // 当前页数
+    logHandleCurrentChange(val) {
+      this.logCurrpage = val;
     }
   },
   created() {
@@ -386,6 +418,33 @@ export default {
   },
   data() {
     return {
+      // --------------------------------------------------------------
+      // 日志的分页信息
+      logCurrpage: 1,
+      logPagesize: 3,
+      logPages: 4,
+      // 日志信息
+      // 序号
+      // 用户名
+      // 操作信息
+      // 操作时间
+      logTableData: [
+        {
+          logMsg: "1",
+          number: "1",
+          userName: "1",
+          actionMsg: "1",
+          actionDate: "1"
+        },
+        {
+          logMsg: "1",
+          number: "1",
+          userName: "1",
+          actionMsg: "1",
+          actionDate: "1"
+        }
+      ],
+      logdiolog: false,
       // 修改用户数据模态框----------------------------------------------1
       updataTab: false,
       obj: {
