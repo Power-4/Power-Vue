@@ -1,5 +1,9 @@
 <template>
   <div class="config">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>系统配置</el-breadcrumb-item>
+    </el-breadcrumb>
     <div class="config-type">
       <el-row>
         <el-button type="primary" @click="add()">新增</el-button>
@@ -13,7 +17,8 @@
         stripe
         style="width: 100%"
         @selection-change="handleSelectionChange"
-        ref="multipleTable">
+        ref="multipleTable"
+      >
         <el-table-column width="55" type="selection" :class="{ischeck:check}"></el-table-column>
         <el-table-column prop="sysProTypeCode" label="配置类型编码" width="150" align="center">
           <template slot-scope="scope">
@@ -39,7 +44,7 @@
     </div>
 
     <div class="icon" @click="icon(one)">
-      <i class="el-icon-caret-right" :class="{on:one}" ></i>
+      <i class="el-icon-caret-right" :class="{on:one}"></i>
     </div>
 
     <div class="child-icon" v-show="isShow">
@@ -86,7 +91,7 @@ export default {
       Connect: [], //子集
       one: false,
       isShow: false,
-      check:  false
+      check: false
     };
   },
   methods: {
@@ -123,20 +128,20 @@ export default {
     },
     //父页面选择框
     handleSelectionChange(val) {
-      this.check=!this.check;
+      this.check = !this.check;
       // window.console.log(this.check,"点击父集")
-      
-      if(this.check == true) {
+
+      if (this.check == true) {
         this.isShow = true;
         this.one = true;
         // window.console.log(this.isShow,"子打开")
-      } else{
-        this.isShow = false
+      } else {
+        this.isShow = false;
         this.one = false;
-        this.tableConnect = []
+        this.tableConnect = [];
         // window.console.log(this.isShow,"子关闭")
       }
-      
+
       this.multipleSelection = val;
       // window.console.log(val);
       this.Data = [];
@@ -157,7 +162,6 @@ export default {
         // window.console.log("子集信息", item.sysProValues);
 
         if (item.sysProValues != undefined) {
-            
           item.sysProValues.forEach(i => {
             // window.console.log("子集的id",i.sysProId);
             if (i.sysProId == this.Data[0]) {
@@ -166,7 +170,7 @@ export default {
             }
           });
         } else {
-          this.tableConnect = []
+          this.tableConnect = [];
         }
       });
     },
@@ -175,15 +179,15 @@ export default {
       var item = {};
       this.tableData.push(item);
     },
-     //子集集添加数组
+    //子集集添加数组
     adds() {
       var item = {};
       this.tableConnect.push(item);
     },
     //取消
     quite() {
-        this.Init()
-       window.console.log(1);
+      this.Init();
+      window.console.log(1);
     },
     //保存父集信息 - 修改信息
     seave() {
@@ -206,7 +210,7 @@ export default {
           })
           .then(res => {
             window.console.log(res.data);
-            this.Init()
+            this.Init();
           })
           .catch(err => {
             window.console.log(err);
@@ -231,7 +235,7 @@ export default {
           })
           .then(res => {
             window.console.log(res.data);
-            this.Init()
+            this.Init();
             this.check == false;
           })
           .catch(err => {
@@ -241,8 +245,8 @@ export default {
     },
     icon() {
       this.isShow = !this.isShow;
-      this.one = !this.one ;
-      window.console.log(this.isShow,"子集打开")
+      this.one = !this.one;
+      window.console.log(this.isShow, "子集打开");
     }
   },
   created() {

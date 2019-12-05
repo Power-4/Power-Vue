@@ -27,7 +27,6 @@ http.interceptors.response.use(function (response) {
   if (response.data.token) {
     sessionStorage.setItem('token', response.data.token) // 将服务器返回的最新token更新到本地中
   }
-
   return response;
 }, function (error) {
   
@@ -40,7 +39,6 @@ http.interceptors.response.use(function (response) {
       return router.replace({
         path: '/login',
       })
-
   }
 
   return Promise.reject(error);
