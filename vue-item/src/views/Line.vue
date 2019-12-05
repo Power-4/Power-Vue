@@ -152,7 +152,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="dialogVisible = false;xiugai()" >确 定</el-button>
       </span>
     </el-dialog>
 
@@ -213,15 +213,15 @@ export default {
       dialogFormVisible: false,
       dialogVisible: false,
       revaTable: {
-        lineId: "",
-        lineName: "",
-        lineLength: "",
-        loopLength: "",
+        lineId: "XW0001",
+        lineName: "西渭一线",
+        lineLength: "5000",
+        loopLength: "400",
         value: "",
-        voltage: "",
-        start: "",
-        end: "",
-        towerBase: "",
+        voltage: "4",
+        start: "XW000100001",
+        end: "XW000100010",
+        towerBase: "500",
         circuitryState: "",
         state: "",
         remark: ""
@@ -328,34 +328,52 @@ export default {
     //修改按钮
     Edit(index, row) {
       window.console.log(index, row);
-      this.poleId = this.tableData[index].poleId;
+      this.circuitryId = this.tableData[index].circuitryId;
     },
     //修改模态框确定按钮
     xiugai() {
+      window.console.log(this.circuitryId);
+      window.console.log("拿到的值",this.revaTable);
       this.axios
         .get("/circuitryOrchid/updateCircuitryById",{
           params: {
+            circuitryId: this.circuitryId,
             circuitryNo: this.revaTable.lineId,
-            circuitryName: this.revaTable.revaTable.lineName,
+            circuitryName: this.revaTable.lineName,
             lineLength: this.revaTable.lineLength,
             backLineLength: this.revaTable.loopLength,
             deLiveryDate: this.revaTable.value,
             voltageLevelId: this.revaTable.voltage,
             startPoleNo: this.revaTable.start,
             endPoleNo: this.revaTable.end,
-            oleNumber: this.revaTable.towerBase,
-            ysProValueName: this.revaTable.state,
+            poleNumber: this.revaTable.towerBase,
+            sysProValueName: this.revaTable.state,
             runningStatus: this.revaTable.circuitryState,
-            ircuitryNote: this.revaTable.remark
+            circuitryNote: this.revaTable.remark
           }
         })
         .then(res => {
+          window.console.log("修改的",res)
           this.countPage = res.data.data.count;
           this.tableData = res.data.data.poles;
-          this.$message({
-            type: "success",
-            message: "修改成功!"
+          
+          if(res.data.code==300)
+          {
+            this.$message({
+            type: "error",
+            message: res.data.data.error
           });
+          }
+
+          else if(res.data.code==200)
+          {
+            this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+          }
+
+          this.fenClick()
         })
         .catch(err => {
           window.console.log(err);
@@ -378,10 +396,6 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!"
-          });
           window.console.log("当前所删除的id", this.circuitryId);
           this.axios
             .get(
@@ -394,7 +408,21 @@ export default {
             )
             .then(res => {
               window.console.log(res.data);
-              this.fenClick();
+               this.fenClick();
+              if(res.data.code==200)
+              {
+                this.$message({
+                type: "success",
+                  message: "删除成功!"
+                 });
+              }
+              else if(res.data.code==300)
+              {
+                  this.$message({
+                  type: "error",
+                  message: res.data.data.error
+                 });
+              }
             })
             .catch(err => {
               window.console.log(err);

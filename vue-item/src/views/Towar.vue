@@ -284,12 +284,8 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!"
-          });
-          window.console.log("当前所删除的id", this.poleId);
-          this.axios
+         
+         this.axios
             .get("/poleOrchid/deletePoleByPoleId", {
               params: {
                 poleId: this.poleId
@@ -298,10 +294,27 @@ export default {
             .then(res => {
               window.console.log(res.data);
               this.fenClick();
+              if(res.data.code==200)
+              {
+                this.$message({
+                type: "success",
+                  message: "删除成功!"
+                 });
+              }
+              else if(res.data.code==300)
+              {
+                  this.$message({
+                  type: "error",
+                  message: res.data.data.error
+                 });
+              }
             })
             .catch(err => {
               window.console.log(err);
             });
+          
+          window.console.log("当前所删除的id", this.poleId);
+          
         })
         .catch(() => {
           this.$message({
