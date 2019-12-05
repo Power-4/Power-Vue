@@ -125,6 +125,9 @@ export default {
     handleClose(key, keyPath) {
       window.console.log(key, keyPath);
     }
-  }
+  },
+   created(){
+     window.console.log("开始做权限了")
+   }
 };
 </script>
