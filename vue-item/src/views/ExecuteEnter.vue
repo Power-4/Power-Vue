@@ -76,7 +76,7 @@ export default {
         poleNo: '',
         nowPoleId: '',
         findDate: '',
-        foundPerson: '巡检员01',
+        foundPerson: sessionStorage.getItem('userName'),
         defectsDescribe: '',
         defectsName: '',
         typeOptions: []
@@ -229,7 +229,6 @@ export default {
         defectsDescribe: this.form.defectsDescribe
       }})
       .then((res) => {
-        
         window.console.log(res.data);
       })
       .catch((err) => {

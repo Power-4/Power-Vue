@@ -422,10 +422,6 @@ export default {
       window.console.log(b);
       this.axios.get(b).then(res => {
         window.console.log("修改角色", res);
-        this.$message({
-          type: "success",
-          message: "修改成功"
-        });
         this.LoadData();
       });
       // 关闭窗口 一切结束后写道axios回调函数里面

@@ -257,6 +257,7 @@ export default {
 
           this.countPage = res.data.data.count;
           this.tableData = res.data.data.poles;
+          this.fenClick();
           this.$message({
             type: "success",
             message: "修改成功!"

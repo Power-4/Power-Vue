@@ -45,13 +45,13 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>发现时间：</label>
-            <el-date-picker v-model="findStartDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
+            <el-date-picker v-model="findStartDate" type="date" placeholder="选择日期" value-format="yyyy/MM/dd"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="performStartDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
+            <el-date-picker v-model="performStartDate" type="date" placeholder="选择日期" value-format="yyyy/MM/dd"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="6">
@@ -156,15 +156,11 @@ export default {
   methods: {
     // 查询
     defectQuery() {
-      window.console.log(this.taskNo)
-      window.console.log(this.circuitryNo)
-      window.console.log(this.defectsName)
-      window.console.log(this.defectsLevel)
-      window.console.log(this.taskNo)
+      this.isQuery = true;
       this.axios.get('/selectDefectsByCondition?', {params:{
         taskNo: this.taskNo,
         circuitryNo: this.circuitryNo,
-        defectsName: this.defectsName,
+        defectsId: this.defectsName,
         defectsLevel: this.defectsLevel,
         findStartDate: this.findStartDate==''?'1970/01/01':this.findStartDate,
         performStartDate: this.performStartDate==''?'1970/01/01':this.performStartDate,
@@ -183,15 +179,17 @@ export default {
     },
     // 分页点击事件
     handleCurrentChange(val) {
+      window.console.log('query的状态值',this.isQuery)
        if(this.isQuery) {
+          window.console.log('query的状态值',this.isQuery)
           this.axios.get('/selectDefectsByCondition?', {params: {
             taskNo: this.taskNo,
             circuitryNo: this.circuitryNo,
-            defectsName: this.defectsName,
+            defectsId: this.defectsName,
             defectsLevel: this.defectsLevel,
-            findStartDate: this.findStartDate,
-            performStartDate: this.performStartDate,
-            currentPage: this.currentPage,
+            findStartDate: this.findStartDate==''?'1970/01/01':this.findStartDate,
+            performStartDate: this.performStartDate==''?'1970/01/01':this.performStartDate,
+            currentPage: val,
             pageSize: this.pageSize
         }})
         .then((res) => {
@@ -202,24 +200,23 @@ export default {
         .catch((err) => {
           window.console.log('错误是', err);
         })
+      } else {
 
+        this.axios.get('/selectAllDefects', {
+          params: {
+            currentPage: val, 
+            pageSize: this.pageSize
+          }
+        })
+        .then((res) => {
+          this.tableData = res.data.data.defectsVO;
+          this.count = res.data.data.count;
+          window.console.log(res.data);
+        })
+        .catch((err) => {
+          window.console.log('错误是', err);
+        })
       }
-
-
-      this.axios.get('/selectAllDefects', {
-        params: {
-          currentPage: val, 
-          pageSize: this.pageSize
-        }
-      })
-      .then((res) => {
-        this.tableData = res.data.data.defectsVO;
-        this.count = res.data.data.count;
-        window.console.log(res.data);
-      })
-      .catch((err) => {
-        window.console.log('错误是', err);
-      })
       
     },
     // 导出excel表

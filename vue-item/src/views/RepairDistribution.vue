@@ -173,7 +173,7 @@
               ref="multipleTable"
               :data="tableData2"
               tooltip-effect="dark"
-              style="width: 100%"
+              style="width: 100%; overflow:auto;"
               size="mini"
             >
               <el-table-column type="selection" width="40"></el-table-column>
@@ -210,7 +210,7 @@
           <template slot-scope="scope">
             <el-button @click="chakanClick(scope.row)" type="text" size="small">查看</el-button>
             <!-- 查看时的模态框 -->
-            <el-dialog title="查看任务" :visible.sync="checkTask">
+            <el-dialog title="查看任务" :visible.sync="checkTask" class="chakanMotai">
               <el-table :data="chakanForm" border style="width: 99%" size="small">
                 <el-table-column prop="taskNum" label="任务编码" width="178"></el-table-column>
                 <el-table-column prop="taskName" label="任务名称" width="178"></el-table-column>
@@ -355,7 +355,7 @@
 
             <!-- 修改时的模态框 -->
             <el-dialog title="修改任务" :visible.sync="xiuTask">
-              <div style="width:100%; height:700px;">
+              <div>
                 <el-form
                   class="zhidingMotai xiugaiMoTai"
                   size="mini"
@@ -364,7 +364,6 @@
                   ref="form"
                   :model="xiuForm"
                   label-width="86px"
-                  style="height:40%"
                 >
                   <!-- 任务编码修改 -->
                   <el-form-item label="任务编码:">
@@ -402,7 +401,7 @@
 
                   <!-- 下发人修改 -->
                   <el-form-item label="下发人:">
-                    <el-input v-model="xiuForm.issuedPeople"></el-input>
+                    <el-input v-model="xiuForm.issuedPeople" :disabled="true"></el-input>
                   </el-form-item>
 
                   <!-- 下发时间修改 -->
@@ -430,8 +429,9 @@
                   <!-- 任务消缺员修改 -->
                   <el-form-item label="消缺员:">
                     <el-table
+                      ref="multipleTable"
                       @selection-change="changeFun"
-                      height="100"
+                      height="150"
                       :data="xiuxiaoPeople"
                       border
                       style="width: 100%"
@@ -449,13 +449,12 @@
                 <el-table
                   class="xiuTable"
                   lazy
-                  v-infinite-scroll="load"
-                  height="150"
+                  height="270"
                   @selection-change="fixchangeFun"
                   ref="multipleTable"
                   :data="tableDataXiu"
                   tooltip-effect="dark"
-                  style="width: 100%"
+                  style="width: 99%;;"
                   size="mini"
                 >
                   <el-table-column type="selection" width="40"></el-table-column>
@@ -471,8 +470,12 @@
                     <el-button type="text" size="mini" @click="open()">取消</el-button>
                   </el-table-column>
                 </el-table>
-                <!-- 确认制定按钮 -->
-                <el-button type="primary" class="addXiaoQueren">确认修改消缺任务</el-button>
+                <!-- 确认修改按钮 -->
+                <el-button
+                  type="primary"
+                  class="addXiaoQueren"
+                  @click="xiuCofim(scope.row)"
+                >确认修改消缺任务</el-button>
               </div>
             </el-dialog>
 
@@ -483,14 +486,7 @@
               @click="open(scope.row)"
               :disabled="scope.row.taskStatus == '待分配'?false:(scope.row.taskStatus == '已分配'?false:true)"
             >取消</el-button>
-            <el-button
-              v-else
-              type="text"
-              size="small"
-              @click="open2(scope.row)"
-              
-            >开启</el-button>
-
+            <el-button v-else type="text" size="small" @click="open2(scope.row)">开启</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -626,7 +622,7 @@ export default {
         }
       ],
       multipleSelection: [],
-      fixSelection: [],
+      fixSelection: [1],
       value: "",
       statusValue: "",
       createTime: "",
@@ -652,6 +648,7 @@ export default {
       leaderShen: true,
       shenStatus: true,
       shenCofimBtn: false,
+      isSelect: false,
       issuedId: "",
       mangerId: "",
       checkList: []
@@ -668,6 +665,7 @@ export default {
       window.console.log(this.fixSelection.join(","));
     },
     shenCofim() {
+      window.console.log(sessionStorage.getItem("userId"));
       window.console.log(this.shenform);
       window.console.log(this.value);
       window.console.log(this.fixId);
@@ -675,7 +673,7 @@ export default {
       window.console.log(this.issuedId);
       window.console.log(this.mangerId);
       //发送确认请求
-      if (10000004 == this.issuedId) {
+      if (sessionStorage.getItem("userId") == this.issuedId) {
         this.axios
           .get("/creatAuditTask", {
             params: {
@@ -686,11 +684,12 @@ export default {
           })
           .then(res => {
             window.console.log(res);
+            this.shenTask = false;
           })
           .catch(err => {
             window.console.log(err);
           });
-      } else if (10000004 == this.mangerId) {
+      } else if (sessionStorage.getItem("userId") == this.mangerId) {
         this.axios
           .get("/manageAuditTask", {
             params: {
@@ -700,11 +699,15 @@ export default {
           })
           .then(res => {
             window.console.log(res);
+            this.shenTask = false;
           })
           .catch(err => {
             window.console.log(err);
           });
-      } else if (10000004 == this.mangerId && 10000003 == this.issuedId) {
+      } else if (
+        sessionStorage.getItem("userId") == this.mangerId &&
+        sessionStorage.getItem("userId") == this.issuedId
+      ) {
         this.axios
           .get("/cbossAuditTask", {
             params: {
@@ -716,6 +719,7 @@ export default {
           })
           .then(res => {
             window.console.log(res);
+            this.shenTask = false;
           })
           .catch(err => {
             window.console.log(err);
@@ -870,13 +874,13 @@ export default {
           this.tableData = newArr.map(function(item) {
             return item;
           });
-           for (var j = 0; j < this.tableData.length; j++) {
-          if (this.tableData[j].isCancel == 1) {
-            this.tableData[j].isCancel = "否";
-          } else if (this.tableData[j].isCancel == 0) {
-            this.tableData[j].isCancel = "是";
+          for (var j = 0; j < this.tableData.length; j++) {
+            if (this.tableData[j].isCancel == 1) {
+              this.tableData[j].isCancel = "否";
+            } else if (this.tableData[j].isCancel == 0) {
+              this.tableData[j].isCancel = "是";
+            }
           }
-        }
           window.console.log(this.tableData);
         })
         .catch(err => {
@@ -1054,7 +1058,8 @@ export default {
         })
         .then(res => {
           window.console.log(res);
-          // this.fenTask = false;
+          this.fenTask = false;
+          this.init();
         })
         .catch(err => {
           window.console.log(err);
@@ -1063,6 +1068,8 @@ export default {
     xiuClick(row) {
       this.xiuTask = true;
       window.console.log(row.fixId);
+      this.fixId = row.fixId;
+      window.console.log(this.fixSelection);
 
       //发送查看请求
       this.fixId = row.fixId;
@@ -1096,7 +1103,23 @@ export default {
           window.console.log(err);
         });
       // 获取任务负责人（线路管理员）
-
+      // 查看消缺任务相应消缺员
+      this.axios
+        .get("/selectFixUserByFixId", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res.data.data);
+          this.multipleSelection = res.data.data.users.map(function(item) {
+            return item.userId;
+          });
+          window.console.log(this.multipleSelection);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
       this.axios
         .get("/selectAllLineUser")
         .then(res => {
@@ -1127,9 +1150,12 @@ export default {
           });
           // window.console.log(newXiao);
 
-          this.xiuxiaoPeople = newXiao.map(function(item) {
-            return item;
-          });
+          this.xiuxiaoPeople = newXiao//.map(function(item) {
+          //   return item;
+          // });
+
+          window.console.log(this.xiuxiaoPeople)
+          this.$refs.multipleTable.toggleRowSelection(this.xiuxiaoPeople[0],true);
         })
         .catch(err => {
           window.console.log(err);
@@ -1137,7 +1163,7 @@ export default {
 
       // 查询缺陷表
       // this.axios
-      //   .get("http://192.168.6.184:8080/selectPoleDamage")
+      //   .get("/selectPoleDamage")
       //   .then(res => {
       //     window.console.log(res.data.data.damageRecord);
       //     var newQue = res.data.data.damageRecord.map(function(item) {
@@ -1162,8 +1188,36 @@ export default {
       //     window.console.log(err);
       //   });
     },
+    xiuCofim() {
+      window.console.log(this.fixId);
+      window.console.log(this.xiuForm);
+      window.console.log(this.multipleSelection.join(","));
+      window.console.log(this.fixSelection);
+      this.axios
+        .get("/alterFixTaskAll", {
+          params: {
+            taskNo: this.xiuForm.taskNum,
+            taskName: this.xiuForm.taskName,
+            userId: sessionStorage.getItem("userId"),
+            taskNote: this.xiuForm.taskNote,
+            taskDescribe: this.xiuForm.taskDescription,
+            fixId: this.fixId,
+            workFormId: this.xiuForm.workDocuments,
+            manageUserId: this.xiuForm.taskLeader,
+            damageRecordId: this.fixSelection.join(","),
+            fixUserId: this.multipleSelection.join(",")
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          this.xiuTask = false;
+          this.init();
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
     shenClick(row) {
-      
       this.shenTask = true;
       // window.console.log(row.fixId);
       //发送查看请求
@@ -1215,9 +1269,9 @@ export default {
           });
           this.shenform.yijian2 = leader.join("");
           window.console.log(this.shenform.yijian2);
-          if(this.shenform.yijian2 == "") {
-             this.issuedShen = true;
-             this.shenCofimBtn = true;
+          if (this.shenform.yijian2 == "") {
+            this.issuedShen = true;
+            this.shenCofimBtn = true;
           }
           window.console.log(first);
           this.shenTable1 = first.map(function(item) {
@@ -1282,11 +1336,12 @@ export default {
             })
             .then(res => {
               window.console.log(res);
-              // this.init();
+              this.init();
             })
             .catch(err => {
               window.console.log(err);
             });
+          this.init();
           this.$message({
             type: "success",
             message: "取消成功!"
@@ -1316,11 +1371,11 @@ export default {
             })
             .then(res => {
               window.console.log(res);
-              // this.init();
             })
             .catch(err => {
               window.console.log(err);
             });
+          this.init();
           this.$message({
             type: "success",
             message: "开启成功!"
@@ -1425,13 +1480,67 @@ export default {
           window.console.log(res);
           this.form = {};
           this.dialogFormVisible = false;
-          // this.init();
+          this.init();
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+    init() {
+      this.axios
+        .get("/selectFixTask", {
+          params: {
+            currentPage: this.currentPage,
+            pageSize: 5
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          this.countPage = res.data.data.count;
+          var work = res.data.data.fix.map(function(item) {
+            return item.workForm.workFormName;
+          });
+          var fix = res.data.data.fix.map(function(item) {
+            return item.fixId;
+          });
+          // window.console.log(work);
+          // window.console.log(fix)
+          var taskArr = res.data.data.fix.map(function(item) {
+            return item.task;
+          });
+          // window.console.log(taskArr);
+          var newArr = taskArr.map(function(item) {
+            return {
+              taskNum: item.taskNo,
+              taskName: item.taskName,
+              issuedPeople: item.users.userName,
+              issuedDate: item.createDate,
+              taskStatus: item.systemPropertiesValue.sysProValueName,
+              completionTime: item.finishDate,
+              isCancel: item.isCancel
+            };
+          });
+          // window.console.log(newArr);
+          for (var i = 0; i < newArr.length; i++) {
+            newArr[i].workDocuments = work[i];
+            newArr[i].fixId = fix[i];
+          }
+          this.tableData = newArr.map(function(item) {
+            return item;
+          });
+          for (var j = 0; j < this.tableData.length; j++) {
+            if (this.tableData[j].isCancel == 1) {
+              this.tableData[j].isCancel = "否";
+            } else if (this.tableData[j].isCancel == 0) {
+              this.tableData[j].isCancel = "是";
+            }
+          }
+          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
         });
     }
-   
   },
   created: function() {
     this.axios

@@ -41,7 +41,7 @@
         <el-col :span="7">
           <div class="grid-content bg-purple">
             <label>下发时间：</label>
-            <el-date-picker v-model="createDate" type="date" placeholder="选择日期" value-format="yyyy/MM/DD"></el-date-picker>
+            <el-date-picker v-model="createDate" type="date" placeholder="选择日期" value-format="yyyy/MM/dd"></el-date-picker>
           </div>
         </el-col>
         <el-col :span="3">
@@ -110,7 +110,8 @@ export default {
       taskState: "",
       options: [],
       edit: true,
-      isQuery: false
+      isQuery: false,
+      nowPage: ''
     };
   },
   created() {
@@ -152,10 +153,10 @@ export default {
   
   methods: {
     // 初始化
-    init() {
+    pageInit(val) {
       this.axios.get('/getAllTaskByUserId?', {
         params: {
-          currentPage: this.currentPage, 
+          currentPage: val, 
           pageSize: this.pageSize
         }
       })
@@ -220,7 +221,7 @@ export default {
       .then(() => {
         this.axios.get('/changeTaskSateToRunning?',{params:{taskId: row.taskId}})
         .then((res) => {
-          this.init();
+          this.pageInit(this.nowPage);
           window.console.log(res.data);
         })
         .catch((err) => {
@@ -239,13 +240,19 @@ export default {
     },
     // 分页点击事件
     handleCurrentChange(val) {
+      // 获取当前点击页
+      this.nowPage = val;
+
+      window.console.log(this.isQuery)
       if(this.isQuery) {
         this.axios.get('/getAllTaskByCondition?',{params:{
           taskNo: this.taskNo,
           circuitryNo: this.circuitryNo,
           taskState: this.taskState,
           userName: this.userName,
-          startDate: this.startDate
+          startDate: this.startDate,
+          currentPage: val,
+          pageSize: this.pageSize
         }})
         .then((res) => {
           this.tableData = res.data.data.tasks;
@@ -255,22 +262,23 @@ export default {
         .catch((err) => {
           window.console.log("错误",err)
         })
+      } else {
+
+        this.axios.get('/getAllTaskByUserId?', {
+          params: {
+            currentPage: val, 
+            pageSize: this.pageSize
+          }
+        })
+        .then((res) => {
+          this.tableData = res.data.data.tasks;
+          this.count = res.data.data.count;
+          window.console.log(res.data);
+        })
+        .catch((err) => {
+          window.console.log('错误是', err);
+        })
       }
-      
-      this.axios.get('/showAllTasksByPageS?',{ 
-        params: {
-          currentPage: val,
-          pageSize: this.pageSize
-        }
-      })
-      .then((res) => {
-        this.tableData = res.data.data.tasks;
-        this.count = res.data.data.count;
-        window.console.log(res.data);
-      })
-      .catch((err) => {
-        window.console.log("错误",err)
-      })
     },
   }
 };
