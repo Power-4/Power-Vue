@@ -76,7 +76,7 @@
 
         <!-- 模态框 -->
         <el-dialog title="制定消缺任务" :visible.sync="dialogFormVisible">
-          <div style="width:100%; height:700px;">
+          <div>
             <el-form
               class="zhidingMotai"
               size="mini"
@@ -144,10 +144,10 @@
               </el-form-item>
 
               <!-- 任务消缺员 -->
-              <el-form-item label="消缺员:">
+              <el-form-item label="消缺员:" class="addXiaoForm">
                 <el-table
                   @selection-change="changeFun"
-                  height="100"
+                  height="200"
                   :data="xiaoPeople"
                   border
                   style="width: 100%"
@@ -211,7 +211,7 @@
             <el-button @click="chakanClick(scope.row)" type="text" size="small">查看</el-button>
             <!-- 查看时的模态框 -->
             <el-dialog title="查看任务" :visible.sync="checkTask" class="chakanMotai">
-              <el-table :data="chakanForm" border style="width: 99%" size="small">
+              <el-table :data="chakanForm" border size="small">
                 <el-table-column prop="taskNum" label="任务编码" width="178"></el-table-column>
                 <el-table-column prop="taskName" label="任务名称" width="178"></el-table-column>
                 <el-table-column prop="taskStatus" label="任务状态" width="178"></el-table-column>
@@ -264,7 +264,7 @@
               type="text"
               size="small"
               @click="fenClick(scope.row)"
-              :disabled="scope.row.isCancel == '是'?true:(scope.row.taskStatus == '审核中'?true:(scope.row.taskStatus == '驳回'?true:false))"
+              :disabled="scope.row.isCancel == '是'?true:(scope.row.taskStatus == '审核中'?true:(scope.row.taskStatus == '驳回'?true:(scope.row.taskStatus == '已完成'?true:false)))"
             >分配任务</el-button>
 
             <!-- 分配任务时的模态框 -->
@@ -284,7 +284,7 @@
               type="text"
               size="small"
               @click="xiuClick(scope.row)"
-              :disabled="scope.row.isCancel == '是'?true:(scope.row.taskStatus == '审核中'?true:(scope.row.taskStatus == '驳回'?true:false))"
+              :disabled="scope.row.isCancel == '是'?true:(scope.row.taskStatus == '审核中'?true:(scope.row.taskStatus == '驳回'?true:(scope.row.taskStatus == '已完成'?true:false)))"
             >修改</el-button>
 
             <!-- 审查时的模态框 -->
@@ -450,6 +450,7 @@
                   class="xiuTable"
                   lazy
                   height="270"
+                  v-infinite-scroll="load2"
                   @selection-change="fixchangeFun"
                   ref="multipleTable"
                   :data="tableDataXiu"
@@ -655,23 +656,77 @@ export default {
     };
   },
   methods: {
-    load() {
-      window.console.log("到底了");
-    },
+    load() {},
+    load2() {},
     fixchangeFun(val) {
       this.fixSelection = val.map(function(item) {
         return item.deId;
       }); // 返回的是选中的列的数组集合
-      window.console.log(this.fixSelection.join(","));
     },
     shenCofim() {
-      window.console.log(sessionStorage.getItem("userId"));
-      window.console.log(this.shenform);
-      window.console.log(this.value);
-      window.console.log(this.fixId);
+      // window.console.log(this.issuedShen == false);
+      if (this.issuedShen == true && this.shenStatus == true) {
+        if (sessionStorage.getItem("userId") == this.mangerId) {
+          this.axios
+            .get("/manageAuditTask", {
+              params: {
+                fixId: this.fixId,
+                headUserOpinion: this.shenform.yijian2
+              }
+            })
+            .then(res => {
+              window.console.log(res);
+              this.shenTask = false;
+              this.init();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
+        }
+      } else if (this.shenform.yijian1 == "" || this.value == "") {
+        window.alert("请审核");
+      } else if (this.shenform.yijian1 != "" && this.value != "") {
+        if (sessionStorage.getItem("userId") == this.issuedId) {
+          this.axios
+            .get("/creatAuditTask", {
+              params: {
+                fixId: this.fixId,
+                createUserOpinion: this.shenform.yijian1,
+                passAudit: this.value
+              }
+            })
+            .then(res => {
+              window.console.log(res);
+              this.shenTask = false;
+              this.init();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
+        } else if (
+          sessionStorage.getItem("userId") == this.mangerId &&
+          sessionStorage.getItem("userId") == this.issuedId
+        ) {
+          this.axios
+            .get("/cbossAuditTask", {
+              params: {
+                fixId: this.fixId,
+                createUserOpinion: this.shenform.yijian1,
+                headUserOpinion: this.shenform.yijian2,
+                passAudit: this.value
+              }
+            })
+            .then(res => {
+              window.console.log(res);
+              this.shenTask = false;
+              this.init();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
+        }
+      }
 
-      window.console.log(this.issuedId);
-      window.console.log(this.mangerId);
       //发送确认请求
       if (sessionStorage.getItem("userId") == this.issuedId) {
         this.axios
@@ -685,6 +740,7 @@ export default {
           .then(res => {
             window.console.log(res);
             this.shenTask = false;
+            this.init();
           })
           .catch(err => {
             window.console.log(err);
@@ -700,6 +756,7 @@ export default {
           .then(res => {
             window.console.log(res);
             this.shenTask = false;
+            this.init();
           })
           .catch(err => {
             window.console.log(err);
@@ -720,6 +777,7 @@ export default {
           .then(res => {
             window.console.log(res);
             this.shenTask = false;
+            this.init();
           })
           .catch(err => {
             window.console.log(err);
@@ -730,7 +788,6 @@ export default {
       this.multipleSelection = val.map(function(item) {
         return item.id;
       }); // 返回的是选中的列的数组集合
-      window.console.log(this.multipleSelection.join(","));
     },
     getTime: function() {
       var str = "";
@@ -773,8 +830,8 @@ export default {
       this.axios
         .get("/selectFixTaskByFind", {
           params: {
-            currentPage: 1,
-            pageSize: 5,
+            currentPage: this.currentPage,
+            pageSize: this.pagesize,
             taskNo: this.input1,
             taskName: this.taskName,
             userName: this.input2,
@@ -784,7 +841,7 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res.data.data.count);
+          window.console.log(res.data.data);
           this.countPage = res.data.data.count;
           var work = res.data.data.fix.map(function(item) {
             return item.workForm.workFormName;
@@ -792,12 +849,11 @@ export default {
           var fix = res.data.data.fix.map(function(item) {
             return item.fixId;
           });
-          // window.console.log(work);
-          // window.console.log(fix)
+
           var taskArr = res.data.data.fix.map(function(item) {
             return item.task;
           });
-          // window.console.log(taskArr);
+
           var newArr = taskArr.map(function(item) {
             return {
               taskNum: item.taskNo,
@@ -809,7 +865,7 @@ export default {
               isCancel: item.isCancel
             };
           });
-          // window.console.log(newArr);
+
           for (var i = 0; i < newArr.length; i++) {
             newArr[i].workDocuments = work[i];
             newArr[i].fixId = fix[i];
@@ -824,7 +880,13 @@ export default {
               this.tableData[j].isCancel = "是";
             }
           }
-          window.console.log(this.tableData);
+
+          this.input1 = "";
+          this.taskName = "";
+          this.input2 = "";
+          this.statusValue = "";
+          this.createTime = "";
+          this.endTime = "";
         })
         .catch(err => {
           window.console.log(err);
@@ -832,7 +894,7 @@ export default {
     },
     handleCurrentChange: function(currentPage) {
       this.currentPage = currentPage;
-      window.console.log(this.currentPage); //点击第几页
+
       this.axios
         .get("/selectFixTask", {
           params: {
@@ -841,19 +903,17 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           var work = res.data.data.fix.map(function(item) {
             return item.workForm.workFormName;
           });
           var fix = res.data.data.fix.map(function(item) {
             return item.fixId;
           });
-          // window.console.log(work);
-          // window.console.log(fix)
+
           var taskArr = res.data.data.fix.map(function(item) {
             return item.task;
           });
-          // window.console.log(taskArr);
+
           var newArr = taskArr.map(function(item) {
             return {
               taskNum: item.taskNo,
@@ -865,7 +925,7 @@ export default {
               isCancel: item.isCancel
             };
           });
-          // window.console.log(newArr);
+
           for (var i = 0; i < newArr.length; i++) {
             newArr[i].workDocuments = work[i];
             newArr[i].fixId = fix[i];
@@ -881,14 +941,12 @@ export default {
               this.tableData[j].isCancel = "是";
             }
           }
-          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
         });
     },
     chakanClick(row) {
-      window.console.log(row.fixId);
       //发送查看请求
       this.axios
         .get("/selectFixTaskByFixId", {
@@ -920,13 +978,12 @@ export default {
           this.chakanForm = first.map(function(item) {
             return item;
           });
-          window.console.log(this.chakanForm);
+
           // 绑定消缺员数据
           var fixUser = res.data.data.fixUser.map(function(item) {
             return item.userName;
           });
           this.chakanForm[0].fixuser = fixUser.join(",");
-          window.console.log(this.chakanForm[0]);
         })
         .catch(err => {
           window.console.log(err);
@@ -940,7 +997,6 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           var newQue = res.data.data.damageRecord.map(function(item) {
             return {
               deId: item.damageRecordId,
@@ -953,7 +1009,7 @@ export default {
               findTime: item.findDate
             };
           });
-          window.console.log(newQue);
+
           this.tableData3 = newQue.map(function(item) {
             return item;
           });
@@ -965,28 +1021,8 @@ export default {
 
     fenClick(row) {
       this.fenTask = true;
-      window.console.log(row.fixId);
+
       this.fixId = row.fixId;
-      //获取所有消缺员
-      // this.axios
-      //   .get("http://192.168.6.184:8080/selectAllFixUser")
-      //   .then(res => {
-      //     window.console.log(res);
-      // var fixUserList = res.data.data.users.map(function(item) {
-      //   return {
-      //     key: item.userId,
-      //     label: item.userName,
-      //     disabled: false
-      //   };
-      // });
-      // this.fneArr = fixUserList.map(function(item) {
-      //   return item;
-      // });
-      // window.console.log(this.fneArr);
-      //   })
-      //   .catch(err => {
-      //     window.console.log(err);
-      //   });
 
       this.axios
         .get("/selectWaitFixUserByFixId", {
@@ -995,7 +1031,6 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           var fixUserList = res.data.data.users.map(function(item) {
             return {
               key: item.userId,
@@ -1006,7 +1041,6 @@ export default {
           this.fneArr = fixUserList.map(function(item) {
             return item;
           });
-          window.console.log(this.fneArr);
         })
         .catch(err => {
           window.console.log(err);
@@ -1020,7 +1054,6 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           this.fneValue = res.data.data.users.map(function(item) {
             return item.userId;
           });
@@ -1037,7 +1070,6 @@ export default {
           for (var k = 0; k < selectFix.length; k++) {
             this.fneArr.push(selectFix[k]);
           }
-          window.console.log(this.fneArr);
         })
         .catch(err => {
           window.console.log(err);
@@ -1045,10 +1077,8 @@ export default {
     },
 
     fenCofirm() {
-      // 确认分配任务
-      window.console.log(this.fneValue);
       var fixUserId = this.fneValue.join(",");
-      window.console.log(fixUserId);
+
       this.axios
         .get("/updateTaskUserRelation", {
           params: {
@@ -1067,9 +1097,8 @@ export default {
     },
     xiuClick(row) {
       this.xiuTask = true;
-      window.console.log(row.fixId);
+
       this.fixId = row.fixId;
-      window.console.log(this.fixSelection);
 
       //发送查看请求
       this.fixId = row.fixId;
@@ -1080,7 +1109,6 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           // 绑定数据
           var newArr = [];
           newArr.push(res.data.data.fix);
@@ -1097,7 +1125,6 @@ export default {
             };
           });
           this.xiuForm = first[0];
-          window.console.log(first);
         })
         .catch(err => {
           window.console.log(err);
@@ -1111,11 +1138,9 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res.data.data);
           this.multipleSelection = res.data.data.users.map(function(item) {
             return item.userId;
           });
-          window.console.log(this.multipleSelection);
         })
         .catch(err => {
           window.console.log(err);
@@ -1141,58 +1166,53 @@ export default {
       this.axios
         .get("/selectAllFixUser")
         .then(res => {
-          window.console.log(res.data.data.users);
           var newXiao = res.data.data.users.map(function(item) {
             return {
               name: item.userName,
               id: item.userId
             };
           });
-          // window.console.log(newXiao);
 
-          this.xiuxiaoPeople = newXiao//.map(function(item) {
-          //   return item;
-          // });
+          this.xiuxiaoPeople = newXiao.map(function(item) {
+            return item;
+          });
 
-          window.console.log(this.xiuxiaoPeople)
-          this.$refs.multipleTable.toggleRowSelection(this.xiuxiaoPeople[0],true);
+          this.$refs.multipleTable.toggleRowSelection(
+            this.xiuxiaoPeople[0],
+            true
+          );
         })
         .catch(err => {
           window.console.log(err);
         });
 
       // 查询缺陷表
-      // this.axios
-      //   .get("/selectPoleDamage")
-      //   .then(res => {
-      //     window.console.log(res.data.data.damageRecord);
-      //     var newQue = res.data.data.damageRecord.map(function(item) {
-      //       return {
-      //         deId: item.damageRecordId,
-      //         lineNum: item.pole.circuitry.circuitryNo,
-      //         poleNum: item.pole.poleNo,
-      //         defectLevels: item.defectsLevel,
-      //         defectTypes: item.defects.defectsName,
-      //         defectDes: item.defectsDescribe,
-      //         quot: item.users.userName,
-      //         findTime: item.findDate
-      //       };
-      //     });
-      //     window.console.log(newQue[0]);
-      //     加入缺陷表中;
-      //     this.tableDataXiu = newQue.map(function(item) {
-      //       return item;
-      //     });
-      //   })
-      //   .catch(err => {
-      //     window.console.log(err);
-      //   });
+      this.axios
+        .get("/selectPoleDamage")
+        .then(res => {
+          var newQue = res.data.data.damageRecord.map(function(item) {
+            return {
+              deId: item.damageRecordId,
+              lineNum: item.pole.circuitry.circuitryNo,
+              poleNum: item.pole.poleNo,
+              defectLevels: item.defectsLevel,
+              defectTypes: item.defects.defectsName,
+              defectDes: item.defectsDescribe,
+              quot: item.users.userName,
+              findTime: item.findDate
+            };
+          });
+
+          // 加入缺陷表中;
+          this.tableDataXiu = newQue.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     xiuCofim() {
-      window.console.log(this.fixId);
-      window.console.log(this.xiuForm);
-      window.console.log(this.multipleSelection.join(","));
-      window.console.log(this.fixSelection);
       this.axios
         .get("/alterFixTaskAll", {
           params: {
@@ -1219,7 +1239,8 @@ export default {
     },
     shenClick(row) {
       this.shenTask = true;
-      // window.console.log(row.fixId);
+      window.console.log(this.shenform);
+
       //发送查看请求
       this.fixId = row.fixId;
       this.axios
@@ -1229,18 +1250,24 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           this.issuedId = res.data.data.fix.task.users.userId;
           this.mangerId = res.data.data.fix.users.userId;
 
-          if (10000004 == res.data.data.fix.task.users.userId) {
+          if (
+            sessionStorage.getItem("userId") ==
+            res.data.data.fix.task.users.userId
+          ) {
             this.issuedShen = false;
             this.shenStatus = false;
-          } else if (10000004 == res.data.data.fix.users.userId) {
+          } else if (
+            sessionStorage.getItem("userId") == res.data.data.fix.users.userId
+          ) {
             this.leaderShen = false;
           } else if (
-            10000004 == res.data.data.fix.users.userId &&
-            10000004 == res.data.data.fix.task.users.userId
+            sessionStorage.getItem("userId") ==
+              res.data.data.fix.users.userId &&
+            sessionStorage.getItem("userId") ==
+              res.data.data.fix.task.users.userId
           ) {
             this.issuedShen = false;
             this.leaderShen = false;
@@ -1268,22 +1295,21 @@ export default {
             return item.headUserOpinion;
           });
           this.shenform.yijian2 = leader.join("");
-          window.console.log(this.shenform.yijian2);
+
           if (this.shenform.yijian2 == "") {
             this.issuedShen = true;
-            this.shenCofimBtn = true;
+            this.shenCofimBtn = false;
           }
-          window.console.log(first);
+
           this.shenTable1 = first.map(function(item) {
             return item;
           });
-          // window.console.log(this.chakanForm);
+
           // 绑定消缺员数据
           var fixUser = res.data.data.fixUser.map(function(item) {
             return item.userName;
           });
           this.shenTable1[0].eliminateVacancies = fixUser.join(",");
-          // window.console.log(this.chakanForm[0]);
         })
         .catch(err => {
           window.console.log(err);
@@ -1297,7 +1323,6 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           var newQue = res.data.data.damageRecord.map(function(item) {
             return {
               deId: item.damageRecordId,
@@ -1310,7 +1335,7 @@ export default {
               findTime: item.findDate
             };
           });
-          // window.console.log(newQue);
+
           this.fixList = newQue.map(function(item) {
             return item;
           });
@@ -1320,7 +1345,6 @@ export default {
         });
     },
     open(row) {
-      window.console.log(row.fixId);
       this.$confirm("此操作将取消该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -1355,7 +1379,6 @@ export default {
         });
     },
     open2(row) {
-      window.console.log(row.fixId);
       this.$confirm("此操作将开启该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -1412,14 +1435,12 @@ export default {
       this.axios
         .get("/selectAllFixUser")
         .then(res => {
-          window.console.log(res.data.data.users);
           var newXiao = res.data.data.users.map(function(item) {
             return {
               name: item.userName,
               id: item.userId
             };
           });
-          // window.console.log(newXiao);
 
           this.xiaoPeople = newXiao.map(function(item) {
             return item;
@@ -1433,7 +1454,6 @@ export default {
       this.axios
         .get("/selectPoleDamage")
         .then(res => {
-          // window.console.log(res.data.data.damageRecord);
           var newQue = res.data.data.damageRecord.map(function(item) {
             return {
               deId: item.damageRecordId,
@@ -1446,7 +1466,7 @@ export default {
               findTime: item.findDate
             };
           });
-          window.console.log(newQue[0]);
+
           // 加入缺陷表中;
           this.tableData2 = newQue.map(function(item) {
             return item;
@@ -1458,9 +1478,7 @@ export default {
     },
     addTaskCofim() {
       // 确认添加新项目
-      window.console.log(this.form);
-      window.console.log(this.value1);
-      window.console.log(this.form.taskLeader);
+
       this.axios
         .get("/addFixTask", {
           params: {
@@ -1495,7 +1513,6 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res);
           this.countPage = res.data.data.count;
           var work = res.data.data.fix.map(function(item) {
             return item.workForm.workFormName;
@@ -1503,12 +1520,11 @@ export default {
           var fix = res.data.data.fix.map(function(item) {
             return item.fixId;
           });
-          // window.console.log(work);
-          // window.console.log(fix)
+
           var taskArr = res.data.data.fix.map(function(item) {
             return item.task;
           });
-          // window.console.log(taskArr);
+
           var newArr = taskArr.map(function(item) {
             return {
               taskNum: item.taskNo,
@@ -1520,7 +1536,7 @@ export default {
               isCancel: item.isCancel
             };
           });
-          // window.console.log(newArr);
+
           for (var i = 0; i < newArr.length; i++) {
             newArr[i].workDocuments = work[i];
             newArr[i].fixId = fix[i];
@@ -1535,7 +1551,6 @@ export default {
               this.tableData[j].isCancel = "是";
             }
           }
-          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
@@ -1551,7 +1566,6 @@ export default {
         }
       })
       .then(res => {
-        window.console.log(res);
         this.countPage = res.data.data.count;
         var work = res.data.data.fix.map(function(item) {
           return item.workForm.workFormName;
@@ -1559,12 +1573,11 @@ export default {
         var fix = res.data.data.fix.map(function(item) {
           return item.fixId;
         });
-        // window.console.log(work);
-        // window.console.log(fix)
+
         var taskArr = res.data.data.fix.map(function(item) {
           return item.task;
         });
-        // window.console.log(taskArr);
+
         var newArr = taskArr.map(function(item) {
           return {
             taskNum: item.taskNo,
@@ -1576,7 +1589,7 @@ export default {
             isCancel: item.isCancel
           };
         });
-        // window.console.log(newArr);
+
         for (var i = 0; i < newArr.length; i++) {
           newArr[i].workDocuments = work[i];
           newArr[i].fixId = fix[i];
@@ -1591,20 +1604,10 @@ export default {
             this.tableData[j].isCancel = "是";
           }
         }
-        window.console.log(this.tableData);
       })
       .catch(err => {
         window.console.log(err);
       });
-
-    // this.axios
-    //   .get("/selectAllWorkForm")
-    //   .then(res => {
-    //     window.console.log(res);
-    //   })
-    //   .catch(err => {
-    //     window.console.log(err);
-    //   });
   }
 };
 </script>
@@ -1689,6 +1692,10 @@ li {
 
   .xiuTable {
     margin-top: 20px;
+  }
+
+  .addXiaoForm {
+    margin-bottom: 20px;
   }
 }
 
