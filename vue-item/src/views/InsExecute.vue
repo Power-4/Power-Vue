@@ -151,6 +151,24 @@ export default {
   },
   
   methods: {
+    // 初始化
+    init() {
+      this.axios.get('http://192.168.6.184:8080/getAllTaskByUserId?', {
+        params: {
+          currentPage: this.currentPage, 
+          pageSize: this.pageSize
+        }
+      })
+      .then((res) => {
+        this.tableData = res.data.data.tasks;
+        this.count = res.data.data.count;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
+
+    },
 
     // 查询
     taskQuery() {
@@ -202,6 +220,7 @@ export default {
       .then(() => {
         this.axios.get('http://192.168.6.184:8080/changeTaskSateToRunning?',{params:{taskId: row.taskId}})
         .then((res) => {
+          this.init();
           window.console.log(res.data);
         })
         .catch((err) => {

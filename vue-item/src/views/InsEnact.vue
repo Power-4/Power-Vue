@@ -60,7 +60,7 @@
     </div>
 
     <!-- 制定任务模态框 -->
-    <el-dialog title="制定巡检任务" :visible.sync="adddialogVisible" width="40%">
+    <el-dialog title="制定巡检任务" :visible.sync="adddialogVisible" width="40%" @close="resetForm('addform')">
       <el-form ref="addform" id="add-form" :rules="rules" :model="addform" label-width="80px">
         <el-form-item label="任务编码">
           <el-input v-model="addform.taskNo" :disabled="edit"></el-input>
@@ -134,7 +134,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="clear(adddialogVisible = false)">取 消</el-button>
+        <el-button @click="resetForm('addform',adddialogVisible=false)">取 消</el-button>
         <el-button type="primary" @click="resetForm('addform')">重 置</el-button>
         <el-button type="primary" @click="addSubmit('addform')">确 定</el-button>
         <!-- ,adddialogVisible = false -->
@@ -159,7 +159,7 @@
     </el-dialog>
 
     <!-- 修改任务模态框 -->
-    <el-dialog title="修改巡检任务" :visible.sync="modifydialogVisible" width="40%">
+    <el-dialog title="修改巡检任务" :visible.sync="modifydialogVisible" width="40%"  @close="resetForm('modifyform')">
       <el-form ref="modifyform" id="modify-form" :rules="rules" :model="modifyform" label-width="80px">
         <el-form-item label="任务编码">
           <el-input v-model="modifyform.taskNo" :disabled="edit"></el-input>
@@ -219,7 +219,8 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="modifyclear(modifydialogVisible = false)">取 消</el-button>
+        <!-- <el-button @click="modifyclear(modifydialogVisible = false)">取 消</el-button> -->
+        <el-button @click="resetForm('modifyform',modifydialogVisible = false)">取 消</el-button>
         <el-button type="primary" @click="resetForm('modifyform')">重 置</el-button>
         <el-button type="primary" @click="modifySubmit('modifyform')">确 定</el-button>
         <!-- ,modifydialogVisible = false -->
@@ -314,7 +315,7 @@ export default {
       modifydialogVisible: false,
 
       addform: {
-        taskNo: 'j111',
+        taskNo: '',
         taskName: '',
         circuitryName: '',
         inspectPerson: '',
@@ -326,19 +327,19 @@ export default {
       },
       rules: {
         taskName: [
-          { validator: checkChinese, required: true, trigger: 'blur' }
+          { validator: checkChinese, required: true, trigger: 'change' }
         ],
         circuitryName: [
           { required: true, message: '请选择巡检线路', trigger: 'change' }
         ],
         inspectPerson: [
-          { message: '请选择巡检员', trigger: 'blur' }
+          { required: false, message: '请选择巡检线路', trigger: 'change' }
         ],
         startPoleNo: [
-          { required: true, message: '请选择起始杆号', trigger: 'blur' }
+          { required: true, message: '请选择起始杆号', trigger: 'change' }
         ],
         endPoleNo: [
-          { required: true, message: '请选择终止杆号', trigger: 'blur' }
+          { required: true, message: '请选择终止杆号', trigger: 'change' }
         ]
       },
       modifyform: {
@@ -391,7 +392,7 @@ export default {
     this.axios.get('http://192.168.6.184:8080/showInspectorsNamesS?')
     .then((res) => {
       this.Inspectors = res.data.data.inspectorNames;
-      window.console.log(res.data);
+      window.console.log('所有巡检员',res.data);
     })
     .catch((err) => {
       window.console.log("错误",err)
@@ -427,6 +428,34 @@ export default {
     this.modifyform.createDate = this.addDate()
   },
   methods: {
+
+    // 初始化
+    init() {
+      this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+        params: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize
+        }
+      })
+      .then((res) => {
+        this.tableData = res.data.data.tasks;
+        for(var i = 0; i< res.data.data.tasks.length; i++) {
+          if(res.data.data.tasks[i].isCancel == 1) {
+            res.data.data.tasks[i].isCancel = '是'
+          } else if (res.data.data.tasks[i].isCancel == 0) {
+            res.data.data.tasks[i].isCancel = '否'
+          }
+        }
+        this.count = res.data.data.count;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
+
+    },
+
+
     // 分配任务巡检员获取
     generateData() {
       const datas = [];
@@ -517,7 +546,6 @@ export default {
     addSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // alert('确定提交数据吗');
           // 添加请求
           this.axios.get('http://192.168.6.184:8080/createTasksS?',{
             params: {
@@ -533,6 +561,7 @@ export default {
             }
           })
           .then((res) => {
+            this.init();
             window.console.log(res.data);
           })
           .catch((err) => {
@@ -543,8 +572,6 @@ export default {
           return false;
         }
       });
-
-      this.$refs[formName].resetFields();
     },
     // 重置
     resetForm(formName) {
@@ -573,6 +600,7 @@ export default {
         }
       })
       .then((res) => {
+        this.init();
         window.console.log(res.data);
       })
       .catch((err) => {
@@ -611,7 +639,17 @@ export default {
         }
       })
       .then((res) => {
-        this.modifyform.inspectPerson = res.data.data.inspectorNames;
+        // window.console.log( res.data.data.inspectorNames[0].userName)
+        // this.modifyform.inspectPerson = res.data.data.inspectorNames[0].userName;
+       
+        // var i = {};
+        res.data.data.inspectorNames.forEach((item)=> {
+          var i = {};
+          i.userId = item.userId;
+          i.userName = item.userName
+          window.console.log(i)
+          this.modifyform.inspectPerson.push(i);
+        })
         window.console.log('该任务巡检员',res.data);
       })
       .catch((err) => {
@@ -621,11 +659,12 @@ export default {
     },
 
 
+
     // 修改提交模态框
     modifySubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('确定提交数据吗');
+          // alert('确定提交数据吗');
           this.axios.get('http://192.168.6.184:8080/changeTaskS?',{
             params: {
               taskId: this.nowTaskId,
@@ -641,6 +680,11 @@ export default {
             }
           })
           .then((res) => {
+            this.$message({
+              type: "success",
+              message: "修改成功!"
+            });
+            this.init();
             window.console.log(res.data);
           })
           .catch((err) => {
@@ -651,10 +695,7 @@ export default {
           return false;
         }
       });
-
-
     },
-
 
     // 分页点击事件
     handleCurrentChange(val) {
@@ -731,6 +772,7 @@ export default {
           // 取消请求
           this.axios.get('http://192.168.6.184:8080/cancelTaskS?',{params:{taskId: row.taskId }})
           .then((res) => {
+            this.init();
             this.$message({
               type: "success",
               message: "删除成功!"
