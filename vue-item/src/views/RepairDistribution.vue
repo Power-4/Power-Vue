@@ -776,15 +776,20 @@ export default {
           }
         })
         .then(res => {
-          window.console.log(res.data.data.fix);
+          window.console.log(res.data.data.count);
+          this.countPage = res.data.data.count;
           var work = res.data.data.fix.map(function(item) {
             return item.workForm.workFormName;
           });
-          window.console.log(work);
+          var fix = res.data.data.fix.map(function(item) {
+            return item.fixId;
+          });
+          // window.console.log(work);
+          // window.console.log(fix)
           var taskArr = res.data.data.fix.map(function(item) {
             return item.task;
           });
-          window.console.log(taskArr);
+          // window.console.log(taskArr);
           var newArr = taskArr.map(function(item) {
             return {
               taskNum: item.taskNo,
@@ -792,17 +797,25 @@ export default {
               issuedPeople: item.users.userName,
               issuedDate: item.createDate,
               taskStatus: item.systemPropertiesValue.sysProValueName,
-              completionTime: item.finishDate
+              completionTime: item.finishDate,
+              isCancel: item.isCancel
             };
           });
-          window.console.log(newArr);
+          // window.console.log(newArr);
           for (var i = 0; i < newArr.length; i++) {
             newArr[i].workDocuments = work[i];
+            newArr[i].fixId = fix[i];
           }
-          this.tableData = [];
           this.tableData = newArr.map(function(item) {
             return item;
           });
+          for (var j = 0; j < this.tableData.length; j++) {
+            if (this.tableData[j].isCancel == 1) {
+              this.tableData[j].isCancel = "否";
+            } else if (this.tableData[j].isCancel == 0) {
+              this.tableData[j].isCancel = "是";
+            }
+          }
           window.console.log(this.tableData);
         })
         .catch(err => {
@@ -1009,7 +1022,7 @@ export default {
               taskNote: item.task.taskNote
             };
           });
-          this.xiuForm = first[0]
+          this.xiuForm = first[0];
           window.console.log(first);
         })
         .catch(err => {
