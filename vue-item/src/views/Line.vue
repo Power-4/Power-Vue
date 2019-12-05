@@ -8,12 +8,12 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>所属线路:</span>
-        <el-input 
-          v-model="submit.circuitryNo" 
-          placeholder="请输入编号" 
+        <el-input
+          v-model="submit.circuitryNo"
+          placeholder="请输入编号"
           class="in-bianhao"
           @change="chaxun"
-          ></el-input>
+        ></el-input>
       </div>
 
       <div class="runningStatus" @input="chaxun">
@@ -86,7 +86,7 @@
               </el-form>
               <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false" class="ok-btn">确 定</el-button>
+                <el-button type="primary" @click="addOk(dialogFormVisible = false)" class="ok-btn">确 定</el-button>
               </div>
             </el-dialog>
           </div>
@@ -131,7 +131,7 @@
           <el-input v-model="revaTable.towerBase" placeholder="请输入塔基数"></el-input>
         </el-form-item>
         <el-form-item label="启动状态" :label-width="formLabelWidth">
-          <el-select v-model="revaTable.state" placeholder="请选启动状态" style="width:202px">
+          <el-select v-model="revaTable.circuitryState" placeholder="请选启动状态" style="width:202px">
             <el-option label="启用" value="启用"></el-option>
             <el-option label="停用" value="停用"></el-option>
           </el-select>
@@ -157,21 +157,28 @@
       <el-table-column prop="endPole.poleNo" label="终止杆号" width="100" align="center"></el-table-column>
       <el-table-column prop="poleNumber" label="塔基数" width="100" align="center"></el-table-column>
       <el-table-column prop="runningStatus" label="运行状态" width="100" align="center"></el-table-column>
-      <el-table-column prop="systemPropertiesValue.sysProValueName" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
+      <el-table-column
+        prop="systemPropertiesValue.sysProValueName"
+        label="状态(启动/未启动)"
+        width="200"
+        align="center"
+      ></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
-        <el-button type="text" @click="block">停用</el-button>
-        <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
-        <el-button type="text" @click="del">删除</el-button>
+        <template slot-scope="scope">
+          <el-button type="text" @click="block(scope.$index, scope.row,bk())">停用</el-button>
+          <el-button type="text" size="small" @click="Edit(scope.$index, scope.row ,dialogVisible = true)">修改</el-button>
+          <el-button type="text" @click="Delete(scope.$index, scope.row,del())">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination 
+      <el-pagination
         class="pages"
-        layout="prev, pager, next" 
-        :total="countPage" 
+        layout="prev, pager, next"
+        :total="countPage"
         :page-size="pageSize"
         @current-change="handleCurrentChange"
-        ></el-pagination>
+      ></el-pagination>
     </div>
   </div>
 </template>
@@ -189,9 +196,9 @@ export default {
         error: "",
         currentPage: 1,
         circuitryNo: "",
-        runningStatus:""
-        },
-      countPage:5, //初始页
+        runningStatus: ""
+      },
+      countPage: 5, //初始页
       pageSize: 5, //    每页的数据
       //模拟表格数据
       tableData: [],
@@ -208,6 +215,7 @@ export default {
         start: "",
         end: "",
         towerBase: "",
+        circuitryState: "",
         state: ""
       },
       form: {
@@ -229,9 +237,9 @@ export default {
     //查询
     chaxun() {
       this.axios
-        .get("http://192.168.6.184:8080/circuitryOrchid/getCirPageByNo",{
+        .get("http://192.168.6.177:8080/circuitryOrchid/getCirPageByNo", {
           params: {
-            currentPage: this.submit.currentPage,
+            currentPage: 1,
             pageSize: this.pageSize,
             circuitryNo: this.submit.circuitryNo,
             runningStatus: this.submit.runningStatus
@@ -249,6 +257,33 @@ export default {
           window.console.log(err);
         });
     },
+    //添加杆塔
+    addOk() {
+      window.console.log(this.submit.poleNo, this.submit.circuitryName, this.submit.activate);
+      
+      this.axios.get("http://192.168.6.177:8080/poleOrchid/addPole", {
+        params:{
+          poleNo: this.submit.poleNo,
+          circuitryName: this.submit.circuitryName,
+          activate: this.submit.activate
+        }
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.fenClick(); //调用初始化函数
+          this.$message({
+            type: "success",
+            message: "添加成功!"
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+          this.$message({
+            type: "info",
+            message: "添加失败！"
+          });
+        });
+    },
     onSubmit() {
       window.console.log("submit!");
     },
@@ -260,9 +295,9 @@ export default {
     },
     fenClick() {
       this.axios
-        .post("http://192.168.6.184:8080/circuitryOrchid/getCirByPage", {
-          currentPage:this.submit.currentPage,
-          pageSize:this.pageSize
+        .post("http://192.168.6.177:8080/circuitryOrchid/getCirByPage", {
+          currentPage: this.submit.currentPage,
+          pageSize: this.pageSize
         })
         .then(res => {
           window.console.log(res.data);
@@ -274,7 +309,51 @@ export default {
           window.console.log(err);
         });
     },
- 
+    //修改按钮
+    Edit(index, row) {
+      window.console.log(index, row);
+      this.poleId = this.tableData[index].poleId;
+      this.submit.poleNo = this.tableData[index].poleNo;
+      this.submit.activate = this.tableData[index].systemPropertiesValue.sysProValueName;
+    },
+    //修改模态框确定按钮
+    xiugai() {
+      this.axios
+        .get("http://192.168.6.177:8080/poleOrchid/updatePoleById",{
+          params: {
+            poleId: this.poleId,
+            poleNo: this.submit.poleNo,
+            circuitryNo: this.submit.circuitryNo,
+            activate: this.submit.activate
+          }
+        })
+        .then(res => {
+          window.console.log("当前所修改的id",this.poleId);
+          // window.console.log(this.submit.poleNo);
+          // window.console.log(this.submit.activate);
+          // window.console.log(res.data);
+          // window.console.log(this.tableData);
+          
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles;
+          this.$message({
+            type: "success",
+            message: "修改成功!"
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+          this.$message({
+            type: "info",
+            message: "取消修改!"
+          });
+        });
+    },
+    //删除按钮
+    Delete(index, row) {
+      window.console.log(index, row);
+      this.circuitryId = this.tableData[index].circuitryId;
+    },
     //删除
     del() {
       this.$confirm("是否删除", "提示", {
@@ -287,6 +366,23 @@ export default {
             type: "success",
             message: "删除成功!"
           });
+          window.console.log("当前所删除的id", this.circuitryId);
+          this.axios
+            .get(
+              "http://192.168.6.177:8080/circuitryOrchid/deleteCircuitryById",
+              {
+                params: {
+                  circuitryId: this.circuitryId
+                }
+              }
+            )
+            .then(res => {
+              window.console.log(res.data);
+              this.fenClick();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
         })
         .catch(() => {
           this.$message({
@@ -295,29 +391,66 @@ export default {
           });
         });
     },
+    //停用按钮
+    block(index, row) {
+      window.console.log(index, row);
+      this.circuitryId = this.tableData[index].circuitryId;
+      this.tableData[index].systemPropertiesValue.sysProValueName = "停用";
+      this.revaTable.circuitryState = this.tableData[
+        index
+      ].systemPropertiesValue.sysProValueName;
+    },
     //停用
-    block() {
-      this.$confirm("是否停用/启用", "提示", {
+    bk() {
+      this.$confirm("是否停用", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "停用/启用成功!"
-          });
+          // window.console.log("当前所停用的id", this.circuitryId);
+          // window.console.log(this.revaTable.circuitryState);
+          this.axios
+            .get(
+              "http://192.168.6.177:8080/circuitryOrchid/updateCircuitryState",
+              {
+                params: {
+                  circuitryId: this.circuitryId,
+                  circuitryState: this.revaTable.circuitryState
+                }
+              }
+            )
+            .then(res => {
+              window.console.log(res.data);
+              window.console.log(res.data.code);
+              if (res.data.code == 300) {
+                this.$message({
+                  type: "info",
+                  message: "该线路有杆塔在启用，无法停用!"
+                });
+              } else {
+                this.$message({
+                  type: "success",
+                  message: "停用成功!"
+                });
+              }
+              this.fenClick();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消停用/启用"
+            message: "已取消停用"
           });
+          this.fenClick();
         });
-    },
+    }
   },
   created() {
-    this.fenClick();   
+    this.fenClick();
   }
 };
 </script>
@@ -328,7 +461,7 @@ export default {
   width: 998px;
   height: 500px;
   float: right;
-  border: 1px solid rgb(218, 218, 218);
+
 }
 /* 导航栏 */
 .nav {

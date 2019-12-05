@@ -8,14 +8,8 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>杆塔编号:</span>
-        <el-input
-          v-model="submit.poleNo"
-          placeholder="请输入编号"
-          class="in-bianhao"
-          @change="chaxun"
-        ></el-input>
+        <el-input v-model="submit.poleNo" placeholder="请输入编号" class="in-bianhao" @change="chaxun"></el-input>
       </div>
-
 
       <div class="activate" @input="chaxun">
         <span>是否启用:</span>
@@ -44,22 +38,15 @@
               <i class="el-icon-circle-plus-outline"></i>添加杆塔
             </button>
             <el-dialog title="添加杆塔" :visible.sync="dialogFormVisible">
-              <el-form :model="form">
+              <el-form :model="submit">
                 <el-form-item label="杆塔编号" :label-width="formLabelWidth">
-                  <el-input v-model="form.id" autocomplete="off"></el-input>
+                  <el-input v-model="submit.poleNo" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="线路名称" :label-width="formLabelWidth">
-                  <el-select v-model="value" placeholder="请选择">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
+                <el-form-item label="线路编号" :label-width="formLabelWidth">
+                  <el-input v-model="submit.circuitryNo" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="启动状态" :label-width="formLabelWidth">
-                  <el-select v-model="form.region" placeholder="请选启动状态">
+                  <el-select v-model="submit.activate" placeholder="请选启动状态">
                     <el-option label="启用" value="启用"></el-option>
                     <el-option label="停用" value="停用"></el-option>
                   </el-select>
@@ -67,7 +54,11 @@
               </el-form>
               <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false" class="ok-btn">确 定</el-button>
+                <el-button
+                  type="primary"
+                  @click="addOk(dialogFormVisible = false)"
+                  class="ok-btn"
+                >确 定</el-button>
               </div>
             </el-dialog>
           </div>
@@ -81,7 +72,7 @@
         <el-form-item label="杆塔编号" :label-width="dialogVisibleWidth">
           <el-input v-model="submit.poleNo" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="线路序号" :label-width="dialogVisibleWidth">
+        <el-form-item label="线路编号" :label-width="formLabelWidth">
           <el-input v-model="submit.circuitryNo" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="启动状态" :label-width="dialogVisibleWidth">
@@ -114,7 +105,7 @@
             size="small"
             @click="Edit(scope.$index, scope.row ,dialogVisible = true)"
           >修改</el-button>
-          <el-button type="text" @click="del">删除</el-button>
+          <el-button type="text" @click="Delete(scope.$index, scope.row,del())">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -139,7 +130,8 @@ export default {
       name: "xun",
       submit: {
         currentPage: 1,
-        poleNo:"",
+        poleNo: "",
+        circuitryNo: "",
         circuitryName: "",
         activate: ""
       },
@@ -161,7 +153,6 @@ export default {
       ],
       value: "",
 
-     
       dialogFormVisible: false,
       dialogVisible: false,
       revaTable: { id: "", state: "" },
@@ -184,46 +175,18 @@ export default {
     //查询
     chaxun() {
       this.axios
-        .get("http://192.168.6.184:8080/poleOrchid/getPolePageByCirIdAndActivate",{
-          params: {
-            currentPage: this.submit.currentPage,
-            pageSize: this.pageSize,
-            poleNo: this.submit.poleNo,
-            activate: this.submit.activate
+        .get(
+          "http://192.168.6.177:8080/poleOrchid/getPolePageByCirIdAndActivate",
+          {
+            params: {
+              currentPage: 1,
+              pageSize: this.pageSize,
+              poleNo: this.submit.poleNo,
+              activate: this.submit.activate
+            }
           }
-        })
+        )
         .then(res => {
-          window.console.log( this.submit.poleNo);
-          window.console.log( this.submit.activate);
-          window.console.log(res.data);
-          window.console.log(this.tableData);
-          this.countPage = res.data.data.count;
-          this.tableData = res.data.data.poles;
-        })
-        .catch(err => {
-          window.console.log(err);
-        });
-    },
-
-    //修改按钮
-    Edit(index, row) {
-      window.console.log(index, row);
-      this.poleId = this.tableData[index].poleId;
-      this.submit.poleNo = this.tableData[index].poleNo;
-      this.submit.activate = this.tableData[index].systemPropertiesValue.sysProValueName;
-    },
-    //修改模态框确定按钮
-    xiugai() {
-      this.axios
-        .get("http://192.168.6.184:8080/poleOrchid/updatePoleById",{
-          params: {
-            poleId: this.poleId,
-            poleNo: this.submit.poleNo,
-            activate: this.submit.activate
-          }
-        })
-        .then(res => {
-          window.console.log("当前所修改的id",this.poleId);
           window.console.log(this.submit.poleNo);
           window.console.log(this.submit.activate);
           window.console.log(res.data);
@@ -235,7 +198,84 @@ export default {
           window.console.log(err);
         });
     },
-    //删除
+    //添加杆塔确定按钮
+    addOk() {
+      window.console.log(
+        this.submit.poleNo,
+        this.submit.circuitryNo,
+        this.submit.activate
+      );
+
+      this.axios
+        .get("http://192.168.6.177:8080/poleOrchid/addPole", {
+          params: {
+            poleNo: this.submit.poleNo,
+            circuitryNo: this.submit.circuitryNo,
+            activate: this.submit.activate
+          }
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.fenClick(); //调用初始化函数
+          this.$message({
+            type: "success",
+            message: "添加成功!"
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+          this.$message({
+            type: "info",
+            message: "添加失败！"
+          });
+        });
+    },
+    //修改按钮
+    Edit(index, row) {
+      window.console.log(index, row);
+      this.poleId = this.tableData[index].poleId;
+      this.submit.poleNo = this.tableData[index].poleNo;
+      this.submit.activate = this.tableData[index].systemPropertiesValue.sysProValueName;
+    },
+    //修改模态框确定按钮
+    xiugai() {
+      this.axios
+        .get("http://192.168.6.177:8080/poleOrchid/updatePoleById", {
+          params: {
+            poleId: this.poleId,
+            poleNo: this.submit.poleNo,
+            circuitryNo: this.submit.circuitryNo,
+            activate: this.submit.activate
+          }
+        })
+        .then(res => {
+          window.console.log("当前所修改的id", this.poleId);
+          // window.console.log(this.submit.poleNo);
+          // window.console.log(this.submit.activate);
+          // window.console.log(res.data);
+          // window.console.log(this.tableData);
+
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles;
+          this.$message({
+            type: "success",
+            message: "修改成功!"
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+          this.$message({
+            type: "info",
+            message: "取消修改!"
+          });
+        });
+    },
+    //删除按钮
+    Delete(index, row) {
+      window.console.log(index, row);
+      this.poleId = this.tableData[index].poleId;
+    },
+    //删除功能模态框
     del() {
       this.$confirm("是否删除", "提示", {
         confirmButtonText: "确定",
@@ -247,6 +287,20 @@ export default {
             type: "success",
             message: "删除成功!"
           });
+          window.console.log("当前所删除的id", this.poleId);
+          this.axios
+            .get("http://192.168.6.177:8080/poleOrchid/deletePoleByPoleId", {
+              params: {
+                poleId: this.poleId
+              }
+            })
+            .then(res => {
+              window.console.log(res.data);
+              this.fenClick();
+            })
+            .catch(err => {
+              window.console.log(err);
+            });
         })
         .catch(() => {
           this.$message({
@@ -263,7 +317,7 @@ export default {
     //分页
     fenClick() {
       this.axios
-        .post("http://192.168.6.184:8080/poleOrchid/getPoleByPage", {
+        .post("http://192.168.6.177:8080/poleOrchid/getPoleByPage", {
           currentPage: this.submit.currentPage,
           pageSize: this.pageSize
         })
@@ -272,7 +326,7 @@ export default {
           window.console.log(res.data);
           this.countPage = res.data.data.count;
           this.tableData = res.data.data.poles;
-          window.console.log(this.tableData);
+          // window.console.log(this.tableData[0].circuitry.circuitryName)
         })
         .catch(err => {
           window.console.log(err);
@@ -287,11 +341,11 @@ export default {
 
 <style lang="less" scoped>
 @mainColor: #5ee4e4;
+
 .towar {
   width: 998px;
   height: 500px;
   float: right;
-  border: 1px solid rgb(218, 218, 218);
 }
 /* 导航栏 */
 .nav {
