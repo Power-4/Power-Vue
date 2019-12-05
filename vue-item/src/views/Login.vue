@@ -106,6 +106,7 @@ export default {
 
       this.axios({
         url: "/user/login",
+        // url: "http://192.168.6.174:8080/user/login",
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
