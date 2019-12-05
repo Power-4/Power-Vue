@@ -49,7 +49,7 @@ export default {
       // 时间计时器
       timer: null,
       // 从本地库中提取的用户名
-      username: "王大波",
+      username: window.sessionStorage['userName'],
       // 生成菜单的数据
       powerData: [
         "a",

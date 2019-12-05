@@ -15,12 +15,12 @@
         <el-col :span="6">
           <div class="grid-content bg-purple-light">
             任务状态:
-            <el-select size="mini" v-model="value" placeholder="请选择" class="queryKuang">
+            <el-select size="mini" v-model="sysProValueId" placeholder="请选择" class="queryKuang">
               <el-option
                 v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                :key="item.sysProValueId"
+                :label="item.sysProValueName"
+                :value="item.sysProValueId"
               ></el-option>
             </el-select>
           </div>
@@ -29,27 +29,25 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             缺陷类型:
-            <el-select size="mini" v-model="value2" placeholder="请选择" class="queryKuang">
+            <el-select size="mini" v-model="defectsId" placeholder="请选择" class="queryKuang">
               <el-option
                 v-for="item in options2"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                :key="item.defectsId"
+                :label="item.defectsName"
+                :value="item.defectsId"
               ></el-option>
             </el-select>
           </div>
         </el-col>
         <!-- 缺陷级别框 -->
         <el-col :span="6">
-          <div class="grid-content bg-purple-light">
-            缺陷级别:
-            <el-select size="mini" v-model="value3" placeholder="请选择" class="queryKuang">
-              <el-option
-                v-for="item in options3"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
+          <div class="grid-content bg-purple-light" >
+            
+             <label>缺陷级别：</label>
+            <el-select v-model="value3"   class="queryKuang">
+              <el-option value="一般">一般</el-option>
+              <el-option value="紧急">紧急</el-option>
+              <el-option value="严重">严重</el-option>
             </el-select>
           </div>
         </el-col>
@@ -61,12 +59,12 @@
         <el-col :span="6">
           <div class="grid-content bg-purple">
             工作单据:
-            <el-select size="mini" v-model="value4" placeholder="请选择" class="queryKuang">
+            <el-select size="mini" v-model="workFormId" placeholder="请选择" class="queryKuang">
               <el-option
                 v-for="item in options4"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                :key="item.workFormId"
+                :label="item.workFormName"
+                :value="item.workFormId"
               ></el-option>
             </el-select>
           </div>
@@ -128,15 +126,15 @@ export default {
     return {
       tableData: [],
       options: [],
-      value: "",
+      defectsId: "",
       value1: "",
       options2: [],
-      value2: "",
+      sysProValueId: "",
       options3: [],
       value3: "",
       input: "",
       options4: [],
-      value4: "",
+      workFormId: "",
       date: "",
       count: null,
       currentPage: 1, //初始页
@@ -202,6 +200,7 @@ export default {
       })
       .then(res => {
         window.console.log("任务状态",res.data);
+        this.options = res.data.data.taskstate;
       })
       .catch(err => {
         window.console.log(err);
@@ -211,6 +210,7 @@ export default {
     })
     .then(res => {
       window.console.log("缺陷类型",res.data);
+       this.options2 = res.data.data.defects;
     })
     .catch(err => {
       window.console.log(err);
@@ -220,15 +220,17 @@ export default {
     })
     .then(res => {
       window.console.log("缺陷级别",res.data);
+      this.options3 = res.data.data.fixlevel;
     })
     .catch(err => {
       window.console.log(err);
     });
 
-    this.axios.get("fix/getalltaskstate", {
+    this.axios.get("fix/getallworkform", {
     })
     .then(res => {
-      window.console.log("任务状态",res.data);
+      window.console.log("工作单据",res.data);
+      this.options4 = res.data.data.workForms
     })
     .catch(err => {
       window.console.log(err);
