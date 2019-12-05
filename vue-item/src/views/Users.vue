@@ -124,7 +124,7 @@
       </el-form>
     </el-dialog>
 
-    <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
+    <el-dialog title="查看用户日志" :visible.sync="seeLogTab" width="800px">
       <span>选择时间</span>
 
       <el-date-picker
@@ -142,13 +142,14 @@
         stripe
         style="width: 100%"
         border
-        :data="logTableData.slice((logCurrpage - 1) * logPagesize, logCurrpage * logPagesize)"
+        :data="logTableData"
       >
-        <el-table-column prop="number" label="序号"></el-table-column>
-        <el-table-column prop="userName" label="用户名"></el-table-column>
-        <el-table-column prop="logMsg" label="日志信息"></el-table-column>
-        <el-table-column prop="actionMsg" label="操作信息"></el-table-column>
-        <el-table-column prop="actionDate" label="操作日志"></el-table-column>
+        <!-- // userLogId: 1;
+      // userLogOperationDate: "2019-11-29";
+        // userLogOperationInformation;-->
+        <el-table-column prop="userLogId" label="编号"></el-table-column>
+        <el-table-column prop="userLogOperationDate" label="时间"></el-table-column>
+        <el-table-column prop="userLogOperationInformation" label="日志信息"  width="400px"></el-table-column>
       </el-table>
       <div class="block">
         <el-pagination
@@ -444,6 +445,7 @@ export default {
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
+        this.maliLogData(res);
       });
     },
     // 发送请求
@@ -461,10 +463,15 @@ export default {
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
+        // 渲染信息
+        this.maliLogData(res);
       });
     },
     // 处理用户信息
-    maliLogData() {}
+    maliLogData(res) {
+      this.logTableData = res.data.data.userLogList;
+      this.logPages = res.data.data.count;
+    }
   },
   created() {
     this.loadData();
