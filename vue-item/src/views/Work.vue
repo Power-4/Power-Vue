@@ -127,7 +127,8 @@ export default {
       var id = row.taskId;
 
       // 请求数据
-      var words = `http://192.168.6.177:8080/taskOrchid/getTaskByTaskId?taskId=${id}`;
+      // http://192.168.6.177:8080
+      var words = `/taskOrchid/getTaskByTaskId?taskId=${id}`;
       this.axios.get(words).then(res => {
         this.workMsg = res.data.data.task;
         switch (this.workMsg.taskType) {
@@ -165,7 +166,8 @@ export default {
     },
     LoadData() {
       // 获取平台数据
-      var words = `http://192.168.6.184:8080/taskOrchid/getTaskByUserId?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
+      // http://192.168.6.184:8080
+      var words = `/taskOrchid/getTaskByUserId?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
       this.axios
         .get(words)
         .then(res => {

@@ -258,7 +258,8 @@ export default {
             message: "删除成功"
           });
           // 输出id
-          var c = `http://192.168.6.184:8080/userManage/deleteUserMessage?roleId=${index.roleId}`;
+          // http://192.168.6.184:8080
+          var c = `/userManage/deleteUserMessage?roleId=${index.roleId}`;
           window.console.log(c);
           this.axios.get(c).then(res => {
             window.console.log(res);
@@ -302,10 +303,9 @@ export default {
     isRoleNoOk() {
       if (this.role.roleNo == "") return;
       window.console.log("roleNo检测");
+      // http://192.168.6.184:8080
       this.axios
-        .get(
-          `http://192.168.6.184:8080/role/isExistsRoleNo?roleNo=${this.role.roleNo}`
-        )
+        .get(`/role/isExistsRoleNo?roleNo=${this.role.roleNo}`)
         .then(res => {
           window.console.log(res);
           if (res.data.code == "200") {
@@ -320,11 +320,12 @@ export default {
       if (this.roleNameOk == 1 && this.roleNoOk == 1) {
         window.console.log("开始添加角色");
         window.console.log(window.sessionStorage.getItem("userId"));
+        // http://192.168.6.184:8080
         this.axios
           .get(
-            `http://192.168.6.184:8080/role/addRole?roleName=${
-              this.role.roleName
-            }&roleNo=${this.role.roleNo}&sysProValueName=${
+            `/role/addRole?roleName=${this.role.roleName}&roleNo=${
+              this.role.roleNo
+            }&sysProValueName=${
               this.radio
             }&userId=${window.sessionStorage.getItem("userId")}`
           )
@@ -342,7 +343,8 @@ export default {
     },
     // 搜索内容
     getSearch() {
-      var words = `http://192.168.6.184:8080/role/fuzzyQueryShowRole?pagesize=${this.pagesize}&currpage=${this.currpage}&roleName=${this.search}&sysProValueName=${this.searchSelect}`;
+      // http://192.168.6.184:8080
+      var words = `/role/fuzzyQueryShowRole?pagesize=${this.pagesize}&currpage=${this.currpage}&roleName=${this.search}&sysProValueName=${this.searchSelect}`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log("加载角色", res);
@@ -368,7 +370,8 @@ export default {
     // 加载角色f
     LoadData() {
       // 获取平台数据
-      var words = `http://192.168.6.184:8080/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
+      // http://192.168.6.184:8080
+      var words = `/role/showAllRole?currentPage=${this.currpage}&pageSize=${this.pagesize}`;
       this.axios
         .get(words)
         .then(res => {
@@ -404,7 +407,8 @@ export default {
       window.console.log(this.roleData.roleName);
       window.console.log(this.roleData.systemPropertiesValue.sysProValueName);
 
-      var b = `http://192.168.6.184:8080/role/modifyRoleNoAndRoleName?roleNo=${this.roleData.roleNo}&roleName=${this.roleData.roleName}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`;
+      // http://192.168.6.184:8080
+      var b = `/role/modifyRoleNoAndRoleName?roleNo=${this.roleData.roleNo}&roleName=${this.roleData.roleName}&sysProValueName=${this.roleData.systemPropertiesValue.sysProValueName}&roleId=${this.roleData.roleId}`;
       window.console.log(b);
       this.axios.get(b).then(res => {
         window.console.log("修改角色", res);

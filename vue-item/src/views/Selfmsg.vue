@@ -128,7 +128,8 @@ export default {
       //
       var userId = sessionStorage.getItem("userId");
       if (userId) {
-        var words = `http://192.168.6.184:8080/user/showUser?userId=${userId}`;
+        // http://192.168.6.184:8080
+        var words = `/user/showUser?userId=${userId}`;
         this.axios.get(words).then(res => {
           window.console.log(res.data.data.user);
           this.user.age = res.data.data.user.age;
@@ -165,7 +166,8 @@ export default {
     },
     // ===============================修改个人资料==========================
     updateUserMsg() {
-      var words = `http://192.168.6.184:8080/user/modifyUser`;
+      // http://192.168.6.184:8080
+      var words = `/user/modifyUser`;
       this.axios
         .get(words, {
           params: {
@@ -204,7 +206,8 @@ export default {
       // 可以拿到 token
       window.console.log(window.sessionStorage.getItem("token"));
       this.axios({
-        url: "http://192.168.6.184:8080/user/modifyPassword",
+        // http://192.168.6.184:8080
+        url: "/user/modifyPassword",
         method: "POST",
         // 415
         // headers: { "content-type": "application/x-www-form-urlencoded" },

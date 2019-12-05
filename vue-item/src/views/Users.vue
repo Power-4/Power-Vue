@@ -3,6 +3,7 @@
     <el-breadcrumb separator-class="el-icon-arrow-right" class="lu">
       <el-breadcrumb-item>系统管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-button @click="seeLog" type="text" size="small" class="log">用户日志</el-button>
     </el-breadcrumb>
     <div class="topRole">
       <el-form>
@@ -54,7 +55,6 @@
         <template slot-scope="scope">
           <el-button class="cli" @click="updata(scope.row)" type="text" size="small">修改</el-button>
           <el-button @click="del(scope.row)" type="text" size="small">删除</el-button>
-          <el-button @click="seeLog(scope.$index, tableData)" type="text" size="small">日志</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -125,6 +125,19 @@
     </el-dialog>
 
     <el-dialog title="查看用户日志" :visible.sync="seeLogTab">
+      <span>选择时间</span>
+
+      <el-date-picker
+        v-model="logData"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        value-format="yyyy-MM-dd"
+        format="yyyy-MM-dd"
+      ></el-date-picker>
+      <el-button @click="sendLogData">查询</el-button>
+      <div class="blockbox"></div>
       <el-table
         stripe
         style="width: 100%"
@@ -232,7 +245,8 @@ export default {
       // userPwd: null -->
     },
     sendUpdata() {
-      var words = `http://192.168.6.184:8080/userManage/modifyUserMessage?userName=${this.obj.userName}&userPwd=&roleName=${this.obj.roleName}&joinDate=&leavingDate=&sysProValueName=正常`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/modifyUserMessage?userName=${this.obj.userName}&userPwd=&roleName=${this.obj.roleName}&joinDate=&leavingDate=&sysProValueName=正常`;
       this.axios.get(words).then(res => {
         window.console.log(res);
         if (res.data.data.code == 200) {
@@ -253,22 +267,18 @@ export default {
     updataUser() {
       this.updataTab = false;
     },
-    // 查看日志按钮--------------------------------------------------
-    seeLog() {
-      this.seeLogTab = true;
-    },
     // 获取日志
     loadLog() {},
     // 添加用户按钮--------------------------------------------------
     // 获取角色类型select数据的函数
     getPowerSelect() {
-      var words = `http://192.168.6.184:8080/permission/getAllRoleName`;
+      // http://192.168.6.184:8080
+      var words = `/permission/getAllRoleName`;
       this.axios.get(words).then(res => {
         window.console.log(res);
         this.powerSelect = res.data.data.roleNames;
       });
     },
-
     // 点击按钮弹出添加角色函数
     openAddUserBTN() {
       this.addUserDialog = true;
@@ -279,7 +289,8 @@ export default {
     // 发送添加用户请求
     sendAddUser() {
       window.console.log("添加用户");
-      var words = `http://192.168.6.184:8080/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinDate=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/addUserMessage?userName=${this.userSubForm.userName}&userPwd=${this.userSubForm.userPwd}&roleName=${this.userSubForm.roleName}&joinDate=${this.userSubForm.joinDate}&leacingDate=${this.userSubForm.leavingDate}&sysProValueName=正常`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log(res);
@@ -323,7 +334,8 @@ export default {
           });
           // 通过传入 scope.row 获取 选取的对象，获得id
           window.console.log(obj);
-          var words = `http://192.168.6.184:8080/userManage/deleteUserMessage?userId=${obj.userId}`;
+          // http://192.168.6.184:8080
+          var words = `/userManage/deleteUserMessage?userId=${obj.userId}`;
           this.axios.get(words).then(res => {
             window.console.log(res);
             this.loadData();
@@ -375,7 +387,8 @@ export default {
     },
     // 加载页面----------------------------------------------------------4
     loadData() {
-      var words = `http://192.168.6.184:8080/userManage/showAllUsers?pageSize=${this.pagesize}&currentPage=${this.currpage}`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/showAllUsers?pageSize=${this.pagesize}&currentPage=${this.currpage}`;
       // http://192.168.6.184:8080/userManage/showAllUsers?pageSize=2&currentPage=1
       window.console.log(words);
       this.axios.get(words).then(res => {
@@ -393,7 +406,8 @@ export default {
     // ===========================搜索部分===============================
     sendSearch() {
       this.currpage = 1;
-      var words = `http://192.168.6.184:8080/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}`;
+      // http://192.168.6.184:8080
+      var words = `/userManage/selectAllUsersByUserNameAndSysProValueName?pageSize=${this.pagesize}&userName=${this.search}&sysProValueName=${this.searchSelect}`;
       window.console.log(words);
       this.axios.get(words).then(res => {
         window.console.log("搜索结果", res.data.data);
@@ -409,13 +423,48 @@ export default {
     },
     // 添加用户----------------------------------------------------------
     // 每页几条
+    // ========================查看日志============================
     logHandleSizeChange(val) {
       this.logPagesize = val;
     },
     // 当前页数
     logHandleCurrentChange(val) {
       this.logCurrpage = val;
-    }
+      // 换页加载
+      this.sendGetlogMsg();
+    },
+    seeLog() {
+      this.seeLogTab = true;
+      // 请求日志信息
+      this.sendGetlogMsg();
+    },
+    sendGetlogMsg() {
+      // http://192.168.6.184:8080
+      var words = `/userManage/showUserLog?pageSize=${this.logPagesize}&currentPage=${this.logCurrpage}`;
+      window.console.log(words);
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+      });
+    },
+    // 发送请求
+    sendLogData() {
+      if (this.logData == "") {
+        window.console.log("日期为空");
+        return;
+      }
+      window.console.log(this.logData);
+      var startDate = this.logData[0];
+      var endtDate = this.logData[1];
+      window.console.log(startDate, endtDate);
+      // http://192.168.6.184:8080
+      var words = `/userManage/showUserLogBySelectDate?pageSize=${this.logPagesize}&startTime=${startDate}&endTime=${endtDate}`;
+      window.console.log(words);
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+      });
+    },
+    // 处理用户信息
+    maliLogData() {}
   },
   created() {
     this.loadData();
@@ -427,27 +476,13 @@ export default {
       logCurrpage: 1,
       logPagesize: 3,
       logPages: 4,
+      logData: "",
       // 日志信息
       // 序号
       // 用户名
       // 操作信息
       // 操作时间
-      logTableData: [
-        {
-          logMsg: "1",
-          number: "1",
-          userName: "1",
-          actionMsg: "1",
-          actionDate: "1"
-        },
-        {
-          logMsg: "1",
-          number: "1",
-          userName: "1",
-          actionMsg: "1",
-          actionDate: "1"
-        }
-      ],
+      logTableData: [],
       logdiolog: false,
       // 修改用户数据模态框----------------------------------------------1
       updataTab: false,
@@ -543,6 +578,9 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.log {
+  font-size: 16px;
+}
 .lu {
   height: 40px;
   font-size: 16px;
@@ -559,6 +597,9 @@ export default {
 }
 </style>
 <style>
+.blockbox {
+  height: 20px;
+}
 .form-box {
   widows: 800px;
   margin: 0 auto;

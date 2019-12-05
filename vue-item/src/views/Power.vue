@@ -40,7 +40,8 @@ export default {
   methods: {
     // ====================获取角色和全选============================
     getPowerSelect() {
-      var words = `http://192.168.6.184:8080/permission/getAllRoleName`;
+      // http://192.168.6.184:8080
+      var words = `/permission/getAllRoleName`;
       this.axios.get(words).then(res => {
         this.powerSelect = res.data.data.roleNames;
       });
@@ -48,7 +49,8 @@ export default {
     // 获取角色信息
     getRolePower() {
       // 获取角色权限信息
-      var words = `http://192.168.6.184:8080/permission/getResourcesByRoleName?roleName=${this.role}`;
+      // http://192.168.6.184:8080
+      var words = `/permission/getResourcesByRoleName?roleName=${this.role}`;
       window.console.log("获取角色权限信息", words);
       this.axios.get(words).then(res => {
         // res.data.data.resourcesName名字
@@ -86,7 +88,8 @@ export default {
       window.console.log("this.rolePower.length", this.rolePower.length);
       window.console.log("this.yesData.length", this.yesData.length);
       window.console.log("获得权限信息", yesDataName);
-      var words = `http://192.168.6.184:8080//permission/addRole_resources_relation`;
+      // http://192.168.6.184:8080
+      var words = `/permission/addRole_resources_relation`;
       window.console.log(words);
       this.axios
         .get(words, {
