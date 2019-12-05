@@ -1163,6 +1163,7 @@ export default {
       //   });
     },
     shenClick(row) {
+      
       this.shenTask = true;
       // window.console.log(row.fixId);
       //发送查看请求
@@ -1487,14 +1488,14 @@ export default {
         window.console.log(err);
       });
 
-    this.axios
-      .get("/selectAllWorkForm")
-      .then(res => {
-        window.console.log(res);
-      })
-      .catch(err => {
-        window.console.log(err);
-      });
+    // this.axios
+    //   .get("/selectAllWorkForm")
+    //   .then(res => {
+    //     window.console.log(res);
+    //   })
+    //   .catch(err => {
+    //     window.console.log(err);
+    //   });
   }
 };
 </script>
