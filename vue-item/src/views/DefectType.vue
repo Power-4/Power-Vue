@@ -263,14 +263,11 @@ export default {
   },
   created() {
   
-    this.axios({
-      url: "/defectsOrchid/getDefectsByPage",
-      method:"get",
-      params:{
-        currentPage:this.currpage,
-        pageSize:this.pagesize
-      }
-    })
+    this.axios
+        .post("/defectsOrchid/getDefectsByPage", {
+          currentPage: this.currpage,
+          pageSize: this.pagesize
+        })
     .then(res => {
       window.console.log(res.data);
       this.tableData = res.data.data.defects;

@@ -46,8 +46,8 @@
       <div class="config-parameter">
         <el-row>
           <el-button type="primary" @click="adds()">新增</el-button>
-          <el-button type="primary">保存</el-button>
-          <el-button type="primary">取消</el-button>
+          <el-button type="primary" @click="seaves()">保存</el-button>
+          <el-button type="primary" @click="quite()">取消</el-button>
         </el-row>
       </div>
       <div class="parameter-connect">
@@ -93,7 +93,7 @@ export default {
     //初始化函数
     Init() {
       this.axios
-        .post("http://192.168.6.184:8080/syspro/getAllSysProl")
+        .post("/syspro/getAllSysProl")
         .then(res => {
           window.console.log(res.data);
           this.tableData = res.data.data.sysPro;
@@ -119,28 +119,31 @@ export default {
     //子页面选择框
     SelectionChange(val) {
       this.multipleSelection = val;
-      window.console.log(val);
+      // window.console.log(val);
     },
     //父页面选择框
     handleSelectionChange(val) {
       this.check=!this.check;
-      window.console.log(this.check,"点击父集")
+      // window.console.log(this.check,"点击父集")
       
       if(this.check == true) {
-        this.isShow = true
-        window.console.log(this.isShow,"子打开")
+        this.isShow = true;
+        this.one = true;
+        // window.console.log(this.isShow,"子打开")
       } else{
         this.isShow = false
-        window.console.log(this.isShow,"子关闭")
+        this.one = false;
+        this.tableConnect = []
+        // window.console.log(this.isShow,"子关闭")
       }
       
       this.multipleSelection = val;
-      window.console.log(val);
+      // window.console.log(val);
       this.Data = [];
       this.Connect = [];
 
       val.forEach(item => {
-        // window.console.log("父集", item.sysProId);
+        // window.console.log("父集id", item.sysProId);
         // window.console.log("子集", item.id);
         this.Data.push(item.sysProId);
         // this.Connect.push(item.ids);
@@ -162,6 +165,8 @@ export default {
               // window.console.log( this.tableConnect);
             }
           });
+        } else {
+          this.tableConnect = []
         }
       });
     },
@@ -175,7 +180,12 @@ export default {
       var item = {};
       this.tableConnect.push(item);
     },
-    //保存信息 - 修改信息
+    //取消
+    quite() {
+        this.Init()
+       window.console.log(1);
+    },
+    //保存父集信息 - 修改信息
     seave() {
       // window.console.log(this.Data);
       this.Data.forEach(item => {
@@ -197,6 +207,32 @@ export default {
           .then(res => {
             window.console.log(res.data);
             this.Init()
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
+      });
+    },
+    //保存子集信息 - 修改信息
+    seaves() {
+      // window.console.log("父集id数组",this.Data);
+      this.Data.forEach(item => {
+        window.console.log("父集id", item);
+        var massage = this.multipleSelection;
+        window.console.log("子集信息", massage);
+        // window.console.log(massage[0].sysProDescribe);
+
+        this.axios
+          .get("/syspro/addSysProValue", {
+            params: {
+              sysProId: item,
+              sysProValueName: massage[0].sysProValueName
+            }
+          })
+          .then(res => {
+            window.console.log(res.data);
+            this.Init()
+            this.check == false;
           })
           .catch(err => {
             window.console.log(err);

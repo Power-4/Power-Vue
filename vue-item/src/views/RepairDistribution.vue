@@ -1542,11 +1542,11 @@ li {
   }
 
   .repair-query {
-    height: 32px;
+    height: 42px;
   }
 
   .repair-add {
-    height: 32px;
+    height: 42px;
   }
 
   .pagination {
