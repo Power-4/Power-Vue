@@ -1,6 +1,6 @@
 <template>
   <div class="RepairPerform">
-    <!-- 任务制定页面 -->
+    <!-- 任务执行页面 -->
     <div class="zhixing">
       <!-- 任务编号和工作单据 -->
       <el-row class="input-1">
@@ -50,22 +50,15 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-            ></el-date-picker>
+              value-format="yyyy/MM/dd"
+            >></el-date-picker>
           </div>
         </el-col>
-        <el-button type="primary" class="repair-query">查询</el-button>
-        
-
-        
+        <el-button type="primary" class="repair-query" @click="chaxun">查询</el-button>
       </el-row>
 
       <!-- 下方表格 -->
-      <el-table
-        :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)"
-        border
-        style="width: 100%"
-        size="small"
-      >
+      <el-table :data="tableData" border style="width: 100%" size="small">
         <el-table-column prop="taskNum" label="任务编号" width="75"></el-table-column>
         <el-table-column prop="taskName" label="任务名称" width="100"></el-table-column>
         <el-table-column prop="workDocuments" label="工作单据" width="100"></el-table-column>
@@ -79,8 +72,8 @@
             <el-button @click="chakanClick(scope.row)" type="text" size="small">查看</el-button>
             <!-- 查看时的模态框 -->
             <el-dialog title="查看任务" :visible.sync="checkTask">
-              <el-table :data="chakanForm" border style="width: 99%" size="small">
-                <el-table-column prop="taskNum" label="任务编码" width="178"></el-table-column>
+              <el-table :data="chakanForm" border size="small">
+                <el-table-column prop="taskNum" label="任务编号" width="178"></el-table-column>
                 <el-table-column prop="taskName" label="任务名称" width="178"></el-table-column>
                 <el-table-column prop="taskStatus" label="任务状态" width="178"></el-table-column>
                 <el-table-column prop="workDocuments" label="工作单据" width="178"></el-table-column>
@@ -89,19 +82,19 @@
               <el-table :data="chakanForm" border style="width: 99%" size="small">
                 <el-table-column prop="issuedPeople" label="下发人" width="178"></el-table-column>
                 <el-table-column prop="issuedDate" label="下发时间" width="178"></el-table-column>
-                <el-table-column prop label="任务负责人" width="178"></el-table-column>
-                <el-table-column prop label="任务描述" width="178"></el-table-column>
+                <el-table-column prop="fuzheren" label="任务负责人" width="178"></el-table-column>
+                <el-table-column prop="miaoshu" label="任务描述" width="178"></el-table-column>
               </el-table>
 
               <el-table :data="chakanForm" border style="width: 99%" size="small">
-                <el-table-column prop label="消缺员" width="178"></el-table-column>
-                <el-table-column prop label="消缺时间" width="178"></el-table-column>
-                <el-table-column prop label="负责人审查意见" width="178"></el-table-column>
-                <el-table-column prop label="完成情况描述" width="178"></el-table-column>
+                <el-table-column prop="xiaoqueren" label="消缺员" width="178"></el-table-column>
+                <el-table-column prop="xiaoqueTime" label="消缺时间" width="178"></el-table-column>
+                <el-table-column prop="fuzheyijian" label="负责人审查意见" width="178"></el-table-column>
+                <el-table-column prop="wanmiaoshu" label="完成情况描述" width="178"></el-table-column>
               </el-table>
 
               <el-table :data="chakanForm" border style="width: 99%" size="small">
-                <el-table-column prop label="下发人审查意见" width="178"></el-table-column>
+                <el-table-column prop="xiayijian" label="下发人审查意见" width="178"></el-table-column>
               </el-table>
 
               <p>缺陷列表:</p>
@@ -123,8 +116,8 @@
 
               <!--  -->
               <el-table :data="chakanForm" border style="width: 100%" size="small">
-                <el-table-column prop label="工作间断延期报告" width="358"></el-table-column>
-                <el-table-column prop label="工作总结报告" width="358"></el-table-column>
+                <el-table-column prop="interruptDelayRecord" label="工作间断延期报告" width="358"></el-table-column>
+                <el-table-column prop="workSummaryReport" label="工作总结报告" width="358"></el-table-column>
               </el-table>
             </el-dialog>
 
@@ -135,6 +128,7 @@
               <el-transfer v-model="fneValue" :data="fneArr"></el-transfer>
               <el-button type="primary" class="fenCofim">确认分配</el-button>
             </el-dialog>
+            
             <el-button type="text" size="small" @click="xiuClick(scope.row)">修改</el-button>
             <!-- 修改时的模态框 -->
             <el-dialog title="修改任务" :visible.sync="xiuTask">
@@ -247,7 +241,7 @@
       <el-pagination
         :page-size="5"
         layout="prev, pager, next"
-        :total="10"
+        :total="countPage"
         class="pagination"
         @current-change="handleCurrentChange"
       ></el-pagination>
@@ -278,7 +272,7 @@ export default {
           disabled: false
         }
       ],
-      chakanForm: [],
+      chakanForm: [{}],
       xiuForm: {},
       form: {
         taskNum: "",
@@ -294,132 +288,13 @@ export default {
       activeName: "first",
       input1: "",
       input2: "",
-      options: [
-        {
-          value: "选项1",
-          label: "任务单"
-        },
-        {
-          value: "选项2",
-          label: "第一种单据"
-        },
-        {
-          value: "选项3",
-          label: "第二种单据"
-        }
-      ],
+      options: [],
       value: "",
       value2: "",
       currentPage: 1, //初始页
       pagesize: 5, //    每页的数据
-      tableData: [
-        {
-          taskNum: "RW0245",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0246",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0247",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0248",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0249",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否"
-        },
-        {
-          taskNum: "RW0250",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0251",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0252",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0253",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        },
-        {
-          taskNum: "RW0254",
-          taskName: "任务巡检",
-          workDocuments: "任务单",
-          issuedPeople: "巡检员1号",
-          issuedDate: "2019/11/27",
-          taskStatus: "未完成",
-          completionTime: "",
-          isCancel: "否",
-          fuzeren: "羊海龙"
-        }
-      ],
+      countPage: null, // 页面总数
+      tableData: [],
       tableData2: [
         {
           lineNum: 123456,
@@ -448,19 +323,128 @@ export default {
   methods: {
     handleCurrentChange: function(currentPage) {
       this.currentPage = currentPage;
-      window.console.log(this.currentPage); //点击第几页
+      this.chaxun( currentPage );
+    },
+    chaxun(currentPage) {
+      var startTime = "1700/01/01";
+      var endTime = "2700/01/01";
+
+      if (this.value2) {
+        startTime = this.value2[0];
+        endTime = this.value2[1];
+      }
+
+      this.axios
+        .get("http://192.168.6.184:8080/fix/getFixByConditions", {
+          params: {
+            currentPage:currentPage||1,
+            pageSize: this.pagesize,
+            taskNo: this.input1,
+            workFormId: this.value,
+            userName: this.input2,
+            startTime,
+            endTime
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+
+          this.countPage = res.data.data.page.count;
+          this.tableData = [];
+
+          res.data.data.fix.forEach(item => {
+            var data = {};
+
+            data.taskNum = item.task.taskNo;
+            data.taskName = item.task.taskName;
+            data.workDocuments = item.workForm.workFormName;
+            data.issuedPeople = item.task.users.userName;
+            data.issuedDate = item.task.createDate;
+            data.taskStatus = item.task.systemPropertiesValue.sysProValueName;
+            data.completionTime = item.task.finishDate;
+            item.task.isCancel == 1
+              ? (data.isCancel = "是")
+              : (data.isCancel = "否");
+
+            data.fixId = item.fixId;
+
+            this.tableData.push(data);
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     chakanClick(row) {
-      this.checkTask = true;
-      this.chakanForm = [];
-      this.chakanForm.push(row);
+      // this.chakanForm = [];
+      // this.chakanForm.push(row);
+
+      this.axios
+        .get("http://192.168.6.184:8080/fix/getfixpolebyfixid", {
+          params: {
+            fixId: row.fixId
+          }
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.chakanForm=[{}];
+          this.tableData2=[];
+
+          var mydata = res.data.data.fix;
+
+          this.chakanForm[0].taskNum = mydata.task.taskNo; // 任务编号
+          this.chakanForm[0].taskName = mydata.task.taskName; //任务名称
+          this.chakanForm[0].taskStatus =
+            mydata.task.systemPropertiesValue.sysProValueName; // 任务状态
+          this.chakanForm[0].workDocuments = mydata.workForm.workFormName; // 工作单据
+          this.chakanForm[0].issuedPeople = mydata.task.users.userName; // 下发人
+          this.chakanForm[0].issuedDate = mydata.task.createDate; // 下发时间
+
+          this.chakanForm[0].fuzheren = mydata.users.userName; // 任务负责人
+          this.chakanForm[0].miaoshu = mydata.task.taskNote; // 任务描述
+
+          // 消缺人
+          this.chakanForm[0].xiaoqueren = "";
+          res.data.data.user.forEach(item2 => {
+            this.chakanForm[0].xiaoqueren += item2.userName + " ";
+          });
+
+          this.chakanForm[0].xiaoqueTime = mydata.task.finishDate; // 消缺时间
+          this.chakanForm[0].fuzheyijian = mydata.headUserOpinion; // 负责人意见
+          this.chakanForm[0].wanmiaoshu = mydata.accomplishDescribe; // 完成情况描述
+          this.chakanForm[0].xiayijian = mydata.createUserOpinion; // 下发人审查意见
+
+
+          this.chakanForm[0].interruptDelayRecord=mydata.interruptDelayRecord;  //中断记录
+          this.chakanForm[0].workSummaryReport = mydata.workSummaryReport; //延期记录
+
+          
+          res.data.data.poles.forEach((item,index)=>{
+            var data ={};
+            data.lineNum = res.data.data.circuitries[index].circuitryNo; //  线路编号
+            data.poleNum =item.damageRecord.pole.poleNo    //杆塔编号
+            data.defectLevels =item.damageRecord.defectsLevel    //缺陷等级
+            data.defectTypes =item.damageRecord.defects.defectsName    //缺陷类型
+            data.defectDes= item.damageRecord.defectsDescribe //缺陷描述
+            data.quot=item.damageRecord.users.userName //发现人
+            data.findTime=item.damageRecord.findDate //发现时间
+
+            this.tableData2.push(data);
+          })
+          
+
+          this.checkTask = true;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     fenClick() {
       this.fenTask = true;
       this.axios
-        .post("http://192.168.6.175:8080/fix/getallfix", {
-          currentPage: 1,
-          pageSize: 2
+        .post("http://192.168.6.184:8080/fix/getFixByConditions", {
+          currentPage: this.currentPage,
+          pageSize: this.pagesize
         })
         .then(res => {
           window.console.log(res.data);
@@ -493,32 +477,28 @@ export default {
             message: "已取消删除"
           });
         });
+    },
+    danju() {
+      this.axios
+        .get("http://192.168.6.184:8080/fix/getallworkform")
+        .then(res => {
+          res.data.data.workForms.forEach(item => {
+            var newDanju = {};
+            newDanju.value = item.workFormId;
+            newDanju.label = item.workFormName;
+            this.options.push(newDanju);
+          });
+        });
     }
   },
   created: function() {
-    // this.axios
-    //   .post("http://192.168.6.184:8080//selectFixTaskByFind", {
-    //     currentPage: 1,
-    //     pageSize: 5,
-    //     taskNo: 1,
-    //     taskName: "",
-    //     userName: "",
-    //     sysProValueId: 1,
-    //     startDate: "1999/2/10",
-    //     endDate: "2020/10/10"
-    //   })
-    //   .then(res => {
-    //     window.console.log(res.data.data.fix[0].task);
-    //   })
-    //   .catch(err => {
-    //     window.console.log(err);
-    //   });
+    this.danju();
+    this.chaxun();
   }
 };
 </script>
 
 <style lang="less" scoped>
-
 .app-repair {
   width: 980px;
   height: 600px;
@@ -583,7 +563,6 @@ export default {
   //   height: 50px;
   // }
 }
-
 
 .el-tabs__item {
   font-size: 18px;
