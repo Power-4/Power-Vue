@@ -61,10 +61,10 @@
       <!-- 插入类型 -->
       <el-form>
         <el-form-item label="角色名">
-          <el-input v-model="roleData.roleName"></el-input>
+          <el-input v-model="roleData.roleName" @blur="isRoleName(role.roleName)"></el-input>
         </el-form-item>
         <el-form-item label="角色编号">
-          <el-input v-model="roleData.roleNo"></el-input>
+          <el-input v-model="roleData.roleNo" @blur="isRoleNoOk(roleData.roleNo)"></el-input>
           <!-- roleName -->
           <!-- roleNo -->
           <!-- sysProValueName -->
@@ -85,10 +85,15 @@
       <el-form>
         <el-form-item label="角色名称">
           <!-- @blur="isRoleNameOk" -->
-          <el-input v-model="role.roleName"></el-input>
+          <el-input v-model="role.roleName" @blur="isRoleName(role.roleName)"></el-input>
         </el-form-item>
         <el-form-item label="角色编号">
-          <el-input v-model="role.roleNo" @blur="isRoleNoOk" minlength="4" maxlength="10"></el-input>
+          <el-input
+            v-model="role.roleNo"
+            @blur="isRoleNoOk(role.roleNo)"
+            minlength="4"
+            maxlength="10"
+          ></el-input>
         </el-form-item>
         <el-radio v-model="radio" label="启用">启用</el-radio>
         <el-radio v-model="radio" label="停用">未启用</el-radio>
@@ -259,7 +264,7 @@ export default {
           });
           // 输出id
           // http://192.168.6.184:8080
-          var c = `/userManage/deleteUserMessage?roleId=${index.roleId}`;
+          var c = `/role/deleteRole?roleId=${index.roleId}`;
           window.console.log(c);
           this.axios.get(c).then(res => {
             window.console.log(res);
@@ -300,19 +305,24 @@ export default {
       this.addRoleTab = true;
     },
     // 检查角色编号是否重合
-    isRoleNoOk() {
+    isRoleNoOk(row) {
       if (this.role.roleNo == "") return;
       window.console.log("roleNo检测");
       // http://192.168.6.184:8080
-      this.axios
-        .get(`/role/isExistsRoleNo?roleNo=${this.role.roleNo}`)
-        .then(res => {
-          window.console.log(res);
-          if (res.data.code == "200") {
-            window.console.log("角色·编号通过");
-            this.roleNoOk = 1;
-          }
-        });
+      this.axios.get(`/role/isExistsRoleNo?roleNo=${row}`).then(res => {
+        window.console.log(res);
+        if (res.data.code == 200) {
+          this.$message({
+            type: "success",
+            message: "角色编号可以使用"
+          });
+        } else {
+          this.$message({
+            type: "info",
+            message: "角色编号已存在"
+          });
+        }
+      });
     },
     // 确认添加角色
     getRole() {
@@ -420,10 +430,37 @@ export default {
       });
       // 关闭窗口 一切结束后写道axios回调函数里面
       this.updataTab = false;
+    },
+    isRoleName(row) {
+      this.axios.get(`/role/isExistsRoleName?roleName=${row}`).then(res => {
+        window.console.log(res);
+        if (res.data.code == 200) {
+          this.$message({
+            type: "success",
+            message: "角色名可以使用"
+          });
+        } else {
+          this.$message({
+            type: "info",
+            message: "角色名已存在"
+          });
+        }
+      });
     }
   },
   created() {
     this.LoadData();
+  },
+  watch: {
+    addRoleTab() {
+      if (this.addRoleTab == false) {
+        window.console.log("关闭添加用户");
+        this.role.roleName = "";
+        this.role.roleNo = "";
+        this.role.sysProValueName = "";
+        window.console.log(this.role);
+      }
+    }
   },
   data() {
     return {

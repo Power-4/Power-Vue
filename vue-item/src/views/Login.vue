@@ -106,6 +106,7 @@ export default {
 
       this.axios({
         url: "/user/login",
+        // url: "http://192.168.6.174:8080/user/login",
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
@@ -114,7 +115,6 @@ export default {
       })
         .then(res => {
           window.console.log(res);
-          //
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
           window.sessionStorage.setItem("userName", res.data.data.user.userName);

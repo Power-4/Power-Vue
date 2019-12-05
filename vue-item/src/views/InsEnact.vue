@@ -292,7 +292,7 @@ export default {
         inspectPerson: '',
         startPoleNo: '',
         endPoleNo: '',
-        userName: 'mi',
+        userName: sessionStorage.getItem('userName'),
         createDate: '',
         describe: '无'
       },
@@ -347,13 +347,13 @@ export default {
     })
     .then((res) => {
       this.tableData = res.data.data.tasks;
-      // for(var i = 0; i< res.data.data.tasks.length; i++) {
-      //   if(res.data.data.tasks[i].isCancel == 1) {
-      //     res.data.data.tasks[i].isCancel = '是'
-      //   } else if (res.data.data.tasks[i].isCancel == 0) {
-      //     res.data.data.tasks[i].isCancel = '否'
-      //   }
-      // }
+      for(var i = 0; i< res.data.data.tasks.length; i++) {
+        if(res.data.data.tasks[i].isCancel == 1) {
+          res.data.data.tasks[i].isCancel = '是'
+        } else if (res.data.data.tasks[i].isCancel == 0) {
+          res.data.data.tasks[i].isCancel = '否'
+        }
+      }
       this.count = res.data.data.count;
       window.console.log("初始化",res.data);
     })
@@ -526,7 +526,7 @@ export default {
               inspectorId: this.addform.inspectPerson.toString(),
               startPoleNo: this.addform.startPoleNo,
               endPoleNo: this.addform.endPoleNo,
-              userId: '10000003',
+              userId: sessionStorage.getItem('userId'),
               createDate: this.addform.createDate,
               taskNote: this.addform.describe
             }
@@ -534,17 +534,23 @@ export default {
           .then((res) => {
             this.$refs[formName].resetFields();
             this.addform.inspectPerson = '';
-            this.$message({
-              type: "success",
-              message: "添加成功!"
-            });
-
+            if(res.data.data.ifSuccess == 'success') {
+              this.$message({
+                type: "success",
+                message: "添加成功!"
+              });
+            } else {
+              this.$message({
+                type: "error",
+                message: "添加失败!"
+              });
+            }
             this.init();
             window.console.log('添加成功',res.data);
           })
           .catch((err) => {
             this.$message({
-              type: "success",
+              type: "error",
               message: "添加失败!"
             });
             window.console.log("错误",err)
@@ -650,23 +656,30 @@ export default {
               inspectorId: this.modifyform.inspectPerson.toString(),
               startPoleNo: this.modifyform.startPoleNo,
               endPoleNo: this.modifyform.endPoleNo,
-              userId: '10000003',
+              userId: sessionStorage.getItem('userId'),
               createDate: this.modifyform.createDate,
               taskNote: this.modifyform.describe
             }
           })
           .then((res) => {
-            this.$message({
-              type: "success",
-              message: "修改成功!"
-            });
+            if(res.data.data.ifSuccess == 'success') {
+              this.$message({
+                type: "success",
+                message: "修改成功!"
+              });
+            } else {
+              this.$message({
+                type: "error",
+                message: "修改失败!"
+              });
+            }
             this.init();
             window.console.log(res.data);
           })
           .catch((err) => {
             this.$message({
-              type: "success",
-              message: "修改成功!"
+              type: "error",
+              message: "修改失败!"
             });
             window.console.log("错误",err)
           })
@@ -735,35 +748,44 @@ export default {
         })
       }
     },
-    //删除弹出框
+    //取消弹出框
     del(row) {
       window.console.log(row)
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将永久取消该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
-        .then(() => {
-          // 取消请求
-          this.axios.get('/cancelTaskS?',{params:{taskId: row.taskId }})
-          .then((res) => {
-            this.init();
+      .then(() => {
+        // 取消请求
+        this.axios.get('/cancelTaskS?',{params:{taskId: row.taskId }})
+        .then((res) => {
+
+          this.init();
+          if(res.data.data.ifSuccess == 'success') {
             this.$message({
               type: "success",
-              message: "删除成功!"
+              message: "取消成功!"
             });
-            window.console.log(res.data);
-          })
-          .catch((err) => {
-            window.console.log("错误",err)
-          })
+          } else {
+            this.$message({
+              type: "error",
+              message: "取消失败!"
+            });
+          }
+          window.console.log(res.data);
         })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
+        .catch((err) => {
+          window.console.log("错误",err)
+        })
+        
+      })
+      .catch(() => {
+        this.$message({
+          type: "info",
+          message: "已取消"
         });
+      });
     }
   }
 };

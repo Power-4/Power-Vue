@@ -98,6 +98,7 @@ export default {
         i.label = item.poleNo;
         this.lines[0].children.push(i)
       })
+      this.form.taskNo = res.data.data.taskAndPoles.task.taskNo;
       this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
       this.form.circuitryNo = res.data.data.taskAndPoles.task.circuitry.circuitryNo;
       window.console.log(res.data);
@@ -132,7 +133,7 @@ export default {
     // 获取基本信息
     getParams() {
       this.taskId = this.$route.query.taskId;
-      this.form.taskNo =  this.$route.query.taskId;
+      // this.form.taskNo =  this.$route.query.taskId;
     },
     // 获取时间
     addDate() {
@@ -217,6 +218,7 @@ export default {
           this.temps.push(msg);
         }
       }
+      window.console.log(this.form.nowPoleId)
        
       // 回执录入请求
       this.axios.get('/insertRecord?',{params:{
@@ -260,6 +262,7 @@ export default {
 
       // 回执修改请求
       this.axios.get('http://192.168.6.184:8080/updateRecord?',{params:{
+        taskNo: this.form.taskNo,
         poleId: this.form.nowPoleId,
         defectsId: this.form.defectsName,
         findDate: this.form.findDate,

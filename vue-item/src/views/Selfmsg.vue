@@ -183,6 +183,7 @@ export default {
         })
         .then(res => {
           window.console.log(res);
+          this.ok("修改成功");
           return;
         });
     },
@@ -261,6 +262,16 @@ export default {
   },
   created() {
     this.loadUserMsg();
+  },
+  watch: {
+    pwdDialog() {
+      if (this.pwdDialog == false) {
+        window.console.log("关闭密码模态框");
+        this.pass.newPass = "";
+        this.pass.oldPass = "";
+        this.pass.newPass = "";
+      }
+    }
   },
   data() {
     return {

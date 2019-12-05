@@ -88,6 +88,7 @@ export default {
       window.console.log("this.rolePower.length", this.rolePower.length);
       window.console.log("this.yesData.length", this.yesData.length);
       window.console.log("获得权限信息", yesDataName);
+      window.console.log(this.role);
       // http://192.168.6.184:8080
       var words = `/permission/addRole_resources_relation`;
       window.console.log(words);
@@ -95,7 +96,7 @@ export default {
         .get(words, {
           params: {
             resourcesNames: yesDataName,
-            userName: this.role
+            roleName: this.role
           },
           // 传输组需要的配置
           paramsSerializer: params => {
