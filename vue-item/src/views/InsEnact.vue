@@ -86,7 +86,6 @@
         </el-form-item>
         <el-form-item 
           label="巡检员"
-          prop="inspectPerson"
         >
           <el-select v-model="addform.inspectPerson" multiple placeholder="请选择">
             <el-option
@@ -101,14 +100,14 @@
         label="起始杆号"
         prop="startPoleNo"
         >
-            <el-select v-model="addform.startPoleNo" clearable placeholder="请选择">
-              <el-option
-                v-for="item in nowPoles"
-                :key="item.poleId"
-                :label="item.poleNo"
-                :value="item.poleNo">
-              </el-option>
-            </el-select>
+          <el-select v-model="addform.startPoleNo" clearable placeholder="请选择">
+            <el-option
+              v-for="item in nowPoles"
+              :key="item.poleId"
+              :label="item.poleNo"
+              :value="item.poleNo">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item 
         label="终止杆号"
@@ -240,8 +239,8 @@
       </el-table-column>
       <el-table-column prop="taskName" label="任务名称" align="center"></el-table-column>
       <el-table-column prop="circuitry.circuitryName" label="巡检线路" align="center"></el-table-column>
-      <el-table-column prop="circuitry.startPole.poleNo" label="起始杆号" align="center"></el-table-column>
-      <el-table-column prop="circuitry.endPole.poleNo" label="终止杆号" align="center"></el-table-column>
+      <el-table-column prop="taskPoleRelation.startPoleNo" label="起始杆号" align="center"></el-table-column>
+      <el-table-column prop="taskPoleRelation.endPoleNo" label="终止杆号" align="center"></el-table-column>
       <el-table-column prop="users.userName" label="下发人" align="center"></el-table-column>
       <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
       <el-table-column prop="systemPropertiesValue.sysProValueName" label="任务状态" align="center"></el-table-column>
@@ -252,7 +251,7 @@
           <el-button type="text" size="small" @click="viewInspectTask(scope.$index,scope.row)">查看</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'? !edit : edit" @click="allot(scope.row, dialogVisible = true)">分配任务</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配' || scope.row.systemPropertiesValue.sysProValueName == '已分配'? !edit : edit" @click="modifyInspectTask(scope.$index, scope.row, modifydialogVisible = true)">修改</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配' || scope.row.systemPropertiesValue.sysProValueName == '已分配' ? !edit : edit" @click="del(scope.row)">取消</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.isCancel == '是'? !edit : edit" @click="del(scope.row)">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -270,36 +269,8 @@
 <script>
 export default {
   data() {
-    var checkChinese = (rule, value, callback)=> {
-      if(value=='') {
-        callback(new Error('请输入任务名称'))
-      } else {
-        let reg=/[\u4e00-\u9fa5]/;
-        if(!reg.test(value)){callback(new Error('名称必须是中文'))}
-      }
-    }
-    
     return {
       tableData: [],
-      // tableData: {
-      //   taskNo: '',
-      //   taskName: '',
-      //   circuitry: {
-      //     circuitryName: '',
-      //     startPole: {
-      //       circuitry: ''
-      //     },
-      //     endPole: {
-      //       circuitry: ''
-      //     }
-      //   },
-      //   users: {
-      //     userName: ''
-      //   },
-      //   systemPropertiesValue: {
-      //     sysProValueName: ''
-      //   },
-      // },
       count: null,
       pageSize: 5,
       currentPage: 1,
@@ -327,13 +298,15 @@ export default {
       },
       rules: {
         taskName: [
-          { validator: checkChinese, required: true, trigger: 'change' }
+          { 
+            required: true,
+            pattern: /[\u4e00-\u9fa5]/,
+            message: "请输入中文任务名称", 
+            trigger: 'blur' 
+          }
         ],
         circuitryName: [
           { required: true, message: '请选择巡检线路', trigger: 'change' }
-        ],
-        inspectPerson: [
-          { required: false, message: '请选择巡检线路', trigger: 'change' }
         ],
         startPoleNo: [
           { required: true, message: '请选择起始杆号', trigger: 'change' }
@@ -346,10 +319,10 @@ export default {
         taskNo: '',
         taskName: '',
         circuitryName: '',
-        inspectPerson: '',
+        inspectPerson: [],
         startPoleNo: '',
         endPoleNo: '',
-        userName: 'mi',
+        userName: sessionStorage.getItem('userName'),
         createDate: '',
         describe: ''
       },
@@ -366,7 +339,7 @@ export default {
   created() {
 
     // 请求列表数据
-    this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+    this.axios.get('/showAllTasksByPageS?',{ 
       params: {
         currentPage: this.currentPage,
         pageSize: this.pageSize
@@ -382,14 +355,14 @@ export default {
         }
       }
       this.count = res.data.data.count;
-      window.console.log(res.data);
+      window.console.log("初始化",res.data);
     })
     .catch((err) => {
       window.console.log("错误",err)
     })
 
     // 查询巡检员
-    this.axios.get('http://192.168.6.184:8080/showInspectorsNamesS?')
+    this.axios.get('/showInspectorsNamesS?')
     .then((res) => {
       this.Inspectors = res.data.data.inspectorNames;
       window.console.log('所有巡检员',res.data);
@@ -400,20 +373,20 @@ export default {
 
 
     // 请求任务状态值
-    this.axios.get('http://192.168.6.184:8080/selectAllFixState?')
+    this.axios.get('/selectAllFixState?')
     .then((res) => {
       this.stateOptions = res.data.data.fixState;
-      window.console.log(res.data);
+      window.console.log("请求任务状态值",res.data);
     })
     .catch((err) => {
       window.console.log('错误是', err);
     })
 
     // 查询所有巡检路线
-    this.axios.get('http://192.168.6.184:8080/showCircuitryNamesS?')
+    this.axios.get('/showCircuitryNamesS?')
     .then((res) => {
       this.circuitryNames = res.data.data.circuitryNames;
-      window.console.log(res.data);
+      window.console.log("查询所有巡检路线",res.data);
     })
     .catch((err) => {
       window.console.log('错误是', err);
@@ -431,7 +404,7 @@ export default {
 
     // 初始化
     init() {
-      this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+      this.axios.get('/showAllTasksByPageS?',{ 
         params: {
           currentPage: this.currentPage,
           pageSize: this.pageSize
@@ -486,7 +459,7 @@ export default {
       this.isQuery = true;
       window.console.log(this.isQuery)
 
-      this.axios.get('http://192.168.6.184:8080/selectTasksByConditionS?',{
+      this.axios.get('/selectTasksByConditionS?',{
         params: {
           currentPage: this.currentPage,
           pageSize: this.pageSize,
@@ -517,7 +490,7 @@ export default {
     // 制定任务按钮
     addTask() {
       // 获取任务编号
-      this.axios.get('http://192.168.6.184:8080/autoCreateTaskNoS?')
+      this.axios.get('/autoCreateTaskNoS?')
       .then((res) => {
         this.addform.taskNo = res.data.data.autoTaskNo;
         window.console.log(res.data);
@@ -530,7 +503,7 @@ export default {
     // 制定任务根据线路id请求杆号
     selectChanged(value) {
       window.console.log(value)
-      this.axios.get('http://192.168.6.184:8080/selectPoleNoByCircuitryIdS?',{params:{circuitryId: value}})
+      this.axios.get('/selectPoleNoByCircuitryIdS?',{params:{circuitryId: value}})
       .then((res) => {
         this.nowPoles = res.data.data.poles;
         window.console.log(res.data);
@@ -540,14 +513,12 @@ export default {
       })
     },
 
-
-
     // 添加保存提交
     addSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // 添加请求
-          this.axios.get('http://192.168.6.184:8080/createTasksS?',{
+          this.axios.get('/createTasksS?',{
             params: {
               taskNo: this.addform.taskNo,
               taskName: this.addform.taskName,
@@ -561,10 +532,21 @@ export default {
             }
           })
           .then((res) => {
+            this.$refs[formName].resetFields();
+            this.addform.inspectPerson = '';
+            this.$message({
+              type: "success",
+              message: "添加成功!"
+            });
+
             this.init();
-            window.console.log(res.data);
+            window.console.log('添加成功',res.data);
           })
           .catch((err) => {
+            this.$message({
+              type: "success",
+              message: "添加失败!"
+            });
             window.console.log("错误",err)
           })
         } else {
@@ -576,6 +558,7 @@ export default {
     // 重置
     resetForm(formName) {
       this.$refs[formName].resetFields();
+      this.addform.inspectPerson = '';
     },
 
     // 查看巡检任务
@@ -593,7 +576,7 @@ export default {
     },
     // 分配提交
     allotSubmit() {
-      this.axios.get('http://192.168.6.184:8080/assignTaskS?',{
+      this.axios.get('/assignTaskS?',{
         params: {
           userId: this.value.toString(),
           taskId: this.nowTaskId,
@@ -619,7 +602,7 @@ export default {
       this.modifyform.describe = this.tableData[index].taskNote;
       
       // 获取当前任务巡检线路杆列表
-      this.axios.get('http://192.168.6.184:8080/selectPoleNoByCircuitryIdS?',{
+      this.axios.get('/selectPoleNoByCircuitryIdS?',{
         params: {
           circuitryId: this.tableData[index].circuitry.circuitryId
         }
@@ -633,22 +616,17 @@ export default {
       })
 
       // 获取当前任务的巡检员
-      this.axios.get('http://192.168.6.184:8080/showInspectorsByTaskIdS?',{ 
+      this.axios.get('/showInspectorsByTaskIdS?',{ 
         params: {
           taskId: row.taskId
         }
       })
       .then((res) => {
-        // window.console.log( res.data.data.inspectorNames[0].userName)
-        // this.modifyform.inspectPerson = res.data.data.inspectorNames[0].userName;
-       
-        // var i = {};
         res.data.data.inspectorNames.forEach((item)=> {
           var i = {};
           i.userId = item.userId;
           i.userName = item.userName
-          window.console.log(i)
-          this.modifyform.inspectPerson.push(i);
+          this.modifyform.inspectPerson.push(i.userName);
         })
         window.console.log('该任务巡检员',res.data);
       })
@@ -658,14 +636,12 @@ export default {
 
     },
 
-
-
     // 修改提交模态框
     modifySubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // alert('确定提交数据吗');
-          this.axios.get('http://192.168.6.184:8080/changeTaskS?',{
+          this.axios.get('/changeTaskS?',{
             params: {
               taskId: this.nowTaskId,
               taskNo: this.modifyform.taskNo,
@@ -688,6 +664,10 @@ export default {
             window.console.log(res.data);
           })
           .catch((err) => {
+            this.$message({
+              type: "success",
+              message: "修改成功!"
+            });
             window.console.log("错误",err)
           })
         } else {
@@ -701,7 +681,7 @@ export default {
     handleCurrentChange(val) {
       if(this.isQuery) {
         window.console.log(this.isQuery);
-        this.axios.get('http://192.168.6.184:8080/selectTasksByConditionS?',{
+        this.axios.get('/selectTasksByConditionS?',{
           params: {
             currentPage: this.currentPage,
             pageSize: this.pageSize,
@@ -731,7 +711,7 @@ export default {
         })
       } else {
         
-        this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+        this.axios.get('/showAllTasksByPageS?',{ 
           params: {
             currentPage: val,
             pageSize: this.pageSize
@@ -753,12 +733,7 @@ export default {
         .catch((err) => {
           window.console.log("错误",err)
         })
-
       }
-
-
-
-
     },
     //删除弹出框
     del(row) {
@@ -770,7 +745,7 @@ export default {
       })
         .then(() => {
           // 取消请求
-          this.axios.get('http://192.168.6.184:8080/cancelTaskS?',{params:{taskId: row.taskId }})
+          this.axios.get('/cancelTaskS?',{params:{taskId: row.taskId }})
           .then((res) => {
             this.init();
             this.$message({

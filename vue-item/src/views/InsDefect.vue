@@ -126,7 +126,7 @@ export default {
   },
   created() {
     // 渲染页面数据
-    this.axios.get('http://192.168.6.184:8080/selectAllDefects', {
+    this.axios.get('/selectAllDefects', {
       params: {
         currentPage: this.currentPage, 
         pageSize: this.pageSize
@@ -143,7 +143,7 @@ export default {
 
 
     // 请求缺陷类型
-    this.axios.get('http://192.168.6.184:8080/getDefectsName?')
+    this.axios.get('/getDefectsName?')
     .then((res) => {
       this.typeOptions = res.data.data.defects;
       window.console.log(res.data);
@@ -161,7 +161,7 @@ export default {
       window.console.log(this.defectsName)
       window.console.log(this.defectsLevel)
       window.console.log(this.taskNo)
-      this.axios.get('http://192.168.6.184:8080/selectDefectsByCondition?', {params:{
+      this.axios.get('/selectDefectsByCondition?', {params:{
         taskNo: this.taskNo,
         circuitryNo: this.circuitryNo,
         defectsName: this.defectsName,
@@ -184,7 +184,7 @@ export default {
     // 分页点击事件
     handleCurrentChange(val) {
        if(this.isQuery) {
-          this.axios.get('http://192.168.6.184:8080/selectDefectsByCondition?', {params: {
+          this.axios.get('/selectDefectsByCondition?', {params: {
             taskNo: this.taskNo,
             circuitryNo: this.circuitryNo,
             defectsName: this.defectsName,
@@ -206,7 +206,7 @@ export default {
       }
 
 
-      this.axios.get('http://192.168.6.184:8080/selectAllDefects', {
+      this.axios.get('/selectAllDefects', {
         params: {
           currentPage: val, 
           pageSize: this.pageSize

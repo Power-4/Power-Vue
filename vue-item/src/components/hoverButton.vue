@@ -68,9 +68,9 @@
           <span slot="title">巡检管理</span>
         </template>
         <el-menu-item-group>
-          <el-menu-item index="/inspect">巡检任务制定与分配</el-menu-item>
-          <el-menu-item index="/inspect/insexecute">巡检任务执行与回执</el-menu-item>
-           <el-menu-item index="/inspect/insdefect">缺陷查询</el-menu-item>
+          <el-menu-item index="/inspect/insenact?name=enact">巡检任务制定与分配</el-menu-item>
+          <el-menu-item index="/inspect/insexecute?name=execute">巡检任务执行与回执</el-menu-item>
+          <el-menu-item index="/inspect/insdefect?name=quexian">缺陷查询</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
      

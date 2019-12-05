@@ -90,7 +90,7 @@ export default {
     this.isadd = this.isAdd;
     
     // 渲染页面数据
-    this.axios.get('http://192.168.6.184:8080/showTaskandPoles?',{params:{taskId: this.taskId}})
+    this.axios.get('/showTaskandPoles?',{params:{taskId: this.taskId}})
     .then((res) => {
       res.data.data.taskAndPoles.poles.forEach((item)=> {
         var i = {};
@@ -107,7 +107,7 @@ export default {
     })
 
     // 请求缺陷类型
-    this.axios.get('http://192.168.6.184:8080/getDefectsName?')
+    this.axios.get('/getDefectsName?')
     .then((res) => {
       this.form.typeOptions = res.data.data.defects;
       window.console.log(res.data);
@@ -129,11 +129,12 @@ export default {
     this.form.findDate = this.addDate()
   },
   methods: {
-    //  获取基本信息
+    // 获取基本信息
     getParams() {
       this.taskId = this.$route.query.taskId;
       this.form.taskNo =  this.$route.query.taskId;
     },
+    // 获取时间
     addDate() {
       var nowDate = new Date()
       var year = nowDate.getFullYear()
@@ -152,7 +153,6 @@ export default {
     // 点击杆号
     handleNodeClick(lines) {
       this.form.nowPoleId = lines.id;
-
 
       // 判断点击的杆塔编号
       if(lines.id !== 0) {
@@ -181,7 +181,7 @@ export default {
       }
 
       if(!this.isadd) {
-        this.axios.get('http://192.168.6.184:8080/selectRecord?',{params:{poleId: lines.id}})
+        this.axios.get('/selectRecord?',{params:{poleId: lines.id}})
         .then((res) => {
             this.form.defectsName = res.data.data.circuitryPoleRecordVO.damageRecord.defects.defectsName;
             this.form.defectsDescribe = res.data.data.circuitryPoleRecordVO.damageRecord.defectsDescribe;
@@ -219,7 +219,7 @@ export default {
       }
        
       // 回执录入请求
-      this.axios.get('http://192.168.6.184:8080/insertRecord?',{params:{
+      this.axios.get('/insertRecord?',{params:{
         taskNo: this.form.taskNo,
         poleId:  this.form.nowPoleId,
         defectsId: this.form.defectsName,
