@@ -20,6 +20,8 @@
             <el-input type="text" v-model="submit.poleNo" class="data" />
           </div>
         </el-col>
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <div class="grid-content bg-purple">
@@ -28,22 +30,20 @@
             </div>
           </div>
         </el-col>
-      </el-row>
-      <el-row :gutter="20">
         <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>缺陷类型：</label>
-            <el-select class="data" v-model="submit.defectsName">
-              <el-option lable="叉梁断裂" value="叉梁断裂"></el-option>
-              <el-option lable="拦河线断裂" value="拦河线断裂"></el-option>
-              <el-option lable="绝缘子爆破" value="绝缘子爆破"></el-option>
-              <el-option lable="塔杆倾斜" value="塔杆倾斜"></el-option>
-              <el-option lable="吊杆变形" value="吊杆变形"></el-option>
-              <el-option lable="其他" value="其他"></el-option>
+            <el-select v-model="submit.defectsId" clearable placeholder="请选择" class="data">
+              <el-option
+                v-for="item in typeOptions"
+                :key="item.defectsId"
+                :label="item.defectsName"
+                :value="item.defectsId"
+              ></el-option>
             </el-select>
           </div>
         </el-col>
-        <el-col :span="6">
+        <!-- <el-col :span="6">
           <div class="grid-content bg-purple">
             <label>缺陷级别：</label>
             <el-select v-model="submit.defectsLevel" class="data">
@@ -52,34 +52,41 @@
               <el-option value="严重">严重</el-option>
             </el-select>
           </div>
-        </el-col>
+        </el-col>-->
         <el-col :span="6">
           <div class="grid-content bg-purple bg-time">
             <label>发现时间：</label>
-            <el-date-picker type="date" class="datas" v-model="submit.findDate" value-format="yyyy/MM/DD"></el-date-picker>
-          </div>
-        </el-col>
-        <el-col :span="6">
-          <div class="grid-content bg-purple">
-            <button type="button" class="btn-query" @click="search( ischeck=false )">查 询</button>
-          </div>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="6">
-          <div class="grid-content bg-purple">
-            <el-button type="text" class="btn-query" @click="save()">保存</el-button>
+            <el-date-picker
+              v-model="submit.findDate"
+              type="date"
+              placeholder="选择日期"
+              value-format="yyyy/MM/dd"
+              class="datas"
+            ></el-date-picker>
+            <!-- <el-date-picker
+              type="date"
+              class="datas"
+              v-model="submit.findDate"
+              value-format="yyyy/MM/DD"
+            ></el-date-picker>-->
           </div>
         </el-col>
       </el-row>
     </div>
+    <div class="save">
+      <el-col :span="6">
+        <div class="grid-content bg-purple">
+          <el-button type="text" class="btn-query" @click="save()">保存</el-button>
+        </div>
+      </el-col>
+      <el-col :span="6" class="search">
+        <div class="grid-content bg-purple">
+          <button type="button" class="btn-query" @click="search( ischeck=false )">查 询</button>
+        </div>
+      </el-col>
+    </div>
     <div class="form">
-      <el-table
-        :data="tableData"
-        stripe
-        style="width: 100%"
-        align="center"
-      >
+      <el-table :data="tableData" stripe style="width: 100%" align="center">
         <el-table-column prop="taskNo" label="任务编号" width="100" align="center"></el-table-column>
         <el-table-column prop="circuitryNo" label="线路编号" width="100" align="center"></el-table-column>
         <el-table-column prop="poleNo" label="塔杆编号" width="100" align="center"></el-table-column>
@@ -121,42 +128,88 @@ export default {
       a: 0,
       // 分页数据 一页显示最大数，当前页数
       pagesize: 5,
-      currpage:1,
+      currpage: 1,
       count: null,
-      ischeck:false,
+      ischeck: false,
+      typeOptions: [],
       // 查询所需要的数据
-      submit: {taskNo: "",circuitryNo: "",poleNo: "",findUser: "",defectsName: "",defectsLevel: "",findDate: ""}
+      submit: {
+        taskNo: "",
+        circuitryNo: "",
+        poleNo: "",
+        findUser: "",
+        defectsId: "",
+        findDate: ""
+      }
     };
   },
   methods: {
     //初始化加载函数
-    Init(){
+    Init() {
       this.axios
-      .post("http://192.168.6.184:8080/defectsOrchid/getDefectsByPage", {
-        currentPage: this.currpage,
-        pageSize: this.pagesize
-      })
-      .then(res => {
-        window.console.log(res.data);
-        this.tableData = res.data.data.defects;
-        this.count = res.data.data.count;
-      })
-      .catch(err => {
-        window.console.log(err);
-      });
+        .post("http://192.168.6.184:8080/selectAllDefectsIsNull", {
+          currentPage: this.currpage,
+          pageSize: this.pagesize
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.tableData = res.data.data.defectsVO;
+          this.count = res.data.data.count;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     //查询
     search() {
-      window.console.log("所查询的信息",this.submit);
+      window.console.log("所查询的信息", this.submit);
       this.ischeck = true;
+      this.axios
+        .get("http://192.168.6.184:8080/selectAllDefectsIsNullByCondition", {
+          params: {
+            taskNo: this.submit.taskNo,
+            circuitryNo: this.submit.circuitryNo,
+            defectsId: this.submit.defectsId,
+            poleNo: this.submit.poleNo,
+            startDate: this.submit.findDate =='' ? '1970/01/01':this.submit.findDate,
+            userName: this.submit.findUser,
+
+            currentPage: this.currpage,
+            pageSize: this.pagesize
+          }
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.tableData = res.data.data.defectsVO;
+          this.count = res.data.data.count;
+          
+        })
+        .catch(err => {
+          window.console.log(err);
+        });    
     },
     //保存
     save() {
-      this.tableData.forEach((item,index)=> {
-        if(index < this.pagesize){
-          window.console.log('当前保存',item.selectOne)
+      this.tableData.forEach((item, index) => {
+        if (index < this.pagesize) {
+          window.console.log("当前保存", item);
+          this.axios.get("http://192.168.6.184:8080/changeDefectsLevel", {
+            params: {
+              defectsLevel:item.selectOne,
+              DamageRecordId:item.damageRecordId
+            }
+          })
+          .then(res => {
+            window.console.log(res.data);
+            this.tableData = res.data.data.defectsVO;
+            this.count = res.data.data.count;
+            this.Init();
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
         }
-      })
+      });
     },
     //分页函数  每页几条
     handleSizeChange(val) {
@@ -164,43 +217,75 @@ export default {
     },
     // 当前页数
     handleCurrentChange(val) {
-      window.console.log("当前页",val)
-      if(this.ischeck == true) {
-        window.console.log("当前是查询分页",this.ischeck)
-
-      }else{
-        window.console.log("当前是初始化分页",this.ischeck)
-
-        this.axios.post("http://192.168.6.184:8080/selectAllDefects", {
-        currentPage:val,
-        pageSize:this.pagesize
-        })
-        .then(res => {
-        window.console.log(res.data);
-        this.tableData = res.data.data.defectsVO;
-        this.count = res.data.data.count;
-        
-        })
-        .catch(err => {
-        window.console.log(err);
-        });
+      window.console.log("当前页", val);
+      if (this.ischeck == true) {
+        window.console.log("当前是查询分页", this.ischeck);
+        this.axios.get("http://192.168.6.184:8080/selectAllDefectsIsNullByCondition", {
+          params: {
+            askNo: this.submit.taskNo,
+            circuitryNo: this.submit.circuitryNo,
+            defectsId: this.submit.defectsId,
+            poleNo: this.submit.poleNo,
+            startDate: this.submit.findDate =='' ? '1970/01/01':this.submit.findDate , 
+            userName: this.submit.findUser,
+            currentPage: val,
+            pageSize: this.pagesize
+            }
+          })
+          .then(res => {
+            window.console.log(res.data);
+            this.tableData = res.data.data.defectsVO;
+            this.count = res.data.data.count;
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
+      } else {
+        window.console.log("当前是初始化分页", this.ischeck);
+        this.axios
+          .get("http://192.168.6.184:8080/selectAllDefectsIsNull", {
+            params: {
+              currentPage: val,
+              pageSize: this.pagesize
+            }
+          })
+          .then(res => {
+            window.console.log(res.data);
+            this.tableData = res.data.data.defectsVO;
+            this.count = res.data.data.count;
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
       }
     }
   },
-    created() {
-    this.axios.post("http://192.168.6.184:8080/selectAllDefects", {
-      currentPage:this.currpage, 
-      pageSize:this.pagesize
-    })
-    .then(res => {
-    window.console.log(res.data);
-    this.tableData = res.data.data.defectsVO;
-    this.count = res.data.data.count;
-    
-    })
-    .catch(err => {
-    window.console.log(err);
-  });
+  created() {
+    //初始化页面请求
+    this.axios
+      .post("http://192.168.6.184:8080/selectAllDefectsIsNull", {
+        currentPage: this.currpage,
+        pageSize: this.pagesize
+      })
+      .then(res => {
+        window.console.log(res.data);
+        this.tableData = res.data.data.defectsVO;
+        this.count = res.data.data.count;
+      })
+      .catch(err => {
+        window.console.log(err);
+      });
+
+    //缺陷类型请求
+    this.axios
+      .get("http://192.168.6.184:8080/getDefectsName")
+      .then(res => {
+        this.typeOptions = res.data.data.defects;
+        window.console.log(res.data);
+      })
+      .catch(err => {
+        window.console.log("错误是", err);
+      });
   }
 };
 </script>
@@ -212,20 +297,21 @@ export default {
 }
 
 .data {
-  width: 120px;
-  height: 26px;
+  width: 150px;
 }
 .datas {
-  width: 140px;
-  height: 26px;
+  width: 150px;
 }
 
 .el-row {
-  padding: 20px 0;
+  padding: 15px 50px;
+  .el-col {
+    margin: 0px 20px;
+  }
 }
 
 .bg-purple {
-  width: 220px;
+  width: 240px;
 }
 .bg-time {
   width: 240px;
@@ -241,7 +327,6 @@ export default {
   padding: 0 15px;
   outline: none;
   float: right;
-  margin-right: 20px;
 }
 
 .btn {
@@ -258,5 +343,18 @@ export default {
 
 .pages {
   float: right;
+}
+
+.save {
+  overflow: hidden;
+  margin: 20px 0;
+  .bg-purple {
+    width: 120px;
+    padding-left: 50px;
+  }
+}
+.search {
+  float: right;
+  margin-right: 70px;
 }
 </style>

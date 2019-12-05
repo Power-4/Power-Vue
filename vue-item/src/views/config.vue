@@ -2,46 +2,78 @@
   <div class="config">
     <div class="config-type">
       <el-row>
-        <el-button type="primary">新增</el-button>
-        <el-button type="primary">删除</el-button>
-        <el-button type="primary">保存</el-button>
-        <el-button type="primary">取消</el-button>
+        <el-button type="primary" @click="add()">新增</el-button>
+        <el-button type="primary" @click="seave()">保存</el-button>
+        <el-button type="primary" @click="quite()">取消</el-button>
       </el-row>
     </div>
     <div class="type-connect">
-      <el-table :data="tableData" stripe style="width: 100%" @selection-change="handleSelectionChange" ref="multipleTable">
-        <el-table-column type="selection" width="55" height="50"></el-table-column>
-        <el-table-column prop="date" label="配置类型编码" width="150" align="center">
+      <el-table
+        :data="tableData"
+        stripe
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
+        ref="multipleTable"
+      >
+        <el-table-column width="55" type="selection"></el-table-column>
+        <el-table-column prop="sysProTypeCode" label="配置类型编码" width="150" align="center">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.date" style="width:150" ></el-input>
+            <el-input v-model="scope.row.sysProTypeCode" style="width:150"></el-input>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="配置类型名称" width="150" align="center" >
+        <el-table-column prop="sysProName" label="配置类型名称" width="150" align="center">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.name" style="width:150"></el-input>
+            <el-input v-model="scope.row.sysProName" style="width:150"></el-input>
           </template>
         </el-table-column>
-        <el-table-column prop="address" label="地址" align="center">
-           <template slot-scope="scope">
-            <el-input v-model="scope.row.address" style="width:150"></el-input>
+        <el-table-column prop="sysProDescribe" label="描述" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.sysProDescribe" style="width:150"></el-input>
           </template>
         </el-table-column>
-        <el-table-column prop="address" label="地址" align="center">
-           <template slot-scope="scope">
-            <el-input v-model="scope.row.address" style="width:150"></el-input>
+        <el-table-column prop="sysProState" label="是否启用" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.sysProState" style="width:150"></el-input>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <div class="config-parameter">
-      <el-row>
-        <el-button type="primary">新增</el-button>
-        <el-button type="primary">删除</el-button>
-        <el-button type="primary">保存</el-button>
-        <el-button type="primary">取消</el-button>
-      </el-row>
+
+    <div class="icon" @click="icon()">
+      <i class="el-icon-caret-right" :class="{on:one}" @click="one=!one"></i>
     </div>
-    <div class="parameter-connect">321</div>
+
+    <div class="child-icon" v-show="isShow">
+      <div class="config-parameter">
+        <el-row>
+          <el-button type="primary">新增</el-button>
+          <el-button type="primary">保存</el-button>
+          <el-button type="primary">取消</el-button>
+        </el-row>
+      </div>
+      <div class="parameter-connect">
+        <el-table
+          :data="tableConnect"
+          stripe
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+          ref="multipleTable"
+        >
+          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column prop="sysProValueId" label="配置参数ID" width="250" align="center">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.sysProValueId" style="width:250"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="sysProValueName" label="配置参数名称" width="250" align="center">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.sysProValueName" style="width:150"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column></el-table-column>
+        </el-table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -49,35 +81,134 @@
 export default {
   data() {
     return {
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
-      ]
+      tableData: [],
+      tableConnect: [],
+      Data: [], //父集
+      Connect: [], //子集
+      one: false,
+      isShow: false
     };
   },
   methods: {
+    //初始化函数
+    Init() {
+      this.axios
+        .post("http://192.168.6.184:8080/syspro/getAllSysProl")
+        .then(res => {
+          window.console.log(res.data);
+          this.tableData = res.data.data.sysPro;
+
+          res.data.data.sysPro.forEach(item => {
+            // window.console.log(item.sysProValues)
+
+            item.sysProValues.forEach(i => {
+              i.sysProId;
+            });
+
+            if (item.sysProState == 1) {
+              item.sysProState = "启用";
+            } else {
+              item.sysProState = "停用";
+            }
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
     handleSelectionChange(val) {
-        this.multipleSelection = val;
-        window.console.log(val)
-      }
+      this.icon((this.one = !this.one));
+      this.multipleSelection = val;
+      window.console.log(val);
+      this.Data = [];
+      this.Connect = [];
+
+      val.forEach(item => {
+        // window.console.log("父集", item.sysProId);
+        // window.console.log("子集", item.id);
+        this.Data.push(item.sysProId);
+        // this.Connect.push(item.ids);
+      });
+
+      // window.console.log("子集", this.Connect);
+      // window.console.log("父集", this.Data[0]);
+      // window.console.log("父集", this.tableData);
+
+      this.tableData.forEach(item => {
+        // window.console.log("子集信息", item.sysProValues);
+
+        if (!item.sysProValues == undefined) {
+          item.sysProValues.forEach(i => {
+            // window.console.log("子集的id",i.sysProId);
+            if (i.sysProId == this.Data[0]) {
+              this.tableConnect = item.sysProValues;
+            }
+          });
+        }
+      });
+    },
+    //添加数组
+    add() {
+      var item = {};
+      this.tableData.push(item);
+    },
+    //保存信息 - 修改信息
+    seave() {
+      // window.console.log(this.Data);
+      this.Data.forEach(item => {
+        window.console.log("保存当前id", item);
+        var massage = this.multipleSelection;
+        window.console.log("信息", massage);
+        // window.console.log(massage[0].sysProDescribe);
+
+        this.axios
+          .get("http://192.168.6.184:8080/syspro/addchangeSysPro", {
+            params: {
+              sysProId: item,
+              sysProName: massage[0].sysProName,
+              sysProTypeCode: massage[0].sysProTypeCode,
+              sysProDescribe: massage[0].sysProDescribe,
+              sysProState: massage[0].sysProState == "启用" ? "1" : "0"
+            }
+          })
+          .then(res => {
+            window.console.log(res.data);
+            this.Init()
+          })
+          .catch(err => {
+            window.console.log(err);
+          });
+      });
+    },
+    icon() {
+      this.isShow = !this.isShow;
+    }
+  },
+  created() {
+    this.axios
+      .post("http://192.168.6.184:8080/syspro/getAllSysProl")
+
+      .then(res => {
+        window.console.log(res.data);
+        this.tableData = res.data.data.sysPro;
+
+        res.data.data.sysPro.forEach(item => {
+          // window.console.log(item.sysProValues)
+
+          item.sysProValues.forEach(i => {
+            i.sysProId;
+          });
+
+          if (item.sysProState == 1) {
+            item.sysProState = "启用";
+          } else {
+            item.sysProState = "停用";
+          }
+        });
+      })
+      .catch(err => {
+        window.console.log(err);
+      });
   }
 };
 </script>
@@ -92,9 +223,11 @@ export default {
   padding: 10px 10px;
 }
 
-.config-type,
+.config-type {
+  margin: 60px 0 5px 50px;
+}
 .config-parameter {
-  margin: 60px 0 0 50px;
+  margin: 30px 0 5px 50px;
 }
 
 .type-connect,
@@ -102,9 +235,25 @@ export default {
   margin-left: 60px;
 }
 
-/deep/.el-table tr  {
-  height:20px;
+.height {
+  height: 20px;
 }
 
+.icon {
+  width: 80px;
+  height: 40px;
+  font-size: 26px;
+  line-height: 40px;
+  margin: 10px 0 0 30px;
+  cursor: pointer;
+  color: rgb(94, 228, 228);
+  text-align: center;
+  background: #ffff;
+  border: 1px solid rgb(94, 228, 228);
+  border-radius: 15px;
+}
 
+.on {
+  transform: rotate(90deg);
+}
 </style>
