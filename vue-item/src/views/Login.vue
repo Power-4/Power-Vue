@@ -105,7 +105,6 @@ export default {
         "userName=" + this.ruleForm.user + "&userPwd=" + this.ruleForm.pass;
 
       this.axios({
-        url: "http://192.168.6.132:8080/user/login",
         url: "/user/login",
         method: "POST",
         headers: {
