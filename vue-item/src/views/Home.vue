@@ -26,7 +26,7 @@
         left
       -->
       <div class="left">
-        <hover-button v-for="(item, index) in powerData" :key="index" :item="item"></hover-button>
+        <hover-button></hover-button>
       </div>
       <!--
         right
@@ -141,9 +141,10 @@ export default {
 }
 .top {
   height: 64px;
-
+ 
   background-color: #5ee4e4;
   margin: 0 auto;
+  margin-bottom: 20px;
 }
 .top-body {
   width: 1200px;
@@ -181,7 +182,7 @@ export default {
   text-align: center;
   float: left;
   height: 100%;
-  background-color: #999;
+  background-color: rgb(255, 255, 255);
 }
 .tab {
   display: block;

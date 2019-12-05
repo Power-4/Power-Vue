@@ -106,12 +106,16 @@ export default {
 
       this.axios({
         url: "http://192.168.6.184:8080/user/login",
+        // url: "http://192.168.6.174:8080/user/login",
         method: "POST",
-        headers: { "content-type": "application/x-www-form-urlencoded" },
+        headers: {
+          "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
         data: params
       })
         .then(res => {
-          window.console.log(res.data.data);
+          window.console.log(res);
+          //
           window.sessionStorage.setItem("token", res.data.data.token);
           window.sessionStorage.setItem("userId", res.data.data.user.userId);
           var role = JSON.stringify(res.data.data.user.role);

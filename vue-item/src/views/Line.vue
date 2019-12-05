@@ -8,20 +8,26 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>所属线路:</span>
-        <el-input v-model="submit.id" placeholder="请输入编号" class="in-bianhao"></el-input>
+        <el-input 
+          v-model="submit.circuitryNo" 
+          placeholder="请输入编号" 
+          class="in-bianhao"
+          @change="chaxun"
+          ></el-input>
       </div>
 
-      <div class="error">
-        <span>是否启用:</span>
+      <div class="runningStatus" @input="chaxun">
+        <span>运行状态:</span>
         <el-select
-          v-model="submit.error"
+          v-model="submit.runningStatus"
           placeholder="请选择"
           class="in-error"
-          :class="{inErrorMin:submit.error}"
+          :class="{inErrorMin:submit.runningStatus}"
+          @change="chaxun"
         >
-          <el-option label="启用" value="yes"></el-option>
+          <el-option label="正常" value="正常"></el-option>
 
-          <el-option label="停用" value="no"></el-option>
+          <el-option label="维修中" value="维修中"></el-option>
         </el-select>
       </div>
 
@@ -130,6 +136,12 @@
             <el-option label="停用" value="停用"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="运行状态" :label-width="formLabelWidth">
+          <el-select v-model="revaTable.state" placeholder="请选运行状态" style="width:202px">
+            <el-option label="正常" value="正常"></el-option>
+            <el-option label="检修中" value="检修中"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -139,13 +151,13 @@
 
     <!-- 线路表单 -->
     <el-table :data="tableData" stripe style="width: 100%" align="center">
-      <el-table-column prop="lineid" label="线路编号" width="100" align="center"></el-table-column>
-      <el-table-column prop="name" label="线路名称" width="100" align="center"></el-table-column>
-      <el-table-column prop="startid" label="起始杆号" width="100" align="center"></el-table-column>
-      <el-table-column prop="endid" label="终止杆号" width="100" align="center"></el-table-column>
-      <el-table-column prop="base" label="塔基数" width="100" align="center"></el-table-column>
-      <el-table-column prop="run" label="运行状态" width="100" align="center"></el-table-column>
-      <el-table-column prop="state" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
+      <el-table-column prop="circuitryNo" label="线路编号" width="100" align="center"></el-table-column>
+      <el-table-column prop="circuitryName" label="线路名称" width="100" align="center"></el-table-column>
+      <el-table-column prop="startPole.poleNo" label="起始杆号" width="100" align="center"></el-table-column>
+      <el-table-column prop="endPole.poleNo" label="终止杆号" width="100" align="center"></el-table-column>
+      <el-table-column prop="poleNumber" label="塔基数" width="100" align="center"></el-table-column>
+      <el-table-column prop="runningStatus" label="运行状态" width="100" align="center"></el-table-column>
+      <el-table-column prop="systemPropertiesValue.sysProValueName" label="状态(启动/未启动)" width="200" align="center"></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
         <el-button type="text" @click="block">停用</el-button>
         <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
@@ -153,59 +165,36 @@
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination layout="prev, pager, next" :total="50" class="pages"></el-pagination>
+      <el-pagination 
+        class="pages"
+        layout="prev, pager, next" 
+        :total="countPage" 
+        :page-size="pageSize"
+        @current-change="handleCurrentChange"
+        ></el-pagination>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "total",
+  name: "towar",
   data() {
     return {
       //查询
       title: "线路",
       name: "xun",
-      submit: { id: "", error: "" },
+      submit: {
+        id: "",
+        error: "",
+        currentPage: 1,
+        circuitryNo: "",
+        runningStatus:""
+        },
+      countPage:5, //初始页
+      pageSize: 5, //    每页的数据
       //模拟表格数据
-      tableData: [
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "正常",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "检修中",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "正常",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          lineid: "XW00001",
-          startid: "XW00010",
-          endid: "XW00250",
-          base: "440",
-          run: "正常",
-          name: "西渭线",
-          state: "停用"
-        }
-      ],
+      tableData: [],
       //修改和添加
       dialogFormVisible: false,
       dialogVisible: false,
@@ -239,11 +228,53 @@ export default {
   methods: {
     //查询
     chaxun() {
-      window.console.log(this.submit);
+      this.axios
+        .get("http://192.168.6.184:8080/circuitryOrchid/getCirPageByNo",{
+          params: {
+            currentPage: this.submit.currentPage,
+            pageSize: this.pageSize,
+            circuitryNo: this.submit.circuitryNo,
+            runningStatus: this.submit.runningStatus
+          }
+        })
+        .then(res => {
+          window.console.log(this.submit.circuitryNo);
+          window.console.log(this.submit.runningStatus);
+          window.console.log(res.data);
+          window.console.log(this.tableData);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.circuitries;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     onSubmit() {
       window.console.log("submit!");
     },
+    //分页
+    handleCurrentChange: function(currentPage) {
+      window.console.log(currentPage); //点击第几页
+      this.submit.currentPage = currentPage;
+      this.fenClick();
+    },
+    fenClick() {
+      this.axios
+        .post("http://192.168.6.184:8080/circuitryOrchid/getCirByPage", {
+          currentPage:this.submit.currentPage,
+          pageSize:this.pageSize
+        })
+        .then(res => {
+          window.console.log(res.data);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.circuitries;
+          window.console.log(this.tableData);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+ 
     //删除
     del() {
       this.$confirm("是否删除", "提示", {
@@ -283,7 +314,10 @@ export default {
             message: "已取消停用/启用"
           });
         });
-    }
+    },
+  },
+  created() {
+    this.fenClick();   
   }
 };
 </script>

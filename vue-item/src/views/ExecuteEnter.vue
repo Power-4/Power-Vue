@@ -71,9 +71,10 @@ export default {
         label: 'label'
       },
       form: {
-        taskNo: '111',
-        circuitryNo: 'XW001',
+        taskNo: '',
+        circuitryNo: '',
         poleNo: '',
+        nowPoleId: '',
         findDate: '',
         foundPerson: '巡检员01',
         defectsDescribe: '',
@@ -81,7 +82,7 @@ export default {
         typeOptions: []
       },
       edit:true,
-      timer: null
+
     }
   },
   created() {
@@ -98,6 +99,7 @@ export default {
         this.lines[0].children.push(i)
       })
       this.lines[0].label = res.data.data.taskAndPoles.task.circuitry.circuitryName;
+      this.form.circuitryNo = res.data.data.taskAndPoles.task.circuitry.circuitryNo;
       window.console.log(res.data);
     })
     .catch((err) => { 
@@ -149,6 +151,8 @@ export default {
     },
     // 点击杆号
     handleNodeClick(lines) {
+      this.form.nowPoleId = lines.id;
+
 
       // 判断点击的杆塔编号
       if(lines.id !== 0) {
@@ -176,22 +180,18 @@ export default {
         }
       }
 
-      
       if(!this.isadd) {
-        // this.axios.get('http://192.168.6.184:8080/selectRecord',{params:{poleId: lines.id}})
-        // .then((res) => {
-        //     this.form.defectsName = res.data.data.circuitryPoleRecordVO.damageRecord.defects.defectsName;
-        //     this.form.defectsDescribe = res.data.data.circuitryPoleRecordVO.damageRecord.defectsDescribe;
-        //   window.console.log(res.data);
-        // })
-        // .catch((err) => {
-        //   window.console.log("错误",err)
-        // })
-
+        this.axios.get('http://192.168.6.184:8080/selectRecord?',{params:{poleId: lines.id}})
+        .then((res) => {
+            this.form.defectsName = res.data.data.circuitryPoleRecordVO.damageRecord.defects.defectsName;
+            this.form.defectsDescribe = res.data.data.circuitryPoleRecordVO.damageRecord.defectsDescribe;
+          window.console.log(res.data);
+        })
+        .catch((err) => {
+          window.console.log("错误",err)
+        })
       }
-
     },
-
 
     // 保存
     addSave() {
@@ -217,26 +217,27 @@ export default {
           this.temps.push(msg);
         }
       }
-
-
-      // this.axios.post('http://192.168.6.184:8080/insertRecord',{
-      //   poleId: this.form.poleNo,
-      //   defectsId: this.form.defectsName,
-      //   findDate: this.form.findDate,
-      //   defectsDescribe: this.form.defectsDescribe
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+       
+      // 回执录入请求
+      this.axios.get('http://192.168.6.184:8080/insertRecord?',{params:{
+        taskNo: this.form.taskNo,
+        poleId:  this.form.nowPoleId,
+        defectsId: this.form.defectsName,
+        findDate: this.form.findDate,
+        defectsDescribe: this.form.defectsDescribe
+      }})
+      .then((res) => {
+        
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
     },
     modifySave() {
       let msg = {
         poleNo: this.form.poleNo,
         defectsName: this.form.defectName,
-        defectsLevel: this.form.defectLevel,
         defectsDescribe: this.form.defectsDescribe
       }
 
@@ -257,20 +258,19 @@ export default {
         }
       }
 
-
-      // this.axios.post('http://192.168.6.184:8080/updateRecord',{
-      //   poleId: this.lines[0].children.poleId,
-      //   defectsId: this.form.typeOptions.defectsId,
-      //   defectsLevel: this.defectLevel,
-      //   findDate: this.findDate,
-      //   defectsDescribe: this.defectsDescribe
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+      // 回执修改请求
+      this.axios.get('http://192.168.6.184:8080/updateRecord?',{params:{
+        poleId: this.form.nowPoleId,
+        defectsId: this.form.defectsName,
+        findDate: this.form.findDate,
+        defectsDescribe: this.form.defectsDescribe
+      }})
+      .then((res) => {
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
     },
   }
 }
@@ -295,7 +295,7 @@ export default {
     .lines {
       width: 20%;
       height: 100%;
-      padding: 0 22px 10px;
+      padding: 0 0 10px;
       overflow: auto;
       box-sizing: border-box;
       border: 1px solid #000;

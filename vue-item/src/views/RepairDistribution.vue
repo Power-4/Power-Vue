@@ -11,11 +11,24 @@
           </div>
         </el-col>
         <el-col :span="10">
+          <div class="grid-content bg-purple">
+            任务名称:
+            <el-input
+              size="small"
+              placeholder="请输入内容"
+              v-model="taskName"
+              clearable
+              class="work-num"
+            ></el-input>
+          </div>
+        </el-col>
+
+        <el-col :span="8">
           <div class="grid-content bg-purple-light">
-            工作单据:
-            <el-select size="small" v-model="value" placeholder="请选择" class="work-danju">
+            任务状态:
+            <el-select size="small" v-model="statusValue" placeholder="请选择" class="work-danju">
               <el-option
-                v-for="item in options"
+                v-for="item in options1"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -43,23 +56,23 @@
           <div class="grid-content bg-purple-light">
             下发时间:
             <el-date-picker
-              class="work-date"
-              size="small"
-              v-model="value2"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
+              format="yyyy/MM/dd"
+              v-model="createTime"
+              type="date"
+              placeholder="选择日期"
+              class="time"
+            ></el-date-picker>-
+            <el-date-picker
+              format="yyyy/MM/dd"
+              v-model="endTime"
+              type="date"
+              placeholder="选择日期"
+              class="time"
             ></el-date-picker>
           </div>
         </el-col>
         <el-button type="primary" class="repair-query" @click="selectByFind()">查询</el-button>
-        <el-button
-          type="primary"
-          icon="el-icon-edit"
-          class="repair-add"
-          @click="dialogFormVisible = true"
-        >制定消缺任务</el-button>
+        <el-button type="primary" icon="el-icon-edit" class="repair-add" @click="addXiao()">制定消缺任务</el-button>
 
         <!-- 模态框 -->
         <el-dialog title="制定消缺任务" :visible.sync="dialogFormVisible">
@@ -76,7 +89,7 @@
             >
               <!-- 任务编码制定 -->
               <el-form-item label="任务编码:">
-                <el-input v-model="form.taskNum"></el-input>
+                <p>{{getTaskNum()}}</p>
               </el-form-item>
 
               <!-- 任务名称制定 -->
@@ -96,9 +109,12 @@
               <!-- 任务负责人选择 -->
               <el-form-item label="任务负责人:">
                 <el-select v-model="form.taskLeader" placeholder="请选择任务负责人">
-                  <el-option label="线路管理测试用户1" value="taskLeaderOne"></el-option>
-                  <el-option label="线路管理测试用户3" value="taskLeaderTwo"></el-option>
-                  <el-option label="线路管理测试用户2" value="taskLeaderThree"></el-option>
+                  <el-option
+                    v-for="item in taskLeader"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
                 </el-select>
               </el-form-item>
 
@@ -109,13 +125,8 @@
 
               <!-- 下发时间 -->
               <el-form-item label="下发时间:">
-                <el-col :span="14">
-                  <el-date-picker
-                    type="date"
-                    placeholder="选择日期"
-                    v-model="form.issuedDate"
-                    style="width: 100%;"
-                  ></el-date-picker>
+                <el-col :span="24">
+                  <p>{{getTime()}}</p>
                 </el-col>
               </el-form-item>
 
@@ -131,15 +142,28 @@
 
               <!-- 任务消缺员 -->
               <el-form-item label="消缺员:">
-                <el-input type="textarea" v-model="form.eliminateVacancies"></el-input>
+                <el-table
+                  @selection-change="changeFun"
+                  height="100"
+                  :data="xiaoPeople"
+                  border
+                  style="width: 100%"
+                  size="mini"
+                >
+                  <el-table-column type="selection" width="40"></el-table-column>
+                  <el-table-column prop="id" label="消缺员id" width="100"></el-table-column>
+                  <el-table-column prop="name" label="消缺员" width="180"></el-table-column>
+                </el-table>
               </el-form-item>
 
               <!--  -->
             </el-form>
             <!-- 添加缺陷按钮 -->
-            <el-button type="primary" size="small">添加缺陷</el-button>
+            <!-- <el-button type="primary" size="small">添加缺陷</el-button> -->
             <!-- 缺陷列表 -->
+            选择缺陷：
             <el-table
+              @selection-change="fixchangeFun"
               ref="multipleTable"
               :data="tableData2"
               tooltip-effect="dark"
@@ -147,10 +171,11 @@
               size="mini"
             >
               <el-table-column type="selection" width="40"></el-table-column>
-              <el-table-column prop="lineNum" label="线路编号" width="84"></el-table-column>
-              <el-table-column prop="poleNum" label="塔杆编号" width="84"></el-table-column>
+              <el-table-column prop="deId" label="id" width="48"></el-table-column>
+              <el-table-column prop="lineNum" label="线路编号" width="70"></el-table-column>
+              <el-table-column prop="poleNum" label="塔杆编号" width="70"></el-table-column>
               <el-table-column prop="defectLevels" label="缺陷等级" width="50"></el-table-column>
-              <el-table-column prop="defectTypes" label="缺陷类型" width="100"></el-table-column>
+              <el-table-column prop="defectTypes" label="缺陷类型" width="80"></el-table-column>
               <el-table-column prop="defectDes" label="缺陷描述" width="100"></el-table-column>
               <el-table-column prop="quot" label="发现人" width="85"></el-table-column>
               <el-table-column prop="findTime" label="发现时间" width="100"></el-table-column>
@@ -159,7 +184,7 @@
               </el-table-column>
             </el-table>
             <!-- 确认制定按钮 -->
-            <el-button type="primary" class="addXiaoQueren">确认制定消缺任务</el-button>
+            <el-button type="primary" class="addXiaoQueren" @click="addTaskCofim()">确认制定消缺任务</el-button>
           </div>
         </el-dialog>
       </el-row>
@@ -327,8 +352,9 @@
                   size="mini"
                 >
                   <el-table-column type="selection" width="40"></el-table-column>
-                  <el-table-column prop="lineNum" label="线路编号" width="84"></el-table-column>
-                  <el-table-column prop="poleNum" label="塔杆编号" width="84"></el-table-column>
+
+                  <el-table-column prop="lineNum" label="线路编号" width="70"></el-table-column>
+                  <el-table-column prop="poleNum" label="塔杆编号" width="70"></el-table-column>
                   <el-table-column prop="defectLevels" label="缺陷等级" width="50"></el-table-column>
                   <el-table-column prop="defectTypes" label="缺陷类型" width="100"></el-table-column>
                   <el-table-column prop="defectDes" label="缺陷描述" width="100"></el-table-column>
@@ -365,6 +391,8 @@ export default {
   name: "repair",
   data() {
     return {
+      xiaoList: ["消缺员1"],
+      selectXuan: false,
       fneValue: [],
       fneArr: [
         {
@@ -385,13 +413,12 @@ export default {
       ],
       chakanForm: [],
       xiuForm: {},
+      xiaoPeople: [],
       form: {
-        taskNum: "",
         taskName: "",
         workDocuments: "",
         taskLeader: "",
         issuedPeople: "",
-        issuedDate: "",
         taskDescription: "",
         taskNote: "",
         eliminateVacancies: ""
@@ -399,6 +426,7 @@ export default {
       activeName: "first",
       input1: "",
       input2: "",
+      taskName: "",
       options: [
         {
           value: "选项1",
@@ -413,55 +441,144 @@ export default {
           label: "第二种单据"
         }
       ],
+      taskLeader: [],
+      options1: [
+        {
+          value: 1,
+          label: "待分配"
+        },
+        {
+          value: 2,
+          label: "已分配"
+        },
+        {
+          value: 3,
+          label: "执行中"
+        },
+        {
+          value: 4,
+          label: "审核中"
+        },
+        {
+          value: 5,
+          label: "已完成"
+        },
+        {
+          value: 6,
+          label: "驳回"
+        }
+      ],
+      multipleSelection: [],
+      fixSelection: [],
       value: "",
-      value2: "",
+      statusValue: "",
+      createTime: "",
+      endTime: "",
       currentPage: 1, //初始页
       pagesize: 5, //    每页的数据
       tableData: [],
-      tableData2: [
-        {
-          lineNum: 123456,
-          poleNum: 45678,
-          defectLevels: "一般",
-          defectTypes: "叉梁断裂",
-          defectDes: "断裂了",
-          quot: "羊海龙",
-          findTime: "2019/11/28"
-        },
-        {
-          lineNum: 123456,
-          poleNum: 45678,
-          defectLevels: "一般",
-          defectTypes: "叉梁断裂",
-          defectDes: "断裂了",
-          quot: "羊海龙",
-          findTime: "2019/11/28"
-        }
-      ],
+      tableData2: [],
       dialogFormVisible: false,
       checkTask: false,
       xiuTask: false,
-      fenTask: false
+      fenTask: false,
+      checkList: []
     };
   },
   methods: {
+    fixchangeFun(val) {
+      this.fixSelection = val.map(function(item) {
+        return item.deId;
+      }); // 返回的是选中的列的数组集合
+      window.console.log(this.fixSelection.join(","));
+    },
+    changeFun(val) {
+      this.multipleSelection = val.map(function(item) {
+        return item.id;
+      }); // 返回的是选中的列的数组集合
+      window.console.log(this.multipleSelection.join(","));
+    },
+    getTime: function() {
+      var str = "";
+      var date = new Date();
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1;
+      var day = date.getDate();
+
+      month = month > 10 ? month : "0" + month;
+      day = day > 10 ? day : "0" + day;
+
+      str += year + "/" + month + "/" + day;
+      this.form.createDate = str;
+      return str;
+    },
+    getTaskNum: function() {
+      var str = "";
+      var date = Date.parse(new Date());
+
+      str += "RXQ" + date;
+      this.form.taskNum = str.substr(0, 13);
+      return str.substr(0, 13);
+      
+    },
     selectByFind: function() {
+      if (this.statusValue == "待分配") {
+        this.statusValue = 1;
+      } else if (this.statusValue == "已分配") {
+        this.statusValue = 2;
+      } else if (this.statusValue == "执行中") {
+        this.statusValue = 3;
+      } else if (this.statusValue == "审核中") {
+        this.statusValue = 4;
+      } else if (this.statusValue == "已完成") {
+        this.statusValue = 5;
+      } else if (this.statusValue == "驳回") {
+        this.statusValue = 6;
+      } else if (this.statusValue == "") {
+        this.statusValue = -1;
+      }
       this.axios
         .get("http://192.168.6.184:8080/selectFixTaskByFind", {
           params: {
             currentPage: 1,
             pageSize: 5,
-            taskNo: 1,
-            taskName: "任务",
-            userName: "Zhang",
-            sysProValueId: 1,
-            startDate: "1999/2/10",
-            endDate: "2020/10/10"
+            taskNo: this.input1,
+            taskName: this.taskName,
+            userName: this.input2,
+            sysProValueId: this.statusValue,
+            startDate: this.createTime,
+            endDate: this.endTime
           }
         })
         .then(res => {
           window.console.log(res.data.data.fix);
-          
+          var work = res.data.data.fix.map(function(item) {
+            return item.workForm.workFormName;
+          });
+          window.console.log(work);
+          var taskArr = res.data.data.fix.map(function(item) {
+            return item.task;
+          });
+          window.console.log(taskArr);
+          var newArr = taskArr.map(function(item) {
+            return {
+              taskNum: item.taskNo,
+              taskName: item.taskName,
+              issuedPeople: item.users.userName,
+              issuedDate: item.createDate,
+              taskStatus: item.systemPropertiesValue.sysProValueName,
+              completionTime: item.finishDate
+            };
+          });
+          window.console.log(newArr);
+          for (var i = 0; i < newArr.length; i++) {
+            newArr[i].workDocuments = work[i];
+          }
+          this.tableData = [];
+          this.tableData = newArr.map(function(item) {
+            return item;
+          });
+          window.console.log(this.tableData);
         })
         .catch(err => {
           window.console.log(err);
@@ -551,6 +668,100 @@ export default {
             type: "info",
             message: "已取消删除"
           });
+        });
+    },
+    addXiao() {
+      this.dialogFormVisible = true;
+      // 获取任务负责人（线路管理员）
+      this.axios
+        .get("http://192.168.6.184:8080/selectAllLineUser")
+        .then(res => {
+          var newLeader = res.data.data.users.map(function(item) {
+            return {
+              value: item.userId,
+              label: item.userName
+            };
+          });
+          this.taskLeader = newLeader.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+      // 获取所有的消缺管理员
+      this.axios
+        .get("http://192.168.6.184:8080/selectAllFixUser")
+        .then(res => {
+          window.console.log(res.data.data.users);
+          var newXiao = res.data.data.users.map(function(item) {
+            return {
+              name: item.userName,
+              id: item.userId
+            };
+          });
+          window.console.log(newXiao);
+
+          this.xiaoPeople = newXiao.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+
+      // 查询缺陷表
+      this.axios
+        .get("http://192.168.6.184:8080/selectPoleDamage")
+        .then(res => {
+          window.console.log(res.data.data.damageRecord);
+          var newQue = res.data.data.damageRecord.map(function(item) {
+            return {
+              deId: item.damageRecordId,
+              lineNum: item.pole.circuitry.circuitryNo,
+              poleNum: item.pole.poleNo,
+              defectLevels: item.defectsLevel,
+              defectTypes: item.defects.defectsName,
+              defectDes: item.defectsDescribe,
+              quot: item.users.userName,
+              findTime: item.findDate
+            };
+          });
+          window.console.log(newQue);
+          // 加入缺陷表中
+          this.tableData2 = newQue.map(function(item) {
+            return item;
+          });
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+    addTaskCofim() {
+      // 确认添加新项目
+      window.console.log(this.form)
+      this.axios
+        .get("http://192.168.6.184:8080/addFixTask", {
+          params: {
+            taskNo: this.form.taskNum,
+            taskName: this.form.taskName,
+            userId: 10000007,
+            createDate: this.form.createDate,
+            taskNote: this.form.taskNote,
+            taskDescribe: this.form.taskDescription,
+            workFormId: 1,
+            damageRecordId:this.fixSelection.join(",") ,
+            fixUserId: this.multipleSelection.join(","),
+            manageUserId: 10000007
+          }
+        })
+        .then(res => {
+          window.console.log(res);
+          this.form = {}
+          this.dialogFormVisible = false
+        })
+        .catch(err => {
+          window.console.log(err);
         });
     }
   },
@@ -666,6 +877,9 @@ li {
   // .is-leaf {
   //   height: 50px;
   // }
+  .time {
+    width: 150px;
+  }
 }
 
 .el-tabs__item {

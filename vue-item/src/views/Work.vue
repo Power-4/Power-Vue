@@ -165,7 +165,7 @@ export default {
       this.axios
         .get(words)
         .then(res => {
-          window.console.log("asd");
+          window.console.log("加载数据",res);
           this.pages = res.data.data.count;
           this.tableData = res.data.data.tasks;
         })

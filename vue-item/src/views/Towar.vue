@@ -4,23 +4,31 @@
       <el-breadcrumb-item>电力巡检系统</el-breadcrumb-item>
       <el-breadcrumb-item>杆塔管理</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 查询杆塔 -->
     <div class="chaxun">
       <div class="bianhao">
-        <span>所属线路:</span>
-        <el-input v-model="submit.id" placeholder="请输入编号" class="in-bianhao"></el-input>
+        <span>杆塔编号:</span>
+        <el-input
+          v-model="submit.poleNo"
+          placeholder="请输入编号"
+          class="in-bianhao"
+          @change="chaxun"
+        ></el-input>
       </div>
 
-      <div class="error">
+
+      <div class="activate" @input="chaxun">
         <span>是否启用:</span>
         <el-select
-          v-model="submit.error"
+          v-model="submit.activate"
           placeholder="请选择"
           class="in-error"
-          :class="{inErrorMin:submit.error}"
+          :class="{inErrorMin:submit.activate}"
+          @change="chaxun"
         >
-          <el-option label="启用" value="yes"></el-option>
+          <el-option label="启用" value="启用"></el-option>
 
-          <el-option label="停用" value="no"></el-option>
+          <el-option label="停用" value="停用"></el-option>
         </el-select>
       </div>
 
@@ -69,12 +77,15 @@
 
     <!-- 修改杆塔模态框 -->
     <el-dialog title="修改杆塔" :visible.sync="dialogVisible" width="45%">
-      <el-form :model="revaTable">
+      <el-form :model="submit">
         <el-form-item label="杆塔编号" :label-width="dialogVisibleWidth">
-          <el-input v-model="revaTable.id" autocomplete="off"></el-input>
+          <el-input v-model="submit.poleNo" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="线路序号" :label-width="dialogVisibleWidth">
+          <el-input v-model="submit.circuitryNo" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="启动状态" :label-width="dialogVisibleWidth">
-          <el-select v-model="revaTable.state" placeholder="请选启动状态">
+          <el-select v-model="submit.activate" placeholder="请选启动状态">
             <el-option label="启用" value="启用"></el-option>
             <el-option label="停用" value="停用"></el-option>
           </el-select>
@@ -82,85 +93,78 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="xiugai(dialogVisible = false)">确 定</el-button>
       </span>
     </el-dialog>
 
     <!-- 杆塔表单 -->
     <el-table :data="tableData" stripe style="width: 100%" align="center">
-      <el-table-column prop="id" label="杆塔编号" width="300" align="center"></el-table-column>
-      <el-table-column prop="name" label="所属路线" width="200" align="center"></el-table-column>
-      <el-table-column prop="state" label="状态(启动/未启动)" width="300" align="center"></el-table-column>
+      <el-table-column prop="poleNo" label="杆塔编号" width="300" align="center"></el-table-column>
+      <el-table-column prop="circuitry.circuitryName" label="所属路线" width="200" align="center"></el-table-column>
+      <el-table-column
+        prop="systemPropertiesValue.sysProValueName"
+        label="状态(启动/未启动)"
+        width="300"
+        align="center"
+      ></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
-        <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
-        <el-button type="text" @click="del">删除</el-button>
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            size="small"
+            @click="Edit(scope.$index, scope.row ,dialogVisible = true)"
+          >修改</el-button>
+          <el-button type="text" @click="del">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination layout="prev, pager, next" :total="50" class="pages"></el-pagination>
+      <el-pagination
+        class="pages"
+        layout="prev, pager, next"
+        :total="countPage"
+        :page-size="pageSize"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "total",
+  name: "towar",
   data() {
     return {
-      //查询
       title: "杆塔",
       name: "xun",
-      submit: { id: "", error: "" },
+      submit: {
+        currentPage: 1,
+        poleNo:"",
+        circuitryName: "",
+        activate: ""
+      },
+      countPage: null,
+      pageSize: 5,
+
       //模拟表格数据
-      tableData: [
-        {
-          id: "XW00001",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          id: "XW00001",
-          name: "西渭线",
-          state: "停用"
-        },
-        {
-          id: "XW00001",
-          name: "西渭线",
-          state: "启用"
-        },
-        {
-          id: "XW00001",
-          name: "西渭线",
-          state: "启用"
-        }
-      ],
+
+      tableData: [],
       options: [
         {
           value: "XW00001",
           label: "西渭线"
         },
         {
-          value: "XW00001",
-          label: "西渭线"
-        },
-        {
-          value: "XW00001",
-          label: "西渭线"
-        },
-        {
-          value: "XW00001",
-          label: "西渭线"
-        },
-        {
-          value: "XW00001",
-          label: "西渭线"
+          value: "XW00002",
+          label: "东渭线"
         }
       ],
       value: "",
-      //添加
+
+     
       dialogFormVisible: false,
       dialogVisible: false,
-      revaTable: { id: "",state: "" },
+      revaTable: { id: "", state: "" },
       form: {
         id: "",
         region: "",
@@ -179,7 +183,57 @@ export default {
   methods: {
     //查询
     chaxun() {
-      window.console.log(this.submit);
+      this.axios
+        .get("http://192.168.6.184:8080/poleOrchid/getPolePageByCirIdAndActivate",{
+          params: {
+            currentPage: this.submit.currentPage,
+            pageSize: this.pageSize,
+            poleNo: this.submit.poleNo,
+            activate: this.submit.activate
+          }
+        })
+        .then(res => {
+          window.console.log( this.submit.poleNo);
+          window.console.log( this.submit.activate);
+          window.console.log(res.data);
+          window.console.log(this.tableData);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
+    },
+
+    //修改按钮
+    Edit(index, row) {
+      window.console.log(index, row);
+      this.poleId = this.tableData[index].poleId;
+      this.submit.poleNo = this.tableData[index].poleNo;
+      this.submit.activate = this.tableData[index].systemPropertiesValue.sysProValueName;
+    },
+    //修改模态框确定按钮
+    xiugai() {
+      this.axios
+        .get("http://192.168.6.184:8080/poleOrchid/updatePoleById",{
+          params: {
+            poleId: this.poleId,
+            poleNo: this.submit.poleNo,
+            activate: this.submit.activate
+          }
+        })
+        .then(res => {
+          window.console.log("当前所修改的id",this.poleId);
+          window.console.log(this.submit.poleNo);
+          window.console.log(this.submit.activate);
+          window.console.log(res.data);
+          window.console.log(this.tableData);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles;
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     },
     //删除
     del() {
@@ -200,7 +254,33 @@ export default {
             message: "已取消删除"
           });
         });
+    },
+    handleCurrentChange: function(currentPage) {
+      window.console.log(currentPage); //点击第几页
+      this.submit.currentPage = currentPage;
+      this.fenClick();
+    },
+    //分页
+    fenClick() {
+      this.axios
+        .post("http://192.168.6.184:8080/poleOrchid/getPoleByPage", {
+          currentPage: this.submit.currentPage,
+          pageSize: this.pageSize
+        })
+        .then(res => {
+          window.console.log(this.submit.currentPage);
+          window.console.log(res.data);
+          this.countPage = res.data.data.count;
+          this.tableData = res.data.data.poles;
+          window.console.log(this.tableData);
+        })
+        .catch(err => {
+          window.console.log(err);
+        });
     }
+  },
+  created() {
+    this.fenClick();
   }
 };
 </script>

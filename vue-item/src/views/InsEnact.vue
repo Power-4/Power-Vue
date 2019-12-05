@@ -51,7 +51,7 @@
         </el-col>
         <el-col :span="7">
           <div class="grid-content bg-purple bg-add">
-            <el-button type="primary" class="bg-color"  @click="adddialogVisible = true ">
+            <el-button type="primary" class="bg-color"  @click="addTask(adddialogVisible = true )">
               <i class="el-icon-circle-plus-outline" ></i> 制定巡检任务
             </el-button>
           </div>
@@ -61,15 +61,21 @@
 
     <!-- 制定任务模态框 -->
     <el-dialog title="制定巡检任务" :visible.sync="adddialogVisible" width="40%">
-      <el-form ref="form" id="add-form" :model="addform" label-width="80px">
+      <el-form ref="addform" id="add-form" :rules="rules" :model="addform" label-width="80px">
         <el-form-item label="任务编码">
-          <el-input v-model="addform.taskNo"></el-input>
+          <el-input v-model="addform.taskNo" :disabled="edit"></el-input>
         </el-form-item>
-        <el-form-item label="任务名称">
-          <el-input v-model="addform.taskName"></el-input>
+        <el-form-item 
+          label="任务名称"
+          prop="taskName"
+        >
+          <el-input v-model="addform.taskName" clearable></el-input>
         </el-form-item>
-        <el-form-item label="巡检线路">
-          <el-select v-model="addform.circuitryName" clearable placeholder="请选择">
+        <el-form-item 
+          label="巡检线路"
+          prop="circuitryName"
+        >
+          <el-select @change="selectChanged" v-model="addform.circuitryName" clearable placeholder="请选择">
             <el-option
               v-for="item in circuitryNames"
               :key="item.circuitryId"
@@ -78,7 +84,10 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="巡检员">
+        <el-form-item 
+          label="巡检员"
+          prop="inspectPerson"
+        >
           <el-select v-model="addform.inspectPerson" multiple placeholder="请选择">
             <el-option
               v-for="item in Inspectors"
@@ -88,23 +97,29 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="起始杆号">
+        <el-form-item 
+        label="起始杆号"
+        prop="startPoleNo"
+        >
             <el-select v-model="addform.startPoleNo" clearable placeholder="请选择">
               <el-option
-                v-for="item in addform.PoleNos"
-                :key="item.id"
-                :label="item.label"
-                :value="item.id">
+                v-for="item in nowPoles"
+                :key="item.poleId"
+                :label="item.poleNo"
+                :value="item.poleNo">
               </el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="终止杆号">
+        <el-form-item 
+        label="终止杆号"
+        prop="endPoleNo"
+        >
             <el-select v-model="addform.endPoleNo" clearable placeholder="请选择">
               <el-option
-                v-for="item in addform.PoleNos"
-                :key="item.id"
-                :label="item.label"
-                :value="item.id">
+                v-for="item in nowPoles"
+                :key="item.poleId"
+                :label="item.poleNo"
+                :value="item.poleNo">
               </el-option>
             </el-select>
         </el-form-item>
@@ -112,7 +127,7 @@
           <el-input v-model="addform.userName" :disabled="edit"></el-input> 
         </el-form-item>
         <el-form-item label="下发日期">
-          <el-input v-model="addform.createDate" :disabled="edit"></el-input> 
+          <el-input v-model="addform.createDate" :disabled="edit" ></el-input> 
         </el-form-item>
         <el-form-item label="备注">
           <el-input type="textarea" v-model="addform.describe"></el-input>
@@ -120,16 +135,19 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="clear(adddialogVisible = false)">取 消</el-button>
-        <el-button type="primary" @click="clear">重置</el-button>
-        <el-button type="primary" @click="addSubmit(adddialogVisible = false)">确 定</el-button>
+        <el-button type="primary" @click="resetForm('addform')">重 置</el-button>
+        <el-button type="primary" @click="addSubmit('addform')">确 定</el-button>
+        <!-- ,adddialogVisible = false -->
       </span>
     </el-dialog>
 
 
     <!-- 分配任务模态框 -->
     <el-dialog title="分配巡检任务" :visible.sync="dialogVisible" width="42%">
-      <template class="allot">
-        <el-transfer v-model="value" 
+      <template>
+        <el-transfer 
+        class="allot"
+        v-model="value" 
         :data="datas"
         :titles="['待选巡检员', '已选巡检员']"
         ></el-transfer>
@@ -142,15 +160,15 @@
 
     <!-- 修改任务模态框 -->
     <el-dialog title="修改巡检任务" :visible.sync="modifydialogVisible" width="40%">
-      <el-form ref="form" id="modify-form" :model="modifyform" label-width="80px">
+      <el-form ref="modifyform" id="modify-form" :rules="rules" :model="modifyform" label-width="80px">
         <el-form-item label="任务编码">
-          <el-input v-model="modifyform.taskNo"></el-input>
+          <el-input v-model="modifyform.taskNo" :disabled="edit"></el-input>
         </el-form-item>
-        <el-form-item label="任务名称">
+        <el-form-item label="任务名称" prop="taskName">
           <el-input v-model="modifyform.taskName"></el-input>
         </el-form-item>
-        <el-form-item label="巡检线路">
-          <el-select v-model="modifyform.circuitryName" clearable placeholder="请选择">
+        <el-form-item label="巡检线路" prop="circuitryName">
+          <el-select @change="selectChanged" v-model="modifyform.circuitryName" clearable placeholder="请选择">
             <el-option
               v-for="item in circuitryNames"
               :key="item.circuitryId"
@@ -159,33 +177,34 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="巡检员">
+        <el-form-item label="巡检员" prop="inspectPerson">
           <el-select v-model="modifyform.inspectPerson" multiple placeholder="请选择">
             <el-option
               v-for="item in Inspectors"
               :key="item.userId"
               :label="item.userName"
-              :value="item.userId">
+              :value="item.userId"
+              >
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="起始杆号">
+        <el-form-item label="起始杆号" prop="startPoleNo">
             <el-select v-model="modifyform.startPoleNo" clearable placeholder="请选择">
               <el-option
-                v-for="item in modifyform.PoleNos"
-                :key="item.id"
-                :label="item.label"
-                :value="item.label">
+                v-for="item in nowPoles"
+                :key="item.poleId"
+                :label="item.poleNo"
+                :value="item.poleNo">
               </el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="终止杆号">
+        <el-form-item label="终止杆号" prop="endPoleNo">
             <el-select v-model="modifyform.endPoleNo" clearable placeholder="请选择">
               <el-option
-                v-for="item in modifyform.PoleNos"
-                :key="item.id"
-                :label="item.label"
-                :value="item.label">
+                v-for="item in nowPoles"
+                :key="item.poleId"
+                :label="item.poleNo"
+                :value="item.poleNo">
               </el-option>
             </el-select>
         </el-form-item>
@@ -201,8 +220,9 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="modifyclear(modifydialogVisible = false)">取 消</el-button>
-        <el-button type="primary" @click="modifyclear">重置</el-button>
-        <el-button type="primary" @click="modifySubmit(modifydialogVisible = false)">确 定</el-button>
+        <el-button type="primary" @click="resetForm('modifyform')">重 置</el-button>
+        <el-button type="primary" @click="modifySubmit('modifyform')">确 定</el-button>
+        <!-- ,modifydialogVisible = false -->
       </span>
     </el-dialog>
 
@@ -219,8 +239,8 @@
       </el-table-column>
       <el-table-column prop="taskName" label="任务名称" align="center"></el-table-column>
       <el-table-column prop="circuitry.circuitryName" label="巡检线路" align="center"></el-table-column>
-      <el-table-column prop="circuitry.startPole.circuitry" label="起始杆号" align="center"></el-table-column>
-      <el-table-column prop="circuitry.endPole.circuitry" label="终止杆号" align="center"></el-table-column>
+      <el-table-column prop="circuitry.startPole.poleNo" label="起始杆号" align="center"></el-table-column>
+      <el-table-column prop="circuitry.endPole.poleNo" label="终止杆号" align="center"></el-table-column>
       <el-table-column prop="users.userName" label="下发人" align="center"></el-table-column>
       <el-table-column prop="createDate" label="下发时间" align="center"></el-table-column>
       <el-table-column prop="systemPropertiesValue.sysProValueName" label="任务状态" align="center"></el-table-column>
@@ -230,8 +250,8 @@
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="viewInspectTask(scope.$index,scope.row)">查看</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'? !edit : edit" @click="allot(scope.row, dialogVisible = true)">分配任务</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'? !edit : edit" @click="modifyInspectTask(scope.$index, scope.row, modifydialogVisible = true)">修改</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'||'已分配'? !edit : edit" @click="del(scope.row)">取消</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配' || scope.row.systemPropertiesValue.sysProValueName == '已分配'? !edit : edit" @click="modifyInspectTask(scope.$index, scope.row, modifydialogVisible = true)">修改</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配' || scope.row.systemPropertiesValue.sysProValueName == '已分配' ? !edit : edit" @click="del(scope.row)">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -249,28 +269,15 @@
 <script>
 export default {
   data() {
-    // const generateData = function() {
-    //   const datas = [];
-    //   const testPerson = [
-    //     '巡检员测试用户1',
-    //     '巡检员测试用户2',
-    //     '巡检员测试用户3',
-    //     '巡检员测试用户4',
-    //     '巡检员测试用户5',
-    //     '巡检员测试用户6',
-    //     '巡检员测试用户7',
-    //     '巡检员测试用户8',
-    //     '巡检员测试用户9',
-    //   ];
-    //   // const testPerson = this.Inspectors;
-    //   for (let i = 0; i <testPerson.length; i++) {
-    //     datas.push({
-    //       key: i,
-    //       label: testPerson[i],
-    //     });
-    //   }
-    //   return datas;
-    // };
+    var checkChinese = (rule, value, callback)=> {
+      if(value=='') {
+        callback(new Error('请输入任务名称'))
+      } else {
+        let reg=/[\u4e00-\u9fa5]/;
+        if(!reg.test(value)){callback(new Error('名称必须是中文'))}
+      }
+    }
+    
     return {
       tableData: [],
       // tableData: {
@@ -307,103 +314,55 @@ export default {
       modifydialogVisible: false,
 
       addform: {
-        taskNo: '',
+        taskNo: 'j111',
         taskName: '',
         circuitryName: '',
-        nameOptions: [
-          {
-            id: 1,
-            label: '西邻一线'
-          },
-          {
-            id: 2,
-            label: '西邻二线'
-          }
-
-        ],
         inspectPerson: '',
-        PoleNos: [
-          {
-            id: 1,
-            label: 'xw001'
-          },
-          {
-            id: 2,
-            label: 'xw002'
-          }
-        ],
-        personOptions: [
-          {
-            id: 1,
-            label: '黄金糕'
-          }, 
-          {
-            id: 2,
-            label: '双皮奶'
-          }, 
-          {
-            id: 3,
-            label: '蚵仔煎'
-          }, 
-          {
-            id: 4,
-            label: '龙须面'
-          }, 
-          {
-            id: 5,
-            label: '北京烤鸭'
-          }
-        ],
-        startPoleId: '',
-        endPoleId: '',
+        startPoleNo: '',
+        endPoleNo: '',
         userName: 'mi',
-        createDate: '2013/02/01',
-        describe: ''
+        createDate: '',
+        describe: '无'
+      },
+      rules: {
+        taskName: [
+          { validator: checkChinese, required: true, trigger: 'blur' }
+        ],
+        circuitryName: [
+          { required: true, message: '请选择巡检线路', trigger: 'change' }
+        ],
+        inspectPerson: [
+          { message: '请选择巡检员', trigger: 'blur' }
+        ],
+        startPoleNo: [
+          { required: true, message: '请选择起始杆号', trigger: 'blur' }
+        ],
+        endPoleNo: [
+          { required: true, message: '请选择终止杆号', trigger: 'blur' }
+        ]
       },
       modifyform: {
         taskNo: '',
         taskName: '',
         circuitryName: '',
-        nameOptions: [
-          {
-            id: 1,
-            label: '西邻一线'
-          },
-          {
-            id: 2,
-            label: '西邻二线'
-          }
-
-        ],
         inspectPerson: '',
-        PoleNos: [
-          {
-            id: 1,
-            label: 'xw001'
-          },
-          {
-            id: 2,
-            label: 'xw002'
-          }
-        ],
-        startPoleId: '',
-        endPoleId: '',
+        startPoleNo: '',
+        endPoleNo: '',
         userName: 'mi',
-        createDate: '2013/02/01',
+        createDate: '',
         describe: ''
       },
       edit: true,
       Inspectors: [],
+      nowPoles: [],
       datas: '',
       value: [],
       nowTaskId: null,
-      isQuery: false
+      isQuery: false,
+      nowInspector: []
     };
   },
   created() {
-
-    // contentType: "application/json",
-    // headers:{ Authorization: window.localStorage.token};
 
     // 请求列表数据
     this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
@@ -459,59 +418,28 @@ export default {
       window.console.log('错误是', err);
     })
 
-    // this.axios.get('http://192.168.6.184:8080/showInspectorsByTaskIdS?',{ 
-    //   params: {
-    //     currentPage: this.currentPage,
-    //     pageSize: this.pageSize
-    //   }
-    // })
-    // .then((res) => {
-    //   this.tableData = res.data.data.tasks;
-    //   this.count = res.data.data.count;
-    //   window.console.log(res.data);
-    // })
-    // .catch((err) => {
-    //   window.console.log("错误",err)
-    // })
-
-
+  },
+  beforeUpdate() {
+    this.datas = this.generateData()
   },
   mounted() {
-    // 页面加载完后显示当前时间
     this.addform.createDate = this.addDate()
     this.modifyform.createDate = this.addDate()
-    this.datas = this.generateData()
-    // // 定时刷新时间
-    // let _this = this
-    // // 定时器
-    // this.timer = setInterval(function () {
-    //   _this.createDate = _this.addDate() // 修改数据date
-    // })
   },
   methods: {
+    // 分配任务巡检员获取
     generateData() {
       const datas = [];
-      // const testPerson = [];
-      // const testPerson = [
-      //   '巡检员测试用户1',
-      //   '巡检员测试用户2',
-      //   '巡检员测试用户3',
-      //   '巡检员测试用户4',
-      //   '巡检员测试用户5',
-      //   '巡检员测试用户6',
-      //   '巡检员测试用户7',
-      //   '巡检员测试用户8',
-      //   '巡检员测试用户9',
-      // ];
-      const testPerson = this.Inspectors;
-      for (let i = 0; i < testPerson.length; i++) {
+      for (let i = 0; i < this.Inspectors.length; i++) {
         datas.push({
           key: i,
-          label: testPerson[i].userName,
+          label: this.Inspectors[i].userName,
         });
       }
       return datas;
     },
+    
+    // 获取当前时间
     addDate() {
       var nowDate = new Date()
       var year = nowDate.getFullYear()
@@ -520,70 +448,107 @@ export default {
       var today = nowDate.getDate();
       today = today < 10? '0' + today:today;
 
-      let systemDate = year + '-' + month + '-' + today;
+      let systemDate = year + '/' + month + '/' + today;
       return systemDate;
     },
 
     // 查询
     enactQuery() {
       this.isQuery = true;
+      window.console.log(this.isQuery)
 
       this.axios.get('http://192.168.6.184:8080/selectTasksByConditionS?',{
         params: {
           currentPage: this.currentPage,
           pageSize: this.pageSize,
+          id: this.taskState,
           userName: this.userName,
-          startDate: this.createDate,
+          startDate: this.createDate==''?'1970/01/01':this.createDate,
           taskNo: this.taskNo,
-          circuitryNo: this.circuitryNo,
-          id: this.taskState
+          circuitryNo: this.circuitryNo
         }
       })
       .then((res) => {
         this.tableData = res.data.data.tasks;
+        this.count = res.data.data.count;
+        for(var i = 0; i< res.data.data.tasks.length; i++) {
+          if(res.data.data.tasks[i].isCancel == 1) {
+            res.data.data.tasks[i].isCancel = '是'
+          } else if (res.data.data.tasks[i].isCancel == 0) {
+            res.data.data.tasks[i].isCancel = '否'
+          }
+        }
         window.console.log(res.data);
       })
       .catch((err) => {
         window.console.log("错误",err)
       })
-      
+    },
 
+    // 制定任务按钮
+    addTask() {
+      // 获取任务编号
+      this.axios.get('http://192.168.6.184:8080/autoCreateTaskNoS?')
+      .then((res) => {
+        this.addform.taskNo = res.data.data.autoTaskNo;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
     },
-    // 添加模态框重置
-    clear() {
-      this.addform.taskNo = '',
-      this.addform.taskName = '',
-      this.addform.circuitryName = '',
-      this.addform.inspectPerson = '',
-      this.addform.startPoleId = '',
-      this.addform.endPoleId = '',
-      this.addform.describe = ''
+
+    // 制定任务根据线路id请求杆号
+    selectChanged(value) {
+      window.console.log(value)
+      this.axios.get('http://192.168.6.184:8080/selectPoleNoByCircuitryIdS?',{params:{circuitryId: value}})
+      .then((res) => {
+        this.nowPoles = res.data.data.poles;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
     },
+
+
+
     // 添加保存提交
-    addSubmit() {
-      
+    addSubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          // alert('确定提交数据吗');
+          // 添加请求
+          this.axios.get('http://192.168.6.184:8080/createTasksS?',{
+            params: {
+              taskNo: this.addform.taskNo,
+              taskName: this.addform.taskName,
+              circuitryId: this.addform.circuitryName,
+              inspectorId: this.addform.inspectPerson.toString(),
+              startPoleNo: this.addform.startPoleNo,
+              endPoleNo: this.addform.endPoleNo,
+              userId: '10000003',
+              createDate: this.addform.createDate,
+              taskNote: this.addform.describe
+            }
+          })
+          .then((res) => {
+            window.console.log(res.data);
+          })
+          .catch((err) => {
+            window.console.log("错误",err)
+          })
+        } else {
+          window.console.log('提交失败！');
+          return false;
+        }
+      });
 
-      // 添加请求
-      // this.axios.get('http://192.168.6.184:8080/createTasksS?',{
-      //   params: {
-      //     taskNo: this.addform.taskNo,
-      //     taskName: this.addform.taskName,
-      //     circuitryId: this.addform.circuitryName,
-      //     inspectorId: this.addform.inspectPerson,
-      //     startPoleNo: this.addform.startPoleNo,
-      //     endPoleNo: this.addform.endPoleNo,
-      //     userId: sessionStorage.getItem('userid'),
-      //     createDate: this.addform.create,
-      //     taskNote: this.addform.describe
-      //   }
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
-
+      this.$refs[formName].resetFields();
+    },
+    // 重置
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     },
 
     // 查看巡检任务
@@ -601,7 +566,6 @@ export default {
     },
     // 分配提交
     allotSubmit() {
-      // window.console.log(this.value.toString());
       this.axios.get('http://192.168.6.184:8080/assignTaskS?',{
         params: {
           userId: this.value.toString(),
@@ -614,7 +578,6 @@ export default {
       .catch((err) => {
         window.console.log("错误",err)
       })
-
     },
 
     // 修改按钮
@@ -623,49 +586,80 @@ export default {
       this.modifyform.taskNo = this.tableData[index].taskNo;
       this.modifyform.taskName = this.tableData[index].taskName;
       this.modifyform.circuitryName = this.tableData[index].circuitry.circuitryName;
+      this.modifyform.startPoleNo = this.tableData[index].circuitry.startPole.poleNo;
+      this.modifyform.endPoleNo = this.tableData[index].circuitry.endPole.poleNo;
+      this.modifyform.describe = this.tableData[index].taskNote;
+      
+      // 获取当前任务巡检线路杆列表
+      this.axios.get('http://192.168.6.184:8080/selectPoleNoByCircuitryIdS?',{
+        params: {
+          circuitryId: this.tableData[index].circuitry.circuitryId
+        }
+      })
+      .then((res) => {
+        this.nowPoles = res.data.data.poles;
+        window.console.log(res.data);
+      })
+      .catch((err) => {
+        window.console.log('错误是', err);
+      })
+
+      // 获取当前任务的巡检员
+      this.axios.get('http://192.168.6.184:8080/showInspectorsByTaskIdS?',{ 
+        params: {
+          taskId: row.taskId
+        }
+      })
+      .then((res) => {
+        this.modifyform.inspectPerson = res.data.data.inspectorNames;
+        window.console.log('该任务巡检员',res.data);
+      })
+      .catch((err) => {
+        window.console.log("错误",err)
+      })
+
     },
 
-    // 修改重置
-    modifyclear() {
-      this.modifyform.taskNo = '',
-      this.modifyform.taskName = '',
-      this.modifyform.circuitryName = '',
-      this.modifyform.inspectPerson = '',
-      this.modifyform.startPoleId = '',
-      this.modifyform.endPoleId = '',
-      this.modifyform.describe = ''
-    },
 
     // 修改提交模态框
-    modifySubmit() {
+    modifySubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          alert('确定提交数据吗');
+          this.axios.get('http://192.168.6.184:8080/changeTaskS?',{
+            params: {
+              taskId: this.nowTaskId,
+              taskNo: this.modifyform.taskNo,
+              taskName: this.modifyform.taskName,
+              circuitryId: this.modifyform.circuitryName,
+              inspectorId: this.modifyform.inspectPerson.toString(),
+              startPoleNo: this.modifyform.startPoleNo,
+              endPoleNo: this.modifyform.endPoleNo,
+              userId: '10000003',
+              createDate: this.modifyform.createDate,
+              taskNote: this.modifyform.describe
+            }
+          })
+          .then((res) => {
+            window.console.log(res.data);
+          })
+          .catch((err) => {
+            window.console.log("错误",err)
+          })
+        } else {
+          window.console.log('提交失败！');
+          return false;
+        }
+      });
 
-      // this.axios.get('http://192.168.6.184:8080/changeTaskS?',{
-      //   params: {
-      //     taskId: this.nowTaskId,
-      //     taskNo: this.modfyform.taskNo,
-      //     taskName: this.modfyform.taskName,
-      //     circuitryId: this.modfyform.circuitryName,
-      //     inspectorId: this.modfyform.inspectPerson,
-      //     startPoleNo: this.modfyform.startPoleNo,
-      //     endPoleNo: this.modfyform.endPoleNo,
-      //     userId: sessionStorage.getItem('userid'),
-      //     createDate: this.modifyform.createDate,
-      //     taskNote: this.addform.describe
-      //   }
-      // })
-      // .then((res) => {
-      //   window.console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   window.console.log("错误",err)
-      // })
+
     },
 
 
     // 分页点击事件
     handleCurrentChange(val) {
       if(this.isQuery) {
-
+        window.console.log(this.isQuery);
         this.axios.get('http://192.168.6.184:8080/selectTasksByConditionS?',{
           params: {
             currentPage: this.currentPage,
@@ -679,6 +673,8 @@ export default {
         })
         .then((res) => {
           this.tableData = res.data.data.tasks;
+          this.count = res.data.data.count;
+          window.console.log(1);
           for(var i = 0; i< res.data.data.tasks.length; i++) {
             if(res.data.data.tasks[i].isCancel == 1) {
               res.data.data.tasks[i].isCancel = '是'
@@ -692,30 +688,35 @@ export default {
         .catch((err) => {
           window.console.log("错误",err)
         })
+      } else {
+        
+        this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
+          params: {
+            currentPage: val,
+            pageSize: this.pageSize
+          }
+        })
+        .then((res) => {
+          this.tableData = res.data.data.tasks;
+          for(var i = 0; i< res.data.data.tasks.length; i++) {
+            if(res.data.data.tasks[i].isCancel == 1) {
+              res.data.data.tasks[i].isCancel = '是'
+            } else if (res.data.data.tasks[i].isCancel == 0) {
+              res.data.data.tasks[i].isCancel = '否'
+            }
+          }
+          this.count = res.data.data.count;
+          window.console.log(res.data);
+          
+        })
+        .catch((err) => {
+          window.console.log("错误",err)
+        })
+
       }
 
 
-      this.axios.get('http://192.168.6.184:8080/showAllTasksByPageS?',{ 
-        params: {
-          currentPage: val,
-          pageSize: this.pageSize
-        }
-      })
-      .then((res) => {
-        this.tableData = res.data.data.tasks;
-        for(var i = 0; i< res.data.data.tasks.length; i++) {
-          if(res.data.data.tasks[i].isCancel == 1) {
-            res.data.data.tasks[i].isCancel = '是'
-          } else if (res.data.data.tasks[i].isCancel == 0) {
-            res.data.data.tasks[i].isCancel = '否'
-          }
-        }
-        this.count = res.data.data.count;
-        window.console.log(res.data);
-      })
-      .catch((err) => {
-        window.console.log("错误",err)
-      })
+
 
     },
     //删除弹出框
@@ -727,18 +728,18 @@ export default {
         type: "warning"
       })
         .then(() => {
-          // 删除请求
-          // this.axios.get('/',{params:{taskId: row.taskId }})
-          // .then((res) => {
-          //   window.console.log(res.data);
-          // })
-          // .catch((err) => {
-          //   window.console.log("错误",err)
-          // })
-          this.$message({
-            type: "success",
-            message: "删除成功!"
-          });
+          // 取消请求
+          this.axios.get('http://192.168.6.184:8080/cancelTaskS?',{params:{taskId: row.taskId }})
+          .then((res) => {
+            this.$message({
+              type: "success",
+              message: "删除成功!"
+            });
+            window.console.log(res.data);
+          })
+          .catch((err) => {
+            window.console.log("错误",err)
+          })
         })
         .catch(() => {
           this.$message({
@@ -747,12 +748,7 @@ export default {
           });
         });
     }
-  },
-  // destroyed () {
-  //   if (this.timer) { 
-  //     clearInterval(this.timer)
-  //   }
-  // }
+  }
 };
 </script>
 
@@ -803,25 +799,22 @@ export default {
     padding: 0 38px;
 
     .el-select {
-      width: 410px;
+      width: 100%;
     }
 
-    .el-input {
-      width: 410px;
-    }
   }
 
   #modify-form {
     padding: 0 38px;
 
     .el-select {
-      width: 410px;
+      width: 100%;
     }
 
-    .el-input {
-      width: 410px;
-    }
+  }
 
+  .allot {
+    width: 100%;
   }
 }
 
