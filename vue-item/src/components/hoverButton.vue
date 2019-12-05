@@ -138,18 +138,20 @@ export default {
     this.axios.get("/permission/getResources")
      .then((res)=>{
       
-       window.console.log("权限判断的",res)
+      
 
         res.data.data.resourceList.forEach((item)=>{
              if(item.systemPropertiesValue.sysProValueName=="启用")
              {     
-                 
+      
+
                   this.list.splice(item.resourcesId,1,false)
+             
              }  
              
         }) 
 
-      window.console.log( "这是我家的",this.list)
+     
 
      })
      .catch((err)=>{
