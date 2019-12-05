@@ -21,13 +21,13 @@
         taskType: 1
         users: null
       -->
-      <el-table-column prop="taskNo" label="任务编号" width="150"></el-table-column>
-      <el-table-column prop="date" label="代办任务类型" width="180"></el-table-column>
-      <el-table-column prop="taskName" label="待办任务名称" width="180"></el-table-column>
-      <el-table-column prop="taskNote" label="任务记录" width="180"></el-table-column>
-      <el-table-column prop="taskDescribe" label="任务描述" width="180"></el-table-column>
-      <el-table-column prop="createDate" label="到达时间" width="110"></el-table-column>
-      <el-table-column prop="createDate" label="完成时间" width="110"></el-table-column>
+      <el-table-column prop="taskNo" label="任务编号"></el-table-column>
+      <el-table-column prop="date" label="代办任务类型"></el-table-column>
+      <el-table-column prop="taskName" label="待办任务名称"></el-table-column>
+      <el-table-column prop="taskNote" label="任务记录"></el-table-column>
+      <el-table-column prop="taskDescribe" label="任务描述"></el-table-column>
+      <el-table-column prop="createDate" label="到达时间"></el-table-column>
+      <el-table-column prop="createDate" label="完成时间"></el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button @click="looklook(scope.row)" type="text" size="small">查看</el-button>

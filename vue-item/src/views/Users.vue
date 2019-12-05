@@ -137,19 +137,16 @@
         format="yyyy-MM-dd"
       ></el-date-picker>
       <el-button @click="sendLogData">查询</el-button>
+      <el-button @click="sendGetlogMsg">全部</el-button>
       <div class="blockbox"></div>
-      <el-table
-        stripe
-        style="width: 100%"
-        border
-        :data="logTableData"
-      >
+      <el-table stripe style="width: 100%" border :data="logTableData">
         <!-- // userLogId: 1;
       // userLogOperationDate: "2019-11-29";
         // userLogOperationInformation;-->
         <el-table-column prop="userLogId" label="编号"></el-table-column>
+        <el-table-column prop="userName" label="用户名"></el-table-column>
         <el-table-column prop="userLogOperationDate" label="时间"></el-table-column>
-        <el-table-column prop="userLogOperationInformation" label="日志信息"  width="400px"></el-table-column>
+        <el-table-column prop="userLogOperationInformation" label="日志信息" width="400px"></el-table-column>
       </el-table>
       <div class="block">
         <el-pagination
@@ -175,7 +172,7 @@
           <el-input v-model="userSubForm.userNo"></el-input>
         </el-form-item>
         <el-form-item label="用户名称" prop="userName">
-          <el-input v-model="userSubForm.userName"></el-input>
+          <el-input v-model="userSubForm.userName" @change="isUser"></el-input>
         </el-form-item>
         <el-form-item label="用户密码" prop="userPwd">
           <el-input v-model="userSubForm.userPwd"></el-input>
@@ -247,14 +244,16 @@ export default {
     },
     sendUpdata() {
       // http://192.168.6.184:8080
-      var words = `/userManage/modifyUserMessage?userName=${this.obj.userName}&userPwd=&roleName=${this.obj.roleName}&joinDate=&leavingDate=&sysProValueName=正常`;
+      var words = `/userManage/modifyUserMessage?userId=${this.obj.userId}&userName=${this.obj.userName}&roleName=${this.obj.roleName}&joinDate=${this.obj.joinDate}&leavingDate=${this.obj.leavingDate}&sysProValueName=正常`;
+      window.console.log(words);
       this.axios.get(words).then(res => {
-        window.console.log(res);
-        if (res.data.data.code == 200) {
+        window.console.log(res.data.code);
+        if (res.data.code == 200) {
           this.$message({
             type: "success",
             message: "修改成功"
           });
+          this.loadData();
         } else {
           this.$message({
             type: "info",
@@ -299,9 +298,26 @@ export default {
           type: "success",
           message: "添加用户成功"
         });
+        this.loadData();
       });
-      // 重新加载
-      this.loadData();
+    },
+    // 用户查重
+    isUser() {
+      var words = `/userManage/selectUserNameExists?userName=${this.userSubForm.roleName}`;
+      this.axios.get(words).then(res => {
+        window.console.log(res);
+        if (res.data.code == 200) {
+          this.$message({
+            type: "success",
+            message: "名称可以使用"
+          });
+        } else {
+          this.$message({
+            type: "info",
+            message: "用户名已存在"
+          });
+        }
+      });
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
@@ -471,6 +487,11 @@ export default {
     maliLogData(res) {
       this.logTableData = res.data.data.userLogList;
       this.logPages = res.data.data.count;
+      for (var i = 0; i < res.data.data.userLogList.length; i++) {
+        this.logTableData[i].userName =
+          res.data.data.userLogList[i].user.userName;
+        this.logTableData[i].i = i + 1;
+      }
     }
   },
   created() {
@@ -478,6 +499,8 @@ export default {
   },
   data() {
     return {
+      isSearch: false,
+      isLogSearch: false,
       // --------------------------------------------------------------
       // 日志的分页信息
       logCurrpage: 1,
@@ -532,7 +555,7 @@ export default {
         ],
         userName: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 2, max: 6, message: "长度在 2 到 6 个字符", trigger: "blur" }
+          { min: 6, max: 40, message: "长度在 6 到 40 个字符", trigger: "blur" }
         ],
         roleName: [
           { required: true, message: "角色类型不能为空", trigger: "blur" }

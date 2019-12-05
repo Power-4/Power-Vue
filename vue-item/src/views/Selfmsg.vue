@@ -183,6 +183,7 @@ export default {
         })
         .then(res => {
           window.console.log(res);
+          this.ok("修改成功");
           return;
         });
     },
