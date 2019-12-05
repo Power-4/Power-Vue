@@ -455,6 +455,10 @@ export default {
     addRoleTab() {
       if (this.addRoleTab == false) {
         window.console.log("关闭添加用户");
+        this.role.roleName = "";
+        this.role.roleNo = "";
+        this.role.sysProValueName = "";
+        window.console.log(this.role);
       }
     }
   },

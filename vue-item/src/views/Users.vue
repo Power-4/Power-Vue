@@ -497,6 +497,18 @@ export default {
   created() {
     this.loadData();
   },
+  watch: {
+    addUserDialog() {
+      if (this.addUserDialog == false) {
+        this.userSubForm.userNo = "";
+        this.userSubForm.userName = "";
+        this.userSubForm.userPwd = "";
+        this.userSubForm.roleName = "";
+        this.userSubForm.joinDate = "";
+        window.console.log(this.userSubForm);
+      }
+    }
+  },
   data() {
     return {
       isSearch: false,

@@ -263,6 +263,16 @@ export default {
   created() {
     this.loadUserMsg();
   },
+  watch: {
+    pwdDialog() {
+      if (this.pwdDialog == false) {
+        window.console.log("关闭密码模态框");
+        this.pass.newPass = "";
+        this.pass.oldPass = "";
+        this.pass.newPass = "";
+      }
+    }
+  },
   data() {
     return {
       // 是否修改的状态存储 false 为未修改，true为修改
