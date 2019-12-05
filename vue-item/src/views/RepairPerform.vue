@@ -295,7 +295,9 @@ export default {
         });
     },
     chakanClick(row, xiuTask) {
-      xiuTask ? (this.xiuTask = true) : (this.xiuTask = false);
+
+       this.checkTask=true;
+        xiuTask ? (this.xiuTask = true) : (this.xiuTask = false);
 
       this.fixId = row.fixId;
 
@@ -356,6 +358,30 @@ export default {
         .catch(err => {
           window.console.log(err);
         });
+    },
+    xiugai(){
+      this.axios.get("/fix/submitfix",{params:{
+        accomplishDescribe:this.wanmiaoshu,
+        interruptDelayRecord:this.interruptDelayRecord,
+        workSummaryReport:this.workSummaryReport,
+        fixId:this.fixId
+      }})
+      .then((res)=>{  
+        this.wanmiaoshu="",
+        this.interruptDelayRecord="",
+        this.workSummaryReport="",
+        this.checkTask=false;
+        window.console.log(res)
+        this.chaxun()
+        this.$message({
+                type: "success",
+                message: "执行成功!"
+                });
+      })
+      .catch(err=>{
+        window.console.log(err)
+      })
+
     },
     open(scope) {
       this.fixId = scope.fixId;

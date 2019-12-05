@@ -249,7 +249,7 @@
           <el-button type="text" size="small" @click="viewInspectTask(scope.$index,scope.row)">查看</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配'? !edit : edit" @click="allot(scope.row, dialogVisible = true)">分配任务</el-button>
           <el-button type="text" size="small" :disabled="scope.row.systemPropertiesValue.sysProValueName == '待分配' || scope.row.systemPropertiesValue.sysProValueName == '已分配'? !edit : edit" @click="modifyInspectTask(scope.$index, scope.row, modifydialogVisible = true)">修改</el-button>
-          <el-button type="text" size="small" :disabled="scope.row.isCancel == '是'? !edit : edit" @click="del(scope.row)">取消</el-button>
+          <el-button type="text" size="small" :disabled="scope.row.isCancel == '否'? !edit : edit" @click="del(scope.row)">取消</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -22,7 +22,7 @@
         users: null
       -->
       <el-table-column prop="taskNo" label="任务编号"></el-table-column>
-      <el-table-column prop="date" label="代办任务类型"></el-table-column>
+      <el-table-column prop="taskTypeData" label="代办任务类型"></el-table-column>
       <el-table-column prop="taskName" label="待办任务名称"></el-table-column>
       <el-table-column prop="taskNote" label="任务记录"></el-table-column>
       <el-table-column prop="taskDescribe" label="任务描述"></el-table-column>
@@ -31,7 +31,7 @@
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button @click="looklook(scope.row)" type="text" size="small">查看</el-button>
-          <el-button @click="goWorkWeb(scope.$index)" type="text" size="small">处理</el-button>
+          <el-button @click="goWorkWeb(scope.row)" type="text" size="small">处理</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -111,12 +111,12 @@ export default {
   methods: {
     // index 编号传入 scope.$index
     // rows 需要修改的数组
-    goWorkWeb(index) {
-      // 获取准确id
-      var a = this.currpage - 1;
-      var b = a * this.pagesize + index;
-      this.a = this.tableData[b].id;
-      // 根据 id 跳转页面
+    goWorkWeb(row) {
+      if (row.taskType == 1) {
+        this.$router.replace("/inspect/insexecute?name=execute");
+      } else if (row.taskType == 2) {
+        this.$router.replace("/repairperform");
+      }
     },
     // 弹出详细信息模态框
     looklook(row) {
@@ -174,6 +174,13 @@ export default {
           window.console.log("加载数据", res);
           this.pages = res.data.data.count;
           this.tableData = res.data.data.tasks;
+          for (var i = 0; i < this.tableData.length; i++) {
+            if (this.tableData[i].taskType == 2) {
+              this.tableData[i].taskTypeData = "消缺任务";
+            } else if (this.tableData[i].taskType == 1) {
+              this.tableData[i].taskTypeData = "巡检任务";
+            }
+          }
         })
         .catch(err => {
           window.console.log(err);
