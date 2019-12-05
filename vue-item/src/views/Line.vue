@@ -8,20 +8,26 @@
     <div class="chaxun">
       <div class="bianhao">
         <span>所属线路:</span>
-        <el-input v-model="submit.circuitryName" placeholder="请输入编号" class="in-bianhao"></el-input>
+        <el-input 
+          v-model="submit.circuitryNo" 
+          placeholder="请输入编号" 
+          class="in-bianhao"
+          @change="chaxun"
+          ></el-input>
       </div>
 
-      <div class="activate">
-        <span>是否启用:</span>
+      <div class="runningStatus" @input="chaxun">
+        <span>运行状态:</span>
         <el-select
-          v-model="submit.activate"
+          v-model="submit.runningStatus"
           placeholder="请选择"
           class="in-error"
-          :class="{inErrorMin:submit.activate}"
+          :class="{inErrorMin:submit.runningStatus}"
+          @change="chaxun"
         >
-          <el-option label="启用" value="启用"></el-option>
+          <el-option label="正常" value="正常"></el-option>
 
-          <el-option label="停用" value="停用"></el-option>
+          <el-option label="维修中" value="维修中"></el-option>
         </el-select>
       </div>
 
@@ -182,8 +188,8 @@ export default {
         id: "",
         error: "",
         currentPage: 1,
-        circuitryName: "",
-        activate: ""
+        circuitryNo: "",
+        runningStatus:""
         },
       countPage:5, //初始页
       pageSize: 5, //    每页的数据
@@ -223,21 +229,21 @@ export default {
     //查询
     chaxun() {
       this.axios
-        .get("http://192.168.6.184:8080/circuitryOrchid/getCircuitryById",{
+        .get("http://192.168.6.184:8080/circuitryOrchid/getCirPageByNo",{
           params: {
             currentPage: this.submit.currentPage,
             pageSize: this.pageSize,
-            circuitryId: this.submit.circuitryId,
-            activate: this.submit.activate
+            circuitryNo: this.submit.circuitryNo,
+            runningStatus: this.submit.runningStatus
           }
         })
         .then(res => {
-          window.console.log(this.submit.circuitryName);
-          window.console.log(this.submit.activate);
+          window.console.log(this.submit.circuitryNo);
+          window.console.log(this.submit.runningStatus);
           window.console.log(res.data);
           window.console.log(this.tableData);
           this.countPage = res.data.data.count;
-          this.tableData = res.data.data.poles;
+          this.tableData = res.data.data.circuitries;
         })
         .catch(err => {
           window.console.log(err);
@@ -261,7 +267,7 @@ export default {
         .then(res => {
           window.console.log(res.data);
           this.countPage = res.data.data.count;
-          this.tableData = res.data.data.circuitries
+          this.tableData = res.data.data.circuitries;
           window.console.log(this.tableData);
         })
         .catch(err => {

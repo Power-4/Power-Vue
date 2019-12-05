@@ -7,14 +7,15 @@
     <!-- 查询杆塔 -->
     <div class="chaxun">
       <div class="bianhao">
-        <span>所属线路:</span>
+        <span>杆塔编号:</span>
         <el-input
-          v-model="submit.circuitryName"
-          placeholder="请输入线路"
+          v-model="submit.poleNo"
+          placeholder="请输入编号"
           class="in-bianhao"
           @change="chaxun"
         ></el-input>
       </div>
+
 
       <div class="activate" @input="chaxun">
         <span>是否启用:</span>
@@ -76,12 +77,15 @@
 
     <!-- 修改杆塔模态框 -->
     <el-dialog title="修改杆塔" :visible.sync="dialogVisible" width="45%">
-      <el-form :model="revaTable">
+      <el-form :model="submit">
         <el-form-item label="杆塔编号" :label-width="dialogVisibleWidth">
-          <el-input v-model="revaTable.id" autocomplete="off"></el-input>
+          <el-input v-model="submit.poleNo" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="线路序号" :label-width="dialogVisibleWidth">
+          <el-input v-model="submit.circuitryNo" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="启动状态" :label-width="dialogVisibleWidth">
-          <el-select v-model="revaTable.state" placeholder="请选启动状态">
+          <el-select v-model="submit.activate" placeholder="请选启动状态">
             <el-option label="启用" value="启用"></el-option>
             <el-option label="停用" value="停用"></el-option>
           </el-select>
@@ -89,7 +93,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="xiugai(dialogVisible = false)">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -104,8 +108,14 @@
         align="center"
       ></el-table-column>
       <el-table-column prop="operate" label="操作" align="center">
-        <el-button type="text" size="small" @click="Edit(dialogVisible = true)">修改</el-button>
-        <el-button type="text" @click="del">删除</el-button>
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            size="small"
+            @click="Edit(scope.$index, scope.row ,dialogVisible = true)"
+          >修改</el-button>
+          <el-button type="text" @click="del">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <div class="block">
@@ -128,9 +138,8 @@ export default {
       title: "杆塔",
       name: "xun",
       submit: {
-        id: "",
-        error: "",
         currentPage: 1,
+        poleNo:"",
         circuitryName: "",
         activate: ""
       },
@@ -179,13 +188,13 @@ export default {
           params: {
             currentPage: this.submit.currentPage,
             pageSize: this.pageSize,
-            circuitryName: this.submit.circuitryName,
+            poleNo: this.submit.poleNo,
             activate: this.submit.activate
           }
         })
         .then(res => {
-          window.console.log(this.submit.circuitryName);
-          window.console.log(this.submit.activate);
+          window.console.log( this.submit.poleNo);
+          window.console.log( this.submit.activate);
           window.console.log(res.data);
           window.console.log(this.tableData);
           this.countPage = res.data.data.count;
@@ -195,19 +204,27 @@ export default {
           window.console.log(err);
         });
     },
-    //修改
+
+    //修改按钮
+    Edit(index, row) {
+      window.console.log(index, row);
+      this.poleId = this.tableData[index].poleId;
+      this.submit.poleNo = this.tableData[index].poleNo;
+      this.submit.activate = this.tableData[index].systemPropertiesValue.sysProValueName;
+    },
+    //修改模态框确定按钮
     xiugai() {
       this.axios
         .get("http://192.168.6.184:8080/poleOrchid/updatePoleById",{
           params: {
-            currentPage: this.submit.currentPage,
-            pageSize: this.pageSize,
-            circuitryName: this.submit.circuitryName,
+            poleId: this.poleId,
+            poleNo: this.submit.poleNo,
             activate: this.submit.activate
           }
         })
         .then(res => {
-          window.console.log(this.submit.circuitryName);
+          window.console.log("当前所修改的id",this.poleId);
+          window.console.log(this.submit.poleNo);
           window.console.log(this.submit.activate);
           window.console.log(res.data);
           window.console.log(this.tableData);
