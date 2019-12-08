@@ -684,7 +684,7 @@ export default {
             });
         }
       } else if (this.shenform.yijian1 == "" || this.value == "") {
-        window.alert("请审核");
+        this.tishi();
       } else if (this.shenform.yijian1 != "" && this.value != "") {
         if (sessionStorage.getItem("userId") == this.issuedId) {
           this.axios
@@ -1555,6 +1555,9 @@ export default {
         .catch(err => {
           window.console.log(err);
         });
+    },
+    tishi() {
+       this.$message('请先审核后再确认');
     }
   },
   created: function() {
